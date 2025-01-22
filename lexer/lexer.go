@@ -3,6 +3,7 @@ package lexer
 import (
 	"errors"
 	"fmt"
+	"github.com/anhgelus/gomath/utils"
 	"slices"
 	"strconv"
 	"strings"
@@ -36,16 +37,20 @@ func Lex(content []string) ([][]*Lexer, error) {
 		for _, w := range strings.Split(line, " ") {
 			word, err := lexWord(w)
 			if err != nil {
-				return nil, errors.Join(errors.New("line "+strconv.Itoa(i+1)+" has an error"), err)
+				return nil, errors.Join(utils.GenErrorLine(i), err)
 			}
 			lexer = append(lexer, word...)
 			for j := 0; j < len(lexer)-1; j++ {
 				if lexer[j].Type == Number && lexer[j].Type == lexer[j+1].Type {
-					return nil, errors.Join(SameTypeFollowErr, fmt.Errorf(
-						"not possible to have %s %s",
-						lexer[j].Value,
-						lexer[j+1].Value,
-					))
+					return nil, errors.Join(
+						utils.GenErrorLine(i),
+						SameTypeFollowErr,
+						fmt.Errorf(
+							"not possible to have %s %s",
+							lexer[j].Value,
+							lexer[j+1].Value,
+						),
+					)
 				}
 			}
 		}

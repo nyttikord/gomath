@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/anhgelus/gomath/interpreter"
 	"github.com/anhgelus/gomath/lexer"
+	"github.com/anhgelus/gomath/utils"
 	"slices"
 	"strconv"
 	"strings"
@@ -27,7 +28,7 @@ type Ast struct {
 
 func parse(lexed [][]*lexer.Lexer) (*Ast, error) {
 	tree := Ast{Type: "program"}
-	for _, l := range lexed {
+	for j, l := range lexed {
 		i := 0
 		var stmt interpreter.Statement
 
@@ -37,19 +38,19 @@ func parse(lexed [][]*lexer.Lexer) (*Ast, error) {
 			// create new variable
 			v, err := interpreter.NewMemory(l, &i)
 			if err != nil {
-				return nil, err
+				return nil, errors.Join(utils.GenErrorLine(j), err)
 			}
 			// get variable expression
 			exp, err := termExpression(l, &i)
 			if err != nil {
-				return nil, err
+				return nil, errors.Join(utils.GenErrorLine(j), err)
 			}
 			v.Expression = exp
 			stmt = v
 		default:
 			exp, err := termExpression(l, &i)
 			if err != nil {
-				return nil, err
+				return nil, errors.Join(utils.GenErrorLine(j), err)
 			}
 			stmt = &interpreter.PrintStatement{Expression: exp}
 		}

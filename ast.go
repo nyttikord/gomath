@@ -36,6 +36,8 @@ type Literal struct {
 	Value float64
 }
 
+type expression func(l []*Lexer, i *int) (Statement, error)
+
 func parse(lexed [][]*Lexer) (*Ast, error) {
 	tree := Ast{Type: "program"}
 	for _, l := range lexed {
@@ -50,45 +52,34 @@ func parse(lexed [][]*Lexer) (*Ast, error) {
 }
 
 func termExpression(l []*Lexer, i *int) (Statement, error) {
-	left, err := factorExpression(l, i)
-	if err != nil {
-		return nil, err
-	}
-	for *i < len(l) && slices.Contains(termOperators, l[*i].Value) {
-		op := l[*i].Value
-		*i++
-		right, err := factorExpression(l, i)
-		if err != nil {
-			return nil, err
-		}
-		left = &BinaryOperation{
-			Operator: op,
-			Left:     left,
-			Right:    right,
-		}
-	}
-	return left, nil
+	return binExpression(termOperators, factorExpression)(l, i)
 }
 
 func factorExpression(l []*Lexer, i *int) (Statement, error) {
-	left, err := literalExpression(l, i)
-	if err != nil {
-		return nil, err
-	}
-	for *i < len(l) && slices.Contains(factorOperators, l[*i].Value) {
-		op := l[*i].Value
-		*i++
-		right, err := literalExpression(l, i)
+	return binExpression(factorOperators, literalExpression)(l, i)
+}
+
+func binExpression(operators []string, sub expression) expression {
+	return func(l []*Lexer, i *int) (Statement, error) {
+		left, err := sub(l, i)
 		if err != nil {
 			return nil, err
 		}
-		left = &BinaryOperation{
-			Operator: op,
-			Left:     left,
-			Right:    right,
+		for *i < len(l) && slices.Contains(operators, l[*i].Value) {
+			op := l[*i].Value
+			*i++
+			right, err := sub(l, i)
+			if err != nil {
+				return nil, err
+			}
+			left = &BinaryOperation{
+				Operator: op,
+				Left:     left,
+				Right:    right,
+			}
 		}
+		return left, nil
 	}
-	return left, nil
 }
 
 func literalExpression(l []*Lexer, i *int) (Statement, error) {

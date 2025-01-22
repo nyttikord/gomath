@@ -15,8 +15,8 @@ const (
 )
 
 var (
-	InvalidSeparatorErr          = errors.New("invalid separator")
-	operators           []string = []string{"+", "-", "*", "/", "^", "%", "="}
+	InvalidSeparatorErr = errors.New("invalid separator")
+	operators           = []string{"+", "-", "*", "/", "^", "%", "="}
 )
 
 type Lexer struct {
@@ -24,16 +24,18 @@ type Lexer struct {
 	Value string
 }
 
-func lex(content []string) ([]Lexer, error) {
-	var lexers []Lexer
+func lex(content []string) ([][]Lexer, error) {
+	var lexers [][]Lexer
 	for _, line := range content {
+		var lexer []Lexer
 		for _, w := range strings.Split(line, " ") {
 			word, err := lexWord(w)
 			if err != nil {
 				return nil, err
 			}
-			lexers = append(lexers, word...)
+			lexer = append(lexer, word...)
 		}
+		lexers = append(lexers, lexer)
 	}
 	return lexers, nil
 }

@@ -26,6 +26,10 @@ func main() {
 		panic(err)
 	}
 	for _, l := range lexed {
-		println(l.String())
+		s := ""
+		for _, v := range l {
+			s += v.String() + " "
+		}
+		println(s[:len(s)-1])
 	}
 }

@@ -3,6 +3,7 @@ package interpreter
 import (
 	"errors"
 	"github.com/anhgelus/gomath/lexer"
+	"math"
 )
 
 var (
@@ -12,6 +13,20 @@ var (
 )
 
 var variables = map[string]*Fraction{}
+var predefinedVariables = map[string]*Fraction{}
+
+func init() {
+	add := func(n string, v float64) {
+		f, err := FloatToFraction(v)
+		if err != nil {
+			panic(err)
+		}
+		predefinedVariables[n] = f
+	}
+	add("pi", math.Pi)
+	add("e", math.E)
+	add("phi", math.Phi)
+}
 
 type Memory struct {
 	ID         string
@@ -33,14 +48,6 @@ func NewMemory(l []*lexer.Lexer, i *int) (*Memory, error) {
 func IsInMemory(id string) bool {
 	_, ok := variables[id]
 	return ok
-}
-
-func GetValueInMemory(id string) (*Fraction, error) {
-	v, ok := variables[id]
-	if !ok {
-		return nil, UnknownVariableErr
-	}
-	return v, nil
 }
 
 func (v *Memory) Eval(*Options) error {

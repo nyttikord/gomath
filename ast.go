@@ -7,6 +7,7 @@ import (
 	"github.com/anhgelus/gomath/lexer"
 	"slices"
 	"strconv"
+	"strings"
 )
 
 var (
@@ -95,19 +96,21 @@ func binExpression(operators []string, sub interpreter.ExpressionFunc) interpret
 
 func literalExpression(l []*lexer.Lexer, i *int) (interpreter.Expression, error) {
 	c := l[*i]
+	*i++
 	if c.Type == lexer.Number {
 		v, err := strconv.ParseFloat(c.Value, 64)
 		if err != nil {
 			return nil, err
 		}
-		*i++
 		f, err := interpreter.FloatToFraction(v)
 		if err != nil {
 			return nil, err
 		}
 		return &interpreter.Literal{Value: f}, nil
 	} else if c.Type == lexer.Literal {
-		*i++
+		if strings.HasPrefix(c.Value, "\\") {
+			return &interpreter.PredefinedVariable{ID: c.Value[1:]}, nil
+		}
 		return &interpreter.Variable{ID: c.Value}, nil
 	}
 	return nil, errors.Join(UnknownExpressionErr, fmt.Errorf(

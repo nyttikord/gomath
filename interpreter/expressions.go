@@ -33,6 +33,8 @@ type Variable struct {
 	ID string
 }
 
+type PredefinedVariable Variable
+
 func (b *BinaryOperation) Eval() (*Fraction, error) {
 	lb, err := b.Left.Eval()
 	if err != nil {
@@ -78,5 +80,17 @@ func (l *Literal) Eval() (*Fraction, error) {
 }
 
 func (v *Variable) Eval() (*Fraction, error) {
-	return GetValueInMemory(v.ID)
+	val, ok := variables[v.ID]
+	if !ok {
+		return nil, UnknownVariableErr
+	}
+	return val, nil
+}
+
+func (v *PredefinedVariable) Eval() (*Fraction, error) {
+	val, ok := predefinedVariables[v.ID]
+	if !ok {
+		return NullFraction, UnknownVariableErr
+	}
+	return val, nil
 }

@@ -29,8 +29,8 @@ You are evaluating it on $\frac{\pi}{2}$ (which is not possible): it will throw 
 ## Todo
 
 - [x] Simple calcul
-- [ ] Variable
-- [ ] Using predefined variable (like $\pi$)
+- [x] Variable
+- [x] Using predefined variable (like $\pi$)
 - [ ] Functions on specific ensemble (e.g., $\mathbb{R}$, $\mathbb{Z}$)
 - [ ] Simplification of equations
 - [ ] Functions on all space (e.g., $\{1, 2\}$, $[0, 3]$, $[| -4, 8 |]$, $[-8, -4]\cup [|2, 23|]$)

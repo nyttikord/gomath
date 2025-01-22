@@ -3,7 +3,6 @@ package interpreter
 import (
 	"errors"
 	"github.com/anhgelus/gomath/lexer"
-	"math"
 )
 
 var (
@@ -13,7 +12,7 @@ var (
 type Expression func(l []*lexer.Lexer, i *int) (Statement, error)
 
 type Statement interface {
-	eval() (float64, error)
+	eval() (*Fraction, error)
 }
 
 type BinaryOperation struct {
@@ -27,49 +26,49 @@ type UnaryOperation struct {
 }
 
 type Literal struct {
-	Value float64
+	Value *Fraction
 }
 
-func (b *BinaryOperation) eval() (float64, error) {
+func (b *BinaryOperation) eval() (*Fraction, error) {
 	lb, err := b.Left.eval()
 	if err != nil {
-		return 0, err
+		return NullFraction, err
 	}
 	lr, err := b.Right.eval()
 	if err != nil {
-		return 0, err
+		return NullFraction, err
 	}
 	switch b.Operator {
 	case "+":
-		return lb + lr, nil
+		return lb.Add(lr), nil
 	case "-":
-		return lb - lr, nil
+		return lb.Sub(lr), nil
 	case "*":
-		return lb * lr, nil
+		return lb.Mul(lr), nil
 	case "/":
-		return lb / lr, nil
+		return lb.Div(lr), nil
 	case "^":
-		return math.Pow(lb, lr), nil
+		return lb.Pow(lr), nil
 	default:
-		return 0, errors.Join(UnknownOperationErr, errors.New("operation "+b.Operator+" is not supported"))
+		return NullFraction, errors.Join(UnknownOperationErr, errors.New("operation "+b.Operator+" is not supported"))
 	}
 }
 
-func (b *UnaryOperation) eval() (float64, error) {
+func (b *UnaryOperation) eval() (*Fraction, error) {
 	lb, err := b.Left.eval()
 	if err != nil {
-		return 0, err
+		return NullFraction, err
 	}
 	switch b.Operator {
 	case "+":
 		return lb, nil
 	case "-":
-		return -lb, nil
+		return lb.Mul(IntToFraction(-1)), nil
 	default:
-		return 0, errors.Join(UnknownOperationErr, errors.New("operation "+b.Operator+" is not supported"))
+		return NullFraction, errors.Join(UnknownOperationErr, errors.New("operation "+b.Operator+" is not supported"))
 	}
 }
 
-func (l *Literal) eval() (float64, error) {
+func (l *Literal) eval() (*Fraction, error) {
 	return l.Value, nil
 }

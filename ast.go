@@ -77,7 +77,11 @@ func literalExpression(l []*lexer.Lexer, i *int) (interpreter.Statement, error) 
 			return nil, err
 		}
 		*i++
-		return &interpreter.Literal{Value: v}, nil
+		f, err := interpreter.FloatToFraction(v)
+		if err != nil {
+			return nil, err
+		}
+		return &interpreter.Literal{Value: f}, nil
 	}
 	return nil, errors.Join(UnknownExpressionErr, errors.New("unknown type "+c.Type))
 }

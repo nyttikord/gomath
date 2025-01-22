@@ -37,7 +37,6 @@ func FloatToFraction(f float64) (*Fraction, error) {
 	if err != nil {
 		return NullFraction, FractionNotIntErr
 	}
-	println(i, sp[0], sp[1])
 	return &Fraction{
 		Numerator:   i,
 		Denominator: int64(math.Pow(10, float64(len(sp[1])))),

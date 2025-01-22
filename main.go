@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	"flag"
 	"fmt"
 	"github.com/anhgelus/gomath/lexer"
@@ -15,10 +14,10 @@ var (
 
 func init() {
 	flag.StringVar(&input, "i", "", "input file")
+	flag.Parse()
 }
 
 func main() {
-	flag.Parse()
 	b, err := os.ReadFile(input)
 	if err != nil {
 		panic(err)
@@ -39,11 +38,11 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	m, err := json.MarshalIndent(p, "", " ")
-	if err != nil {
-		panic(err)
-	}
-	println(string(m))
+	//m, err := json.MarshalIndent(p, "", " ")
+	//if err != nil {
+	//	panic(err)
+	//}
+	//println(string(m))
 	for _, stmt := range p.Body {
 		f, err := stmt.Eval()
 		if err != nil {

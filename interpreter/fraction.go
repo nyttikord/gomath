@@ -46,7 +46,7 @@ func FloatToFraction(f float64) (*Fraction, error) {
 
 func (f *Fraction) String() string {
 	if f.Denominator != 1 {
-		return fmt.Sprintf("%d/%d", f.Numerator, f.Numerator)
+		return fmt.Sprintf("%d/%d", f.Numerator, f.Denominator)
 	}
 	return fmt.Sprintf("%d", f.Numerator)
 }

@@ -12,7 +12,7 @@ var (
 type Expression func(l []*lexer.Lexer, i *int) (Statement, error)
 
 type Statement interface {
-	eval() (*Fraction, error)
+	Eval() (*Fraction, error)
 }
 
 type BinaryOperation struct {
@@ -29,12 +29,12 @@ type Literal struct {
 	Value *Fraction
 }
 
-func (b *BinaryOperation) eval() (*Fraction, error) {
-	lb, err := b.Left.eval()
+func (b *BinaryOperation) Eval() (*Fraction, error) {
+	lb, err := b.Left.Eval()
 	if err != nil {
 		return NullFraction, err
 	}
-	lr, err := b.Right.eval()
+	lr, err := b.Right.Eval()
 	if err != nil {
 		return NullFraction, err
 	}
@@ -54,8 +54,8 @@ func (b *BinaryOperation) eval() (*Fraction, error) {
 	}
 }
 
-func (b *UnaryOperation) eval() (*Fraction, error) {
-	lb, err := b.Left.eval()
+func (b *UnaryOperation) Eval() (*Fraction, error) {
+	lb, err := b.Left.Eval()
 	if err != nil {
 		return NullFraction, err
 	}
@@ -69,6 +69,6 @@ func (b *UnaryOperation) eval() (*Fraction, error) {
 	}
 }
 
-func (l *Literal) eval() (*Fraction, error) {
+func (l *Literal) Eval() (*Fraction, error) {
 	return l.Value, nil
 }

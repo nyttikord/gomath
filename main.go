@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"flag"
+	"fmt"
 	"github.com/anhgelus/gomath/lexer"
 	"os"
 	"strings"
@@ -43,4 +44,11 @@ func main() {
 		panic(err)
 	}
 	println(string(m))
+	for _, stmt := range p.Body {
+		f, err := stmt.Eval()
+		if err != nil {
+			panic(err)
+		}
+		fmt.Printf("%s - %f\n", f.String(), f.Float())
+	}
 }

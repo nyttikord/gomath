@@ -18,7 +18,7 @@ var (
 
 type Ast struct {
 	Type string
-	Body []*interpreter.Statement
+	Body []interpreter.Statement
 }
 
 func parse(lexed [][]*lexer.Lexer) (*Ast, error) {
@@ -29,7 +29,7 @@ func parse(lexed [][]*lexer.Lexer) (*Ast, error) {
 		if err != nil {
 			return nil, err
 		}
-		tree.Body = append(tree.Body, &stmt)
+		tree.Body = append(tree.Body, stmt)
 	}
 	return &tree, nil
 }

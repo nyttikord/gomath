@@ -24,14 +24,17 @@ type Lexer struct {
 	Value string
 }
 
-func lex(content []string) ([][]Lexer, error) {
-	var lexers [][]Lexer
-	for _, line := range content {
-		var lexer []Lexer
+func lex(content []string) ([][]*Lexer, error) {
+	var lexers [][]*Lexer
+	for i, line := range content {
+		if strings.HasPrefix(line, "#") {
+			continue
+		}
+		var lexer []*Lexer
 		for _, w := range strings.Split(line, " ") {
 			word, err := lexWord(w)
 			if err != nil {
-				return nil, err
+				return nil, errors.Join(errors.New("line "+strconv.Itoa(i+1)+" has an error"), err)
 			}
 			lexer = append(lexer, word...)
 		}
@@ -40,27 +43,27 @@ func lex(content []string) ([][]Lexer, error) {
 	return lexers, nil
 }
 
-func lexWord(w string) ([]Lexer, error) {
+func lexWord(w string) ([]*Lexer, error) {
 	if isDigit(w) {
-		return []Lexer{
+		return []*Lexer{
 			{number, w},
 		}, nil
 	}
 	if strings.Contains(w, ",") {
 		if strings.Contains(w[:len(w)-1], ",") {
-			return nil, errors.Join(InvalidSeparatorErr, errors.New(w+" contains more than one comma"))
+			return nil, errors.Join(InvalidSeparatorErr, errors.New(w+" contains an invalid comma"))
 		}
-		return []Lexer{
+		return []*Lexer{
 			{literal, w[:len(w)-1]},
 			{seperator, ","},
 		}, nil
 	}
 	if isOperator(w) {
-		return []Lexer{
+		return []*Lexer{
 			{operator, w},
 		}, nil
 	}
-	return []Lexer{
+	return []*Lexer{
 		{literal, w},
 	}, nil
 }

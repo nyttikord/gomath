@@ -1,1 +1,4 @@
-for x in R, f(x) = 5x + 3
+#let a = 5.3
+#for x in R, f(x) = 5x + a
+#f(5)
+5 + 3

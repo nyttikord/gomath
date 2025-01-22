@@ -70,6 +70,8 @@ func lexWord(w string) ([]*Lexer, error) {
 			fnUpdate(Operator)
 		} else if isSeparator(c) {
 			fnUpdate(Separator)
+		} else {
+			fnUpdate(Literal)
 		}
 		sel += string(c)
 	}

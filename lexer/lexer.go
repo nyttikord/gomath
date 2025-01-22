@@ -8,15 +8,15 @@ import (
 )
 
 const (
-	Literal   string = "Literal"
-	Number    string = "Number"
-	Seperator string = "Seperator"
-	Operator  string = "Operator"
+	Literal   string = "literal"
+	Number    string = "number"
+	Separator string = "separator"
+	Operator  string = "operator"
 )
 
 var (
-	InvalidSeparatorErr = errors.New("invalid separator")
-	operators           = []string{"+", "-", "*", "/", "^", "%", "="}
+	operators  = []string{"+", "-", "*", "/", "^", "%", "="}
+	separators = []string{",", "(", ")"}
 )
 
 type Lexer struct {
@@ -48,23 +48,33 @@ func lexWord(w string) ([]*Lexer, error) {
 			{Number, w},
 		}, nil
 	}
-	if strings.Contains(w, ",") {
-		if strings.Contains(w[:len(w)-1], ",") {
-			return nil, errors.Join(InvalidSeparatorErr, errors.New(w+" contains an invalid comma"))
+	var lexers []*Lexer
+	sel := ""
+	tpe := ""
+
+	fnUpdate := func(typ string) {
+		if tpe == typ {
+			return
 		}
-		return []*Lexer{
-			{Literal, w[:len(w)-1]},
-			{Seperator, ","},
-		}, nil
+		if tpe != "" {
+			lexers = append(lexers, &Lexer{tpe, sel})
+		}
+		sel = ""
+		tpe = typ
 	}
-	if isOperator(w) {
-		return []*Lexer{
-			{Operator, w},
-		}, nil
+
+	for _, c := range []rune(w) {
+		if isDigit(string(c)) || (c == '.' && sel != "") {
+			fnUpdate(Number)
+		} else if isOperator(c) {
+			fnUpdate(Operator)
+		} else if isSeparator(c) {
+			fnUpdate(Separator)
+		}
+		sel += string(c)
 	}
-	return []*Lexer{
-		{Literal, w},
-	}, nil
+	lexers = append(lexers, &Lexer{tpe, sel})
+	return lexers, nil
 }
 
 func isDigit(s string) bool {
@@ -72,8 +82,12 @@ func isDigit(s string) bool {
 	return err == nil
 }
 
-func isOperator(s string) bool {
-	return slices.Contains(operators, s)
+func isOperator(s rune) bool {
+	return slices.Contains(operators, string(s))
+}
+
+func isSeparator(s rune) bool {
+	return slices.Contains(separators, string(s))
 }
 
 func (l *Lexer) String() string {

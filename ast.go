@@ -2,6 +2,7 @@ package main
 
 import (
 	"errors"
+	"fmt"
 	"github.com/anhgelus/gomath/interpreter"
 	"github.com/anhgelus/gomath/lexer"
 	"slices"
@@ -83,5 +84,9 @@ func literalExpression(l []*lexer.Lexer, i *int) (interpreter.Statement, error) 
 		}
 		return &interpreter.Literal{Value: f}, nil
 	}
-	return nil, errors.Join(UnknownExpressionErr, errors.New("unknown type "+c.Type))
+	return nil, errors.Join(UnknownExpressionErr, fmt.Errorf(
+		"unknown type %s ('%s'): excepting a valid literal expression",
+		c.Type,
+		c.Value,
+	))
 }

@@ -15,7 +15,7 @@ let a = 5
 is defining a new variable.
 
 ```gomath
-for x in R, f(x) = 5x + 1
+for x in R, f{x} = 5x + 1
 ```
 is defining a new function.
 

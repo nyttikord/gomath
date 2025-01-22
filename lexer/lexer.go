@@ -17,7 +17,7 @@ const (
 )
 
 var (
-	operators  = []string{"+", "-", "*", "/", "^", "%", "="}
+	operators  = []string{"+", "-", "*", "/", "^", "%", "=", "{", "}"}
 	separators = []string{",", "(", ")"}
 
 	SameTypeFollowErr = errors.New("sequence of two with exclusively numbers")
@@ -117,6 +117,14 @@ func isOperator(s rune) bool {
 
 func isSeparator(s rune) bool {
 	return slices.Contains(separators, string(s))
+}
+
+func Stringify(lexers []*Lexer) string {
+	s := ""
+	for _, l := range lexers {
+		s += l.Value
+	}
+	return s
 }
 
 func (l *Lexer) String() string {

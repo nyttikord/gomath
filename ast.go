@@ -47,6 +47,14 @@ func parse(lexed [][]*lexer.Lexer) (*Ast, error) {
 			}
 			v.Expression = exp
 			stmt = v
+		case "for":
+			i++
+			// create new function
+			f, err := interpreter.NewFunction(l, &i)
+			if err != nil {
+				return nil, errors.Join(utils.GenErrorLine(j), err)
+			}
+			stmt = f
 		default:
 			exp, err := termExpression(l, &i)
 			if err != nil {

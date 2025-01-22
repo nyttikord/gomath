@@ -1,5 +1,5 @@
-#for x in R, f(x) = 5x + a
-#f(5)
+for x in R, f{x} = 5*x + a
+#f{5}
 #let a = 5
 #(\pi +a) * 5
 2 * -5

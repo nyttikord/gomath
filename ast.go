@@ -15,10 +15,9 @@ var (
 	factorOperators = []string{"*", "/"}
 	expOperators    = []string{"^"}
 
-	statements = []string{"let"}
-
 	UnknownExpressionErr = errors.New("unknown expression")
 	UnknownStatementErr  = errors.New("unknown statement")
+	WrongExpressionErr   = errors.New("wrong expression")
 )
 
 type Ast struct {
@@ -97,7 +96,8 @@ func binExpression(operators []string, sub interpreter.ExpressionFunc) interpret
 func literalExpression(l []*lexer.Lexer, i *int) (interpreter.Expression, error) {
 	c := l[*i]
 	*i++
-	if c.Type == lexer.Number {
+	switch c.Type {
+	case lexer.Number:
 		v, err := strconv.ParseFloat(c.Value, 64)
 		if err != nil {
 			return nil, err
@@ -107,11 +107,23 @@ func literalExpression(l []*lexer.Lexer, i *int) (interpreter.Expression, error)
 			return nil, err
 		}
 		return &interpreter.Literal{Value: f}, nil
-	} else if c.Type == lexer.Literal {
+	case lexer.Literal:
 		if strings.HasPrefix(c.Value, "\\") {
 			return &interpreter.PredefinedVariable{ID: c.Value[1:]}, nil
 		}
 		return &interpreter.Variable{ID: c.Value}, nil
+	case lexer.Separator:
+		if c.Value == "(" {
+			exp, err := termExpression(l, i)
+			if err != nil {
+				return nil, err
+			}
+			if l[*i].Value != ")" {
+				return nil, errors.Join(WrongExpressionErr, errors.New(") excepted"))
+			}
+			*i++
+			return exp, nil
+		}
 	}
 	return nil, errors.Join(UnknownExpressionErr, fmt.Errorf(
 		"unknown type %s('%s'): excepting a valid literal expression",

@@ -20,7 +20,7 @@ for x in R, f{x} = 5x + 1
 is defining a new function.
 
 ```gomath
-for x in ]-\pi / 2, \pi / 2[, f(x) = tan{x}
+for x in ]-\pi / 2, \pi / 2[, f{x} = tan{x}
 f{\pi / 2}
 ```
 is defining an alias for $\tan$ on $\left]-\frac{\pi}{2}, \frac{\pi}{2}\right[$. 

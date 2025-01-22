@@ -2,18 +2,20 @@ package main
 
 import (
 	"flag"
-	"fmt"
+	"github.com/anhgelus/gomath/interpreter"
 	"github.com/anhgelus/gomath/lexer"
 	"os"
 	"strings"
 )
 
 var (
-	input string
+	input   string
+	decimal bool
 )
 
 func init() {
 	flag.StringVar(&input, "i", "", "input file")
+	flag.BoolVar(&decimal, "d", false, "decimal output")
 	flag.Parse()
 }
 
@@ -38,16 +40,15 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	//m, err := json.MarshalIndent(p, "", " ")
+	//m, err := json.MarshalIndent(p, "", "  ")
 	//if err != nil {
 	//	panic(err)
 	//}
 	//println(string(m))
 	for _, stmt := range p.Body {
-		f, err := stmt.Eval()
+		err = stmt.Eval(&interpreter.Options{Decimal: decimal})
 		if err != nil {
 			panic(err)
 		}
-		fmt.Printf("%s - %f\n", f.String(), f.Float())
 	}
 }

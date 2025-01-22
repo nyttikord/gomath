@@ -9,24 +9,28 @@ var (
 	UnknownOperationErr = errors.New("unknown operation")
 )
 
-type Expression func(l []*lexer.Lexer, i *int) (Statement, error)
+type ExpressionFunc func(l []*lexer.Lexer, i *int) (Expression, error)
 
-type Statement interface {
+type Expression interface {
 	Eval() (*Fraction, error)
 }
 
 type BinaryOperation struct {
 	Operator    string
-	Left, Right Statement
+	Left, Right Expression
 }
 
 type UnaryOperation struct {
 	Operator string
-	Left     Statement
+	Left     Expression
 }
 
 type Literal struct {
 	Value *Fraction
+}
+
+type Variable struct {
+	ID string
 }
 
 func (b *BinaryOperation) Eval() (*Fraction, error) {
@@ -71,4 +75,8 @@ func (b *UnaryOperation) Eval() (*Fraction, error) {
 
 func (l *Literal) Eval() (*Fraction, error) {
 	return l.Value, nil
+}
+
+func (v *Variable) Eval() (*Fraction, error) {
+	return GetValueInMemory(v.ID)
 }

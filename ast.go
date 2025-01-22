@@ -2,6 +2,7 @@ package main
 
 import (
 	"errors"
+	"math"
 	"slices"
 	"strconv"
 )
@@ -11,6 +12,7 @@ var (
 
 	termOperators   = []string{"+", "-"}
 	factorOperators = []string{"*", "/"}
+	expOperators    = []string{"^"}
 )
 
 type Ast struct {
@@ -56,7 +58,11 @@ func termExpression(l []*Lexer, i *int) (Statement, error) {
 }
 
 func factorExpression(l []*Lexer, i *int) (Statement, error) {
-	return binExpression(factorOperators, literalExpression)(l, i)
+	return binExpression(factorOperators, expExpression)(l, i)
+}
+
+func expExpression(l []*Lexer, i *int) (Statement, error) {
+	return binExpression(expOperators, literalExpression)(l, i)
 }
 
 func binExpression(operators []string, sub expression) expression {
@@ -108,11 +114,13 @@ func (b *BinaryOperation) eval() (float64, error) {
 	case "+":
 		return lb + lr, nil
 	case "-":
-		return lb + lr, nil
+		return lb - lr, nil
 	case "*":
-		return lb + lr, nil
+		return lb * lr, nil
 	case "/":
-		return lb + lr, nil
+		return lb / lr, nil
+	case "^":
+		return math.Pow(lb, lr), nil
 	default:
 		return 0, errors.Join(UnknownOperationErr, errors.New("operation "+b.Operator+" is not supported"))
 	}

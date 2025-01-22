@@ -1,4 +1,4 @@
-package main
+package lexer
 
 import (
 	"errors"
@@ -8,10 +8,10 @@ import (
 )
 
 const (
-	literal   string = "literal"
-	number    string = "number"
-	seperator string = "seperator"
-	operator  string = "operator"
+	Literal   string = "Literal"
+	Number    string = "Number"
+	Seperator string = "Seperator"
+	Operator  string = "Operator"
 )
 
 var (
@@ -23,7 +23,7 @@ type Lexer struct {
 	Type, Value string
 }
 
-func lex(content []string) ([][]*Lexer, error) {
+func Lex(content []string) ([][]*Lexer, error) {
 	var lexers [][]*Lexer
 	for i, line := range content {
 		if strings.HasPrefix(line, "#") {
@@ -45,7 +45,7 @@ func lex(content []string) ([][]*Lexer, error) {
 func lexWord(w string) ([]*Lexer, error) {
 	if isDigit(w) {
 		return []*Lexer{
-			{number, w},
+			{Number, w},
 		}, nil
 	}
 	if strings.Contains(w, ",") {
@@ -53,17 +53,17 @@ func lexWord(w string) ([]*Lexer, error) {
 			return nil, errors.Join(InvalidSeparatorErr, errors.New(w+" contains an invalid comma"))
 		}
 		return []*Lexer{
-			{literal, w[:len(w)-1]},
-			{seperator, ","},
+			{Literal, w[:len(w)-1]},
+			{Seperator, ","},
 		}, nil
 	}
 	if isOperator(w) {
 		return []*Lexer{
-			{operator, w},
+			{Operator, w},
 		}, nil
 	}
 	return []*Lexer{
-		{literal, w},
+		{Literal, w},
 	}, nil
 }
 

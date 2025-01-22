@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"flag"
+	"github.com/anhgelus/gomath/lexer"
 	"os"
 	"strings"
 )
@@ -22,7 +23,7 @@ func main() {
 		panic(err)
 	}
 	content := strings.Split(string(b), "\n")
-	lexed, err := lex(content)
+	lexed, err := lexer.Lex(content)
 	if err != nil {
 		panic(err)
 	}

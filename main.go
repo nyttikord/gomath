@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"flag"
 	"github.com/anhgelus/gomath/interpreter"
 	"github.com/anhgelus/gomath/lexer"
@@ -40,11 +41,11 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	//m, err := json.MarshalIndent(p, "", "  ")
-	//if err != nil {
-	//	panic(err)
-	//}
-	//println(string(m))
+	m, err := json.MarshalIndent(p, "", "  ")
+	if err != nil {
+		panic(err)
+	}
+	println(string(m))
 	for _, stmt := range p.Body {
 		err = stmt.Eval(&interpreter.Options{Decimal: decimal})
 		if err != nil {

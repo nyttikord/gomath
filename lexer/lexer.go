@@ -2,6 +2,7 @@ package lexer
 
 import (
 	"errors"
+	"fmt"
 	"slices"
 	"strconv"
 	"strings"
@@ -17,6 +18,8 @@ const (
 var (
 	operators  = []string{"+", "-", "*", "/", "^", "%", "="}
 	separators = []string{",", "(", ")"}
+
+	SameTypeFollowErr = errors.New("sequence of two with exclusively numbers")
 )
 
 type Lexer struct {
@@ -36,6 +39,15 @@ func Lex(content []string) ([][]*Lexer, error) {
 				return nil, errors.Join(errors.New("line "+strconv.Itoa(i+1)+" has an error"), err)
 			}
 			lexer = append(lexer, word...)
+			for j := 0; j < len(lexer)-1; j++ {
+				if lexer[j].Type == Number && lexer[j].Type == lexer[j+1].Type {
+					return nil, errors.Join(SameTypeFollowErr, fmt.Errorf(
+						"not possible to have %s %s",
+						lexer[j].Value,
+						lexer[j+1].Value,
+					))
+				}
+			}
 		}
 		lexers = append(lexers, lexer)
 	}

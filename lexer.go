@@ -20,8 +20,7 @@ var (
 )
 
 type Lexer struct {
-	Type  string
-	Value string
+	Type, Value string
 }
 
 func lex(content []string) ([][]*Lexer, error) {

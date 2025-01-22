@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"flag"
 	"os"
 	"strings"
@@ -32,4 +33,13 @@ func main() {
 		}
 		println(s[:len(s)-1])
 	}
+	p, err := parse(lexed)
+	if err != nil {
+		panic(err)
+	}
+	m, err := json.MarshalIndent(p, "", " ")
+	if err != nil {
+		panic(err)
+	}
+	println(string(m))
 }

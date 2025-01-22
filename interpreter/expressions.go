@@ -21,8 +21,8 @@ type BinaryOperation struct {
 }
 
 type UnaryOperation struct {
-	Operator string
-	Left     Expression
+	Operator   string
+	Expression Expression
 }
 
 type Literal struct {
@@ -61,7 +61,7 @@ func (b *BinaryOperation) Eval() (*Fraction, error) {
 }
 
 func (b *UnaryOperation) Eval() (*Fraction, error) {
-	lb, err := b.Left.Eval()
+	lb, err := b.Expression.Eval()
 	if err != nil {
 		return NullFraction, err
 	}

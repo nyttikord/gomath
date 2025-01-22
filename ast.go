@@ -125,6 +125,12 @@ func literalExpression(l []*lexer.Lexer, i *int) (interpreter.Expression, error)
 			*i++
 			return exp, nil
 		}
+	case lexer.Operator:
+		exp, err := expExpression(l, i)
+		if err != nil {
+			return nil, err
+		}
+		return &interpreter.UnaryOperation{Operator: c.Value, Expression: exp}, nil
 	}
 	return nil, errors.Join(UnknownExpressionErr, fmt.Errorf(
 		"unknown type %s('%s'): excepting a valid literal expression",

@@ -61,6 +61,16 @@ func Lex(content []string) ([][]*Lexer, error) {
 
 func lexWord(w string) ([]*Lexer, error) {
 	if isDigit(w) {
+		if []rune(w)[0] == '-' {
+			return []*Lexer{
+				{Operator, "-"},
+				{Number, w[1:]},
+			}, nil
+		} else if []rune(w)[0] == '+' {
+			return []*Lexer{
+				{Number, w[1:]},
+			}, nil
+		}
 		return []*Lexer{
 			{Number, w},
 		}, nil

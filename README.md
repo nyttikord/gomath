@@ -4,27 +4,28 @@ GoMath is a new lang aiming to be between a formal calculator and a complete com
 
 ## Syntax
 
+You can evaluate any expressions by just writing it
 ```gomath
-2^3 + 4.5*4.17
+1 + (2 + 3)*4^2/3
 ```
-will give you the result of this addition.
 
+You can create a variable with `let` statement.
 ```gomath
-let a = 5
+let x = 5
 ```
-is defining a new variable.
+Every variable is a fraction (here it's `5/1`).
+Every calculus is free of double float (float on 64 bits) approximation while these remains in $\mathbb{Q}$.
 
+You can create a function with this statement:
 ```gomath
-for x in R, f{x} = 5x + 1
+for x in R, f{x} = 5*x+1
 ```
-is defining a new function.
+`for x in R` defines the variable in your function and their space (here it's $\mathbb{R}$: all commons sets are 
+integrated).
+Then, `f{x} =` defines the name of the function (`f`).
+Finally, `5*x+1` defines the relation between $x$ and $f(x)$.
+:warning: It is `f{x}` and not `f(x)`!
 
-```gomath
-for x in ]-\pi / 2, \pi / 2[, f{x} = tan{x}
-f{\pi / 2}
-```
-is defining an alias for $\tan$ on $\left]-\frac{\pi}{2}, \frac{\pi}{2}\right[$. 
-You are evaluating it on $\frac{\pi}{2}$ (which is not possible): it will throw an error.
 
 ## Todo
 

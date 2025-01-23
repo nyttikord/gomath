@@ -43,6 +43,13 @@ func FloatToFraction(f float64) (*Fraction, error) {
 	}, nil
 }
 
+func PGCD(a, b int64) int64 {
+	for b != 0 {
+		a, b = b, a%b
+	}
+	return a
+}
+
 func (f *Fraction) String() string {
 	if f.Denominator != 1 {
 		return fmt.Sprintf("%d/%d", f.Numerator, f.Denominator)
@@ -50,31 +57,41 @@ func (f *Fraction) String() string {
 	return fmt.Sprintf("%d", f.Numerator)
 }
 
+func (f *Fraction) Simplify() *Fraction {
+	pgcd := PGCD(f.Numerator, f.Denominator)
+	if pgcd == 0 {
+		return f
+	}
+	f.Numerator = f.Numerator / pgcd
+	f.Denominator = f.Denominator / pgcd
+	return f
+}
+
 func (f *Fraction) Add(a *Fraction) *Fraction {
 	f.Numerator = f.Numerator*a.Denominator + a.Numerator*f.Denominator
 	f.Denominator = f.Denominator * a.Denominator
-	return f
+	return f.Simplify()
 }
 
 func (f *Fraction) Sub(a *Fraction) *Fraction {
 	f.Numerator = f.Numerator*a.Denominator - a.Numerator*f.Denominator
 	f.Denominator = f.Denominator * a.Denominator
-	return f
+	return f.Simplify()
 }
 
 func (f *Fraction) Mul(a *Fraction) *Fraction {
 	f.Numerator = f.Numerator * a.Numerator
 	f.Denominator = f.Denominator * a.Denominator
-	return f
+	return f.Simplify()
 }
 
 func (f *Fraction) Inv() *Fraction {
 	f.Numerator, f.Denominator = f.Denominator, f.Numerator
-	return f
+	return f.Simplify()
 }
 
 func (f *Fraction) Div(a *Fraction) *Fraction {
-	return f.Mul(a.Inv())
+	return f.Mul(a.Inv()).Simplify()
 }
 
 func (f *Fraction) IsInt() bool {

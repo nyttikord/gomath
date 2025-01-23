@@ -87,7 +87,7 @@ func (b *UnaryOperation) Eval() (*Fraction, error) {
 func (e *EvaluateOperation) Eval() (*Fraction, error) {
 	f, ok := functions[e.FunctionName]
 	if !ok {
-		return nil, errors.Join(UnknownFunctionErr, fmt.Errorf("undefined function \\%s", e.FunctionName))
+		return nil, errors.Join(UnknownFunctionErr, fmt.Errorf("undefined function %s", e.FunctionName))
 	}
 	return f.Relation.Eval(f.Variable, e.Expression)
 }

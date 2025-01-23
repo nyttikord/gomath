@@ -135,7 +135,7 @@ func literalExpression(l []*lexer.Lexer, i *int) (Expression, error) {
 	case lexer.Literal:
 		if strings.HasPrefix(c.Value, "\\") {
 			return &PredefinedVariable{ID: c.Value[1:]}, nil
-		} else if *i < len(l) && l[*i].Type == lexer.Operator {
+		} else if *i < len(l) && l[*i].Type == lexer.Operator && l[*i].Value == "{" {
 			name := c.Value
 			*i++
 			exp, err := operatorExpression(l, i)

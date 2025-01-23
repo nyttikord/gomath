@@ -20,6 +20,11 @@ func (p *PrintStatement) Eval(opt *Options) error {
 		return err
 	}
 	if opt.Decimal {
+		if f.IsInt() {
+			i, _ := f.Int()
+			fmt.Printf("%d\n", i)
+			return nil
+		}
 		fmt.Printf("%f\n", f.Float())
 		return nil
 	}

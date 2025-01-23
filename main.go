@@ -31,13 +31,13 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	for _, l := range lexed {
-		s := ""
-		for _, v := range l {
-			s += v.String() + " "
-		}
-		println(s[:len(s)-1])
-	}
+	//for _, l := range lexed {
+	//	s := ""
+	//	for _, v := range l {
+	//		s += v.String() + " "
+	//	}
+	//	println(s[:len(s)-1])
+	//}
 	p, err := interpreter.Parse(lexed)
 	if err != nil {
 		panic(err)

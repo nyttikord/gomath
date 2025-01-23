@@ -25,7 +25,10 @@ func (p *PrintStatement) Eval(opt *Options) error {
 			fmt.Printf("%d\n", i)
 			return nil
 		}
-		fmt.Printf("%f\n", f.Float())
+		var i1, i2 int64
+		i2 = f.Numerator % f.Denominator
+		i1 = (f.Numerator - i2) / f.Denominator
+		fmt.Printf("%d.%d\n", i1, i2)
 		return nil
 	}
 	println(f.String())

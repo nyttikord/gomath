@@ -3,18 +3,20 @@ package interpreter
 import (
 	"errors"
 	"fmt"
+	"github.com/anhgelus/gomath/interpreter/math"
 	"github.com/anhgelus/gomath/lexer"
 )
 
 var (
 	UnknownOperationErr = errors.New("unknown operation")
 	LexerNotValidErr    = errors.New("lexer is not valid")
+	NumberNotInSpaceErr = errors.New("number is not in the definition space")
 )
 
 type ExpressionFunc func(l []*lexer.Lexer, i *int) (Expression, error)
 
 type Expression interface {
-	Eval() (*Fraction, error)
+	Eval() (*math.Fraction, error)
 }
 
 type BinaryOperation struct {
@@ -33,7 +35,7 @@ type EvaluateOperation struct {
 }
 
 type Literal struct {
-	Value *Fraction
+	Value *math.Fraction
 }
 
 type Variable struct {
@@ -44,7 +46,7 @@ type PredefinedVariable Variable
 
 type Relation string
 
-func (b *BinaryOperation) Eval() (*Fraction, error) {
+func (b *BinaryOperation) Eval() (*math.Fraction, error) {
 	lb, err := b.Left.Eval()
 	if err != nil {
 		return nil, err
@@ -69,7 +71,7 @@ func (b *BinaryOperation) Eval() (*Fraction, error) {
 	}
 }
 
-func (b *UnaryOperation) Eval() (*Fraction, error) {
+func (b *UnaryOperation) Eval() (*math.Fraction, error) {
 	lb, err := b.Expression.Eval()
 	if err != nil {
 		return nil, err
@@ -78,25 +80,25 @@ func (b *UnaryOperation) Eval() (*Fraction, error) {
 	case "+":
 		return lb, nil
 	case "-":
-		return lb.Mul(IntToFraction(-1)), nil
+		return lb.Mul(math.IntToFraction(-1)), nil
 	default:
 		return nil, errors.Join(UnknownOperationErr, errors.New("operation "+b.Operator+" is not supported"))
 	}
 }
 
-func (e *EvaluateOperation) Eval() (*Fraction, error) {
+func (e *EvaluateOperation) Eval() (*math.Fraction, error) {
 	f, ok := functions[e.FunctionName]
 	if !ok {
 		return nil, errors.Join(UnknownFunctionErr, fmt.Errorf("undefined function %s", e.FunctionName))
 	}
-	return f.Relation.Eval(f.Variable, e.Expression)
+	return f.Relation.Eval(f.Definition, f.Variable, e.Expression)
 }
 
-func (l *Literal) Eval() (*Fraction, error) {
+func (l *Literal) Eval() (*math.Fraction, error) {
 	return l.Value, nil
 }
 
-func (v *Variable) Eval() (*Fraction, error) {
+func (v *Variable) Eval() (*math.Fraction, error) {
 	val, ok := variables[v.ID]
 	if !ok {
 		return nil, errors.Join(UnknownVariableErr, fmt.Errorf("undefined variable %s", v.ID))
@@ -104,7 +106,7 @@ func (v *Variable) Eval() (*Fraction, error) {
 	return val, nil
 }
 
-func (v *PredefinedVariable) Eval() (*Fraction, error) {
+func (v *PredefinedVariable) Eval() (*math.Fraction, error) {
 	val, ok := predefinedVariables[v.ID]
 	if !ok {
 		return nil, errors.Join(UnknownVariableErr, fmt.Errorf("undefined variable \\%s", v.ID))
@@ -124,7 +126,7 @@ func (r *Relation) String() string {
 	return string(*r)
 }
 
-func (r *Relation) Eval(variable string, val Expression) (*Fraction, error) {
+func (r *Relation) Eval(def math.Space, variable string, val Expression) (*math.Fraction, error) {
 	lexed, err := lexer.Lex([]string{r.String()})
 	if err != nil {
 		return nil, err
@@ -139,6 +141,9 @@ func (r *Relation) Eval(variable string, val Expression) (*Fraction, error) {
 			fr, err := val.Eval()
 			if err != nil {
 				return nil, err
+			}
+			if !def.Contains(fr) {
+				return nil, errors.Join(NumberNotInSpaceErr, fmt.Errorf("%s is not in %s", fr.String(), def.String()))
 			}
 			lex = append(lex, &lexer.Lexer{Type: lexer.Separator, Value: "("})
 			l.Type = lexer.Number

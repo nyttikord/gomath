@@ -3,6 +3,7 @@ package interpreter
 import (
 	"errors"
 	"fmt"
+	"github.com/anhgelus/gomath/interpreter/math"
 	"github.com/anhgelus/gomath/lexer"
 	"github.com/anhgelus/gomath/utils"
 	"slices"
@@ -127,7 +128,7 @@ func literalExpression(l []*lexer.Lexer, i *int) (Expression, error) {
 		if err != nil {
 			return nil, err
 		}
-		f, err := FloatToFraction(v)
+		f, err := math.FloatToFraction(v)
 		if err != nil {
 			return nil, err
 		}

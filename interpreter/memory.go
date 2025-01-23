@@ -2,8 +2,9 @@ package interpreter
 
 import (
 	"errors"
+	math "github.com/anhgelus/gomath/interpreter/math"
 	"github.com/anhgelus/gomath/lexer"
-	"math"
+	m "math"
 )
 
 var (
@@ -15,23 +16,23 @@ var (
 )
 
 var (
-	variables           = map[string]*Fraction{}
-	predefinedVariables = map[string]*Fraction{}
+	variables           = map[string]*math.Fraction{}
+	predefinedVariables = map[string]*math.Fraction{}
 
 	functions = map[string]*Function{}
 )
 
 func init() {
 	add := func(n string, v float64) {
-		f, err := FloatToFraction(v)
+		f, err := math.FloatToFraction(v)
 		if err != nil {
 			panic(err)
 		}
 		predefinedVariables[n] = f
 	}
-	add("pi", math.Pi)
-	add("e", math.E)
-	add("phi", math.Phi)
+	add("pi", m.Pi)
+	add("e", m.E)
+	add("phi", m.Phi)
 }
 
 type Memory struct {
@@ -40,7 +41,7 @@ type Memory struct {
 }
 
 type Function struct {
-	Definition string
+	Definition math.Space
 	Relation   *Relation
 	Name       string
 	Variable   string
@@ -59,7 +60,7 @@ func NewMemory(l []*lexer.Lexer, i *int) (*Memory, error) {
 }
 
 func NewFunction(l []*lexer.Lexer, i *int) (*Function, error) {
-	if *i+6 >= len(l) {
+	if *i+9 >= len(l) {
 		return nil, InvalidFunctionDeclarationErr
 	}
 	if l[*i+1].Type != lexer.Literal && l[*i+1].Value != "in" {
@@ -72,7 +73,7 @@ func NewFunction(l []*lexer.Lexer, i *int) (*Function, error) {
 		return nil, InvalidFunctionDeclarationErr
 	}
 	variable := l[*i].Value
-	def := l[*i+2].Value
+	rawDef := l[*i+2].Value
 	*i += 4
 	if l[*i].Type != lexer.Literal {
 		return nil, InvalidFunctionDeclarationErr
@@ -93,12 +94,21 @@ func NewFunction(l []*lexer.Lexer, i *int) (*Function, error) {
 	}
 	*i += 4
 	rel := LexToRel(l[*i:])
+	def, err := math.ParseSpace(rawDef)
+	if err != nil {
+		return nil, err
+	}
 	return &Function{Definition: def, Relation: rel, Name: name, Variable: variable}, nil
 }
 
 func IsInMemory(id string) bool {
 	_, ok := variables[id]
-	return ok
+	if ok {
+		return true
+	} else if _, ok = functions[id]; ok {
+		return true
+	}
+	return false
 }
 
 func (v *Memory) Eval(*Options) error {

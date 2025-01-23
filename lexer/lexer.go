@@ -119,14 +119,6 @@ func isSeparator(s rune) bool {
 	return slices.Contains(separators, string(s))
 }
 
-func Stringify(lexers []*Lexer) string {
-	s := ""
-	for _, l := range lexers {
-		s += l.Value
-	}
-	return s
-}
-
 func (l *Lexer) String() string {
 	return l.Type + "(" + l.Value + ")"
 }

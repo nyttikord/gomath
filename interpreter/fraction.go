@@ -35,7 +35,7 @@ func FloatToFraction(f float64) (*Fraction, error) {
 	sp := strings.Split(s, ".")
 	i, err := strconv.ParseInt(sp[0]+sp[1], 10, 64)
 	if err != nil {
-		return NullFraction, FractionNotIntErr
+		return nil, FractionNotIntErr
 	}
 	return &Fraction{
 		Numerator:   i,

@@ -38,7 +38,7 @@ func main() {
 		}
 		println(s[:len(s)-1])
 	}
-	p, err := parse(lexed)
+	p, err := interpreter.Parse(lexed)
 	if err != nil {
 		panic(err)
 	}

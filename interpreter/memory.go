@@ -11,6 +11,7 @@ var (
 	InvalidFunctionDeclarationErr = errors.New("invalid function declaration")
 	VariableMustHaveExpressionErr = errors.New("variable must have an expression")
 	UnknownVariableErr            = errors.New("unknown variable")
+	UnknownFunctionErr            = errors.New("unknown function")
 )
 
 var (
@@ -40,7 +41,7 @@ type Memory struct {
 
 type Function struct {
 	Definition string
-	Relation   string
+	Relation   *Relation
 	Name       string
 	Variable   string
 }
@@ -91,7 +92,7 @@ func NewFunction(l []*lexer.Lexer, i *int) (*Function, error) {
 		return nil, InvalidFunctionDeclarationErr
 	}
 	*i += 4
-	rel := lexer.Stringify(l[*i:])
+	rel := LexToRel(l[*i:])
 	return &Function{Definition: def, Relation: rel, Name: name, Variable: variable}, nil
 }
 

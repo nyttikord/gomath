@@ -90,13 +90,24 @@ func lexWord(w string) ([]*Lexer, error) {
 		tpe = typ
 	}
 
+	fnUpdateUnique := func(typ string) {
+		if tpe == typ && sel == "" {
+			return
+		}
+		if tpe != "" {
+			lexers = append(lexers, &Lexer{tpe, sel})
+		}
+		sel = ""
+		tpe = typ
+	}
+
 	for _, c := range []rune(w) {
 		if isDigit(string(c)) || (c == '.' && sel != "") {
 			fnUpdate(Number)
 		} else if isOperator(c) {
-			fnUpdate(Operator)
+			fnUpdateUnique(Operator)
 		} else if isSeparator(c) {
-			fnUpdate(Separator)
+			fnUpdateUnique(Separator)
 		} else {
 			fnUpdate(Literal)
 		}

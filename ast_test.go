@@ -6,7 +6,35 @@ import (
 )
 
 func TestAstSum(t *testing.T) {
-	lexr, err := lex("1+2") // useless to test another sum
+	genericTest(t, "1+2", "3")
+}
+
+func TestAstSub(t *testing.T) {
+	genericTest(t, "1-2", "-1")
+}
+
+func TestAstAddUnary(t *testing.T) {
+	genericTest(t, "1+-2", "-1")
+}
+
+func TestAstMult(t *testing.T) {
+	genericTest(t, "2*3", "6")
+}
+
+func TestAstMultUnary(t *testing.T) {
+	genericTest(t, "2*-3", "-6")
+}
+
+func TestAstDiv(t *testing.T) {
+	genericTest(t, "2/3", "2/3")
+}
+
+func TestAstDivUnary(t *testing.T) {
+	genericTest(t, "2/-3", "-2/3")
+}
+
+func TestAstDivDecimal(t *testing.T) {
+	lexr, err := lex("1/10")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -17,20 +45,20 @@ func TestAstSum(t *testing.T) {
 	if tree.Type != "return" {
 		t.Errorf("got type %s; want return", tree.Type)
 	}
-	val, err := tree.Body.Eval(&Options{})
+	val, err := tree.Body.Eval(&Options{true})
 	if err != nil {
 		t.Fatal(err)
 	}
-	if val != "3" {
-		t.Errorf("got %s; want 3", val)
+	if val != "0.1" {
+		t.Errorf("got %s; want %s", val, "0.1")
 	}
 	if t.Failed() {
 		printAst(t, tree)
 	}
 }
 
-func TestAstSub(t *testing.T) {
-	lexr, err := lex("1-2") // useless to test another sum
+func genericTest(t *testing.T, exp string, excepted string) {
+	lexr, err := lex(exp)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -45,8 +73,8 @@ func TestAstSub(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if val != "-1" {
-		t.Errorf("got %s; want -1", val)
+	if val != excepted {
+		t.Errorf("got %s; want %s", val, excepted)
 	}
 	if t.Failed() {
 		printAst(t, tree)

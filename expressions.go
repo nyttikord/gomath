@@ -71,15 +71,15 @@ func (b *binaryOperation) Eval() (*fraction, error) {
 	close(chanLr)
 	switch b.Operator {
 	case "+":
-		return lf.Add(lr), nil
+		return lf.Add(lr)
 	case "-":
-		return lf.Sub(lr), nil
+		return lf.Sub(lr)
 	case "*":
-		return lf.Mul(lr), nil
+		return lf.Mul(lr)
 	case "/":
-		return lf.Div(lr), nil
+		return lf.Div(lr)
 	case "^":
-		return lf.Pow(lr), nil
+		return lf.Pow(lr)
 	default:
 		return nil, errors.Join(ErrUnknownOperation, errors.New("operation "+string(b.Operator)+" is not supported"))
 	}
@@ -94,7 +94,7 @@ func (b *unaryOperation) Eval() (*fraction, error) {
 	case "+":
 		return lb, nil
 	case "-":
-		return lb.Mul(intToFraction(-1)), nil
+		return lb.Mul(intToFraction(-1))
 	default:
 		return nil, errors.Join(ErrUnknownOperation, errors.New("operation "+string(b.Operator)+" is not supported"))
 	}

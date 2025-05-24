@@ -3,7 +3,6 @@ package gomath
 import (
 	"errors"
 	"fmt"
-	"log/slog"
 	"math"
 	"strconv"
 	"strings"
@@ -18,7 +17,8 @@ var (
 	NullFraction = &fraction{Numerator: 0, Denominator: 1}
 	OneFraction  = &fraction{Numerator: 1, Denominator: 1}
 
-	ErrFractionNotInt = errors.New("fraction is not an int")
+	ErrFractionNotInt   = errors.New("fraction is not an int")
+	ErrIllegalOperation = errors.New("illegal operation")
 )
 
 // intToFraction converts an int64 into a fraction
@@ -72,43 +72,43 @@ func (f *fraction) Simplify() *fraction {
 }
 
 // Add a fraction
-func (f *fraction) Add(a *fraction) *fraction {
+func (f *fraction) Add(a *fraction) (*fraction, error) {
 	f.Numerator = f.Numerator*a.Denominator + a.Numerator*f.Denominator
 	f.Denominator = f.Denominator * a.Denominator
-	return f.Simplify()
+	return f.Simplify(), nil
 }
 
 // Sub (subtrack) a fraction
-func (f *fraction) Sub(a *fraction) *fraction {
+func (f *fraction) Sub(a *fraction) (*fraction, error) {
 	f.Numerator = f.Numerator*a.Denominator - a.Numerator*f.Denominator
 	f.Denominator = f.Denominator * a.Denominator
-	return f.Simplify()
+	return f.Simplify(), nil
 }
 
 // Mul (multiply) by fraction
-func (f *fraction) Mul(a *fraction) *fraction {
+func (f *fraction) Mul(a *fraction) (*fraction, error) {
 	f.Numerator = f.Numerator * a.Numerator
 	f.Denominator = f.Denominator * a.Denominator
-	return f.Simplify()
+	return f.Simplify(), nil
 }
 
 // Inv (invert) the fraction
-func (f *fraction) Inv() *fraction {
+func (f *fraction) Inv() (*fraction, error) {
 	if f.Numerator == 0 {
-		slog.Error("cannot invert a null fraction")
-		return f
+		return f, errors.Join(ErrIllegalOperation, errors.New("cannot invert a null fraction"))
 	}
 	f.Numerator, f.Denominator = f.Denominator, f.Numerator
-	return f.Simplify()
+	return f.Simplify(), nil
 }
 
 // Div (divide) by a fraction
-func (f *fraction) Div(a *fraction) *fraction {
-	if a.Numerator == 0 {
-		slog.Error("cannot divide by a null fraction")
-		return f
+func (f *fraction) Div(a *fraction) (*fraction, error) {
+	inva, err := a.Inv()
+	if err != nil {
+		return f, errors.Join(err, errors.New("cannot divide by a null fraction"))
 	}
-	return f.Mul(a.Inv()).Simplify()
+	mul, _ := f.Mul(inva) // avoid checking error because it's always nil for fraction.Mul
+	return mul.Simplify(), nil
 }
 
 // IsInt returns true if the fraction is an int
@@ -131,33 +131,35 @@ func (f *fraction) Float() float64 {
 }
 
 // Pow the fraction by another
-func (f *fraction) Pow(a *fraction) *fraction {
+func (f *fraction) Pow(a *fraction) (*fraction, error) {
 	if a.IsInt() {
 		n, _ := a.Int()
 		if f.Float() == 0 {
 			if n == 0 {
-				return OneFraction
+				return OneFraction, nil
 			}
-			return NullFraction
+			return NullFraction, nil
 		}
 		nf := fraction{
 			Numerator:   int64(math.Pow(float64(f.Numerator), float64(n))),
 			Denominator: int64(math.Pow(float64(f.Denominator), float64(n))),
 		}
 		*f = nf
-		return f.Simplify()
+		return f.Simplify(), nil
 	}
 	afl := a.Float()
 	nf, err := floatToFraction(math.Pow(float64(f.Numerator), afl))
 	if err != nil {
-		slog.Error("impossible to converts numerator^a into a fraction", "numerator", f.Numerator, "a", afl)
-		return NullFraction
+		return NullFraction, errors.Join(err, errors.New("cannot convert numerator^a into a fraction"))
 	}
 	nff, err := floatToFraction(math.Pow(float64(f.Denominator), afl))
 	if err != nil {
-		slog.Error("impossible to converts denominator^a into a fraction", "denominator", f.Denominator, "a", afl)
-		return NullFraction
+		return NullFraction, errors.Join(err, errors.New("cannot convert denominator^a into a fraction"))
 	}
-	*f = *nf.Div(nff)
-	return f.Simplify()
+	pf, err := nf.Div(nff)
+	if err != nil {
+		return NullFraction, err
+	}
+	*f = *pf
+	return f.Simplify(), nil
 }

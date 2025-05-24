@@ -21,7 +21,7 @@ var (
 	operators  = []operator{"+", "-", "*", "/", "^", "%", "=", "{", "}"}
 	separators = []separator{",", "(", ")"}
 
-	SameTypeFollowErr = errors.New("sequence of two with exclusively numbers")
+	ErrSameTypeFollow = errors.New("sequence of two with exclusively numbers")
 )
 
 type lexer struct {
@@ -41,7 +41,7 @@ func lex(content string) ([]*lexer, error) {
 		for j := 0; j < len(lexr)-1; j++ {
 			if lexr[j].Type == Number && lexr[j].Type == lexr[j+1].Type {
 				return nil, errors.Join(
-					SameTypeFollowErr,
+					ErrSameTypeFollow,
 					fmt.Errorf(
 						"not possible to have %s %s",
 						lexr[j].Value,

@@ -10,7 +10,7 @@ var (
 )
 
 type Space interface {
-	Contains(f *Fraction) bool
+	Contains(f *fraction) bool
 	String() string
 }
 
@@ -22,7 +22,7 @@ type RelativeSet struct{}
 
 type NaturalSet struct{}
 
-func ParseSpace(s string) (Space, error) {
+func parseSpace(s string) (Space, error) {
 	switch s {
 	case "R":
 		return RealSet{}, nil
@@ -36,7 +36,7 @@ func ParseSpace(s string) (Space, error) {
 	return nil, errors.Join(UnknownSpaceErr, fmt.Errorf("unknown space %s", s))
 }
 
-func (RealSet) Contains(f *Fraction) bool {
+func (RealSet) Contains(f *fraction) bool {
 	return true
 }
 
@@ -44,7 +44,7 @@ func (RealSet) String() string {
 	return "R"
 }
 
-func (RationalSet) Contains(f *Fraction) bool {
+func (RationalSet) Contains(f *fraction) bool {
 	return true
 }
 
@@ -56,7 +56,7 @@ func (NaturalSet) String() string {
 	return "N"
 }
 
-func (NaturalSet) Contains(f *Fraction) bool {
+func (NaturalSet) Contains(f *fraction) bool {
 	if !f.IsInt() {
 		return false
 	}
@@ -68,6 +68,6 @@ func (RelativeSet) String() string {
 	return "Z"
 }
 
-func (RelativeSet) Contains(f *Fraction) bool {
+func (RelativeSet) Contains(f *fraction) bool {
 	return f.IsInt()
 }

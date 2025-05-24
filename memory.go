@@ -14,15 +14,15 @@ var (
 )
 
 var (
-	variables           = map[string]*Fraction{}
-	predefinedVariables = map[string]*Fraction{}
+	variables           = map[string]*fraction{}
+	predefinedVariables = map[string]*fraction{}
 
 	functions = map[string]*mathFunction{}
 )
 
 func init() {
 	add := func(n string, v float64) {
-		f, err := FloatToFraction(v)
+		f, err := floatToFraction(v)
 		if err != nil {
 			panic(err)
 		}
@@ -40,7 +40,8 @@ type mathFunction struct {
 	Variable   string
 }
 
-func NewFunction(l []*lexer, i *int) (*mathFunction, error) {
+// newFunction handles the creation of a new mathFunction
+func newFunction(l []*lexer, i *int) (*mathFunction, error) {
 	if *i+9 >= len(l) {
 		return nil, ErrInvalidFunctionDeclaration
 	}
@@ -75,14 +76,15 @@ func NewFunction(l []*lexer, i *int) (*mathFunction, error) {
 	}
 	*i += 4
 	rel := lexToRel(l[*i:])
-	def, err := ParseSpace(rawDef)
+	def, err := parseSpace(rawDef)
 	if err != nil {
 		return nil, err
 	}
 	return &mathFunction{Definition: def, Relation: rel, Name: name, Variable: variable}, nil
 }
 
-func IsInMemory(id string) bool {
+// isInMemory checks if the given id is already used
+func isInMemory(id string) bool {
 	_, ok := variables[id]
 	if ok {
 		return true

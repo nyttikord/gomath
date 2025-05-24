@@ -25,6 +25,7 @@ type ast struct {
 	Body statement
 }
 
+// astParse the given lexer and returns an ast
 func astParse(lexed []*lexer, tpe astType) (*ast, error) {
 	tree := ast{Type: tpe}
 	i := 0
@@ -97,7 +98,7 @@ func literalExpression(l []*lexer, i *int) (expression, error) {
 		if err != nil {
 			return nil, err
 		}
-		f, err := FloatToFraction(v)
+		f, err := floatToFraction(v)
 		if err != nil {
 			return nil, err
 		}

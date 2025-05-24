@@ -18,8 +18,8 @@ const (
 )
 
 var (
-	operators  = []string{"+", "-", "*", "/", "^", "%", "=", "{", "}"}
-	separators = []string{",", "(", ")"}
+	operators  = []operator{"+", "-", "*", "/", "^", "%", "=", "{", "}"}
+	separators = []separator{",", "(", ")"}
 
 	SameTypeFollowErr = errors.New("sequence of two with exclusively numbers")
 )
@@ -29,6 +29,7 @@ type lexer struct {
 	Value string
 }
 
+// lex returns the lexer of the content
 func lex(content string) ([]*lexer, error) {
 	var lexr []*lexer
 	for _, w := range strings.Split(content, " ") {
@@ -53,6 +54,7 @@ func lex(content string) ([]*lexer, error) {
 	return lexr, nil
 }
 
+// lexWord returns the lexer of the word
 func lexWord(w string) ([]*lexer, error) {
 	if isDigit(w) {
 		if []rune(w)[0] == '-' {
@@ -112,17 +114,20 @@ func lexWord(w string) ([]*lexer, error) {
 	return lexers, nil
 }
 
+// isDigit checks if the string contains a digit
 func isDigit(s string) bool {
 	_, err := strconv.ParseFloat(s, 64)
 	return err == nil
 }
 
+// isOperator checks if the rune is an operator
 func isOperator(s rune) bool {
-	return slices.Contains(operators, string(s))
+	return slices.Contains(operators, operator(s))
 }
 
+// isSeparator checks if the rune is a separator
 func isSeparator(s rune) bool {
-	return slices.Contains(separators, string(s))
+	return slices.Contains(separators, separator(s))
 }
 
 func (l *lexer) String() string {

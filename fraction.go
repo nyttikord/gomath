@@ -8,57 +8,60 @@ import (
 	"strings"
 )
 
-type Fraction struct {
+type fraction struct {
 	Numerator   int64
 	Denominator int64
 }
 
 var (
-	NullFraction = &Fraction{Numerator: 0, Denominator: 1}
-	OneFraction  = &Fraction{Numerator: 1, Denominator: 1}
+	NullFraction = &fraction{Numerator: 0, Denominator: 1}
+	OneFraction  = &fraction{Numerator: 1, Denominator: 1}
 
 	ErrFractionNotInt = errors.New("fraction is not an int")
 )
 
-func IntToFraction(n int64) *Fraction {
-	return &Fraction{
+// intToFraction converts an int64 into a fraction
+func intToFraction(n int64) *fraction {
+	return &fraction{
 		Numerator:   n,
 		Denominator: 1,
 	}
 }
 
-func FloatToFraction(f float64) (*Fraction, error) {
+// floatToFraction converts a float64 into a fraction
+func floatToFraction(f float64) (*fraction, error) {
 	if f == float64(int64(f)) {
-		return IntToFraction(int64(f)), nil
+		return intToFraction(int64(f)), nil
 	}
 	s := strconv.FormatFloat(f, 'f', -1, 64)
 	sp := strings.Split(s, ".")
 	i, err := strconv.ParseInt(sp[0]+sp[1], 10, 64)
 	if err != nil {
-		return nil, ErrFractionNotInt
+		return nil, err
 	}
-	return &Fraction{
+	return &fraction{
 		Numerator:   i,
 		Denominator: int64(math.Pow(10, float64(len(sp[1])))),
 	}, nil
 }
 
-func PGCD(a, b int64) int64 {
+func gcd(a, b int64) int64 {
 	for b != 0 {
 		a, b = b, a%b
 	}
 	return a
 }
 
-func (f *Fraction) String() string {
+func (f *fraction) String() string {
 	if f.Denominator != 1 {
 		return fmt.Sprintf("%d/%d", f.Numerator, f.Denominator)
 	}
 	return fmt.Sprintf("%d", f.Numerator)
 }
 
-func (f *Fraction) Simplify() *Fraction {
-	pgcd := PGCD(f.Numerator, f.Denominator)
+// Simplify the fraction
+func (f *fraction) Simplify() *fraction {
+	pgcd := gcd(f.Numerator, f.Denominator)
 	if pgcd == 0 {
 		return f
 	}
@@ -67,63 +70,68 @@ func (f *Fraction) Simplify() *Fraction {
 	return f
 }
 
-func (f *Fraction) Add(a *Fraction) *Fraction {
+// Add a fraction
+func (f *fraction) Add(a *fraction) *fraction {
 	f.Numerator = f.Numerator*a.Denominator + a.Numerator*f.Denominator
 	f.Denominator = f.Denominator * a.Denominator
 	return f.Simplify()
 }
 
-func (f *Fraction) Sub(a *Fraction) *Fraction {
+// Sub (subtrack) a fraction
+func (f *fraction) Sub(a *fraction) *fraction {
 	f.Numerator = f.Numerator*a.Denominator - a.Numerator*f.Denominator
 	f.Denominator = f.Denominator * a.Denominator
 	return f.Simplify()
 }
 
-func (f *Fraction) Mul(a *Fraction) *Fraction {
+// Mul (multiply) by fraction
+func (f *fraction) Mul(a *fraction) *fraction {
 	f.Numerator = f.Numerator * a.Numerator
 	f.Denominator = f.Denominator * a.Denominator
 	return f.Simplify()
 }
 
-func (f *Fraction) Inv() *Fraction {
+// Inv (invert) the fraction
+func (f *fraction) Inv() *fraction {
 	f.Numerator, f.Denominator = f.Denominator, f.Numerator
 	return f.Simplify()
 }
 
-func (f *Fraction) Div(a *Fraction) *Fraction {
+// Div (divide) by a fraction
+func (f *fraction) Div(a *fraction) *fraction {
 	return f.Mul(a.Inv()).Simplify()
 }
 
-func (f *Fraction) IsInt() bool {
+// IsInt returns true if the fraction is an int
+func (f *fraction) IsInt() bool {
 	return f.Numerator%f.Denominator == 0
 }
 
 // Int convers the fraction to an int.
-// Returns ErrFractionNotInt if the fraction isn't an int (check before with Fraction.IsInt)
-func (f *Fraction) Int() (int64, error) {
+// Returns ErrFractionNotInt if the fraction isn't an int (check before with fraction.IsInt)
+func (f *fraction) Int() (int64, error) {
 	if !f.IsInt() {
 		return 0, errors.Join(ErrFractionNotInt, errors.New(f.String()+" is not an int"))
 	}
 	return f.Numerator / f.Denominator, nil
 }
 
-func (f *Fraction) Float() float64 {
+// Float converts the fraction to a float
+func (f *fraction) Float() float64 {
 	return float64(f.Numerator) / float64(f.Denominator)
 }
 
-func (f *Fraction) Pow(a *Fraction) *Fraction {
+// Pow the fraction by another
+func (f *fraction) Pow(a *fraction) *fraction {
 	if a.IsInt() {
-		n, err := a.Int()
-		if err != nil {
-			panic(err)
-		}
+		n, _ := a.Int()
 		if f.Float() == 0 {
 			if n == 0 {
 				return OneFraction
 			}
 			return NullFraction
 		}
-		nf := Fraction{
+		nf := fraction{
 			Numerator:   int64(math.Pow(float64(f.Numerator), float64(n))),
 			Denominator: int64(math.Pow(float64(f.Denominator), float64(n))),
 		}
@@ -135,7 +143,7 @@ func (f *Fraction) Pow(a *Fraction) *Fraction {
 		return NullFraction
 	}
 	d := math.Pow(fl, a.Float())
-	ff, err := FloatToFraction(d)
+	ff, err := floatToFraction(d)
 	if err != nil {
 		panic(err)
 	}

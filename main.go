@@ -1,13 +1,14 @@
 package gomath
 
-func Parse(content string, opt *Options) (string, error) {
-	lexed, err := lex(content)
+// Parse an expression with given Options
+func Parse(expression string, opt *Options) (string, error) {
+	lexed, err := lex(expression)
 	if err != nil {
-		panic(err)
+		return "", err
 	}
 	p, err := astParse(lexed, "return")
 	if err != nil {
-		panic(err)
+		return "", err
 	}
 	return p.Body.Eval(opt)
 }

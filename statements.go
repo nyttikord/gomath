@@ -7,6 +7,7 @@ type Options struct {
 }
 
 type statement interface {
+	// Eval the statement
 	Eval(*Options) (string, error)
 }
 

@@ -58,6 +58,15 @@ func TestEvalDivDecimal(t *testing.T) {
 	}
 }
 
+func TestEvalPriority(t *testing.T) {
+	t.Log("testing 2*(1+2)")
+	genericTest(t, "2*(1+2)", "6")
+	t.Log("testing 2*1+2")
+	genericTest(t, "2*1+2", "4")
+	t.Log("testing 2*(1+2)^2")
+	genericTest(t, "2*(1+2)^2", "18")
+}
+
 func genericTest(t *testing.T, exp string, excepted string) {
 	lexr, err := lex(exp)
 	if err != nil {

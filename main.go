@@ -1,29 +1,7 @@
 package gomath
 
-import (
-	"flag"
-	"os"
-	"strings"
-)
-
-var (
-	input   string
-	decimal bool
-)
-
-func init() {
-	flag.StringVar(&input, "i", "", "input file")
-	flag.BoolVar(&decimal, "d", false, "decimal output")
-	flag.Parse()
-}
-
-func main() {
-	b, err := os.ReadFile(input)
-	if err != nil {
-		panic(err)
-	}
-	content := strings.Split(string(b), "\n")
-	lexed, err := Lex(content)
+func Parse(content string, opt *Options) {
+	lexed, err := lex(content)
 	if err != nil {
 		panic(err)
 	}
@@ -34,7 +12,7 @@ func main() {
 	//	}
 	//	println(s[:len(s)-1])
 	//}
-	p, err := Parse(lexed)
+	p, err := astParse(lexed)
 	if err != nil {
 		panic(err)
 	}
@@ -44,7 +22,7 @@ func main() {
 	//}
 	//println(string(m))
 	for _, stmt := range p.Body {
-		err = stmt.Eval(&Options{Decimal: decimal})
+		err = stmt.Eval(opt)
 		if err != nil {
 			panic(err)
 		}

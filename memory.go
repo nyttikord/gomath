@@ -18,7 +18,7 @@ var (
 	variables           = map[string]*math2.Fraction{}
 	predefinedVariables = map[string]*math2.Fraction{}
 
-	functions = map[string]*Function{}
+	functions = map[string]*mathFunction{}
 )
 
 func init() {
@@ -34,31 +34,14 @@ func init() {
 	add("phi", m.Phi)
 }
 
-type Memory struct {
-	ID         string
-	Expression Expression
-}
-
-type Function struct {
+type mathFunction struct {
 	Definition math2.Space
-	Relation   *Relation
+	Relation   *relation
 	Name       string
 	Variable   string
 }
 
-func NewMemory(l []*Lexer, i *int) (*Memory, error) {
-	if *i+2 >= len(l) {
-		return nil, InvalidVariableDeclarationErr
-	}
-	if l[*i+1].Type != Operator && l[*i+1].Value != "=" {
-		return nil, VariableMustHaveExpressionErr
-	}
-	id := l[*i].Value
-	*i += 2
-	return &Memory{ID: id}, nil
-}
-
-func NewFunction(l []*Lexer, i *int) (*Function, error) {
+func NewFunction(l []*lexer, i *int) (*mathFunction, error) {
 	if *i+9 >= len(l) {
 		return nil, InvalidFunctionDeclarationErr
 	}
@@ -97,7 +80,7 @@ func NewFunction(l []*Lexer, i *int) (*Function, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &Function{Definition: def, Relation: rel, Name: name, Variable: variable}, nil
+	return &mathFunction{Definition: def, Relation: rel, Name: name, Variable: variable}, nil
 }
 
 func IsInMemory(id string) bool {
@@ -110,16 +93,7 @@ func IsInMemory(id string) bool {
 	return false
 }
 
-func (v *Memory) Eval(*Options) error {
-	f, err := v.Expression.Eval()
-	if err != nil {
-		return err
-	}
-	variables[v.ID] = f
-	return nil
-}
-
-func (f *Function) Eval(*Options) error {
+func (f *mathFunction) Eval(*Options) error {
 	functions[f.Name] = f
 	return nil
 }

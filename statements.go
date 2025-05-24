@@ -11,7 +11,7 @@ type Statement interface {
 }
 
 type PrintStatement struct {
-	Expression Expression
+	Expression expression
 }
 
 func (p *PrintStatement) Eval(opt *Options) error {

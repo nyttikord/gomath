@@ -24,7 +24,7 @@ type Ast struct {
 	Body []Statement
 }
 
-func Parse(lexed []*Lexer) (*Ast, error) {
+func astParse(lexed []*lexer) (*Ast, error) {
 	tree := Ast{Type: "program"}
 	i := 0
 	var stmt Statement
@@ -38,20 +38,20 @@ func Parse(lexed []*Lexer) (*Ast, error) {
 	return &tree, nil
 }
 
-func termExpression(l []*Lexer, i *int) (Expression, error) {
+func termExpression(l []*lexer, i *int) (expression, error) {
 	return binExpression(termOperators, factorExpression)(l, i)
 }
 
-func factorExpression(l []*Lexer, i *int) (Expression, error) {
+func factorExpression(l []*lexer, i *int) (expression, error) {
 	return binExpression(factorOperators, expExpression)(l, i)
 }
 
-func expExpression(l []*Lexer, i *int) (Expression, error) {
+func expExpression(l []*lexer, i *int) (expression, error) {
 	return binExpression(expOperators, literalExpression)(l, i)
 }
 
-func binExpression(operators []string, sub ExpressionFunc) ExpressionFunc {
-	return func(l []*Lexer, i *int) (Expression, error) {
+func binExpression(operators []string, sub expressionFunc) expressionFunc {
+	return func(l []*lexer, i *int) (expression, error) {
 		left, err := sub(l, i)
 		if err != nil {
 			return nil, err
@@ -63,8 +63,8 @@ func binExpression(operators []string, sub ExpressionFunc) ExpressionFunc {
 			if err != nil {
 				return nil, err
 			}
-			left = &BinaryOperation{
-				Operator: op,
+			left = &binaryOperation{
+				Operator: operator(op),
 				Left:     left,
 				Right:    right,
 			}
@@ -73,7 +73,7 @@ func binExpression(operators []string, sub ExpressionFunc) ExpressionFunc {
 	}
 }
 
-func operatorExpression(l []*Lexer, i *int) (Expression, error) {
+func operatorExpression(l []*lexer, i *int) (expression, error) {
 	c := l[*i]
 	if c.Type == Operator && c.Value == "{" {
 		*i++
@@ -90,7 +90,7 @@ func operatorExpression(l []*Lexer, i *int) (Expression, error) {
 	return literalExpression(l, i)
 }
 
-func literalExpression(l []*Lexer, i *int) (Expression, error) {
+func literalExpression(l []*lexer, i *int) (expression, error) {
 	c := l[*i]
 	*i++
 	switch c.Type {
@@ -103,10 +103,10 @@ func literalExpression(l []*Lexer, i *int) (Expression, error) {
 		if err != nil {
 			return nil, err
 		}
-		return &TLiteral{Value: f}, nil
+		return &literalExp{Value: f}, nil
 	case Literal:
 		if strings.HasPrefix(c.Value, "\\") {
-			return &PredefinedVariable{ID: c.Value[1:]}, nil
+			return &predefinedVariable{ID: c.Value[1:]}, nil
 		} else if *i < len(l) && l[*i].Type == Operator && l[*i].Value == "{" {
 			name := c.Value
 			*i++
@@ -114,9 +114,9 @@ func literalExpression(l []*Lexer, i *int) (Expression, error) {
 			if err != nil {
 				return nil, err
 			}
-			return &EvaluateOperation{Expression: exp, FunctionName: name}, nil
+			return &evaluateOperation{Expression: exp, FunctionName: name}, nil
 		}
-		return &Variable{ID: c.Value}, nil
+		return &variable{ID: c.Value}, nil
 	case Separator:
 		if c.Value == "(" {
 			exp, err := termExpression(l, i)
@@ -134,7 +134,7 @@ func literalExpression(l []*Lexer, i *int) (Expression, error) {
 		if err != nil {
 			return nil, err
 		}
-		return &UnaryOperation{Operator: c.Value, Expression: exp}, nil
+		return &unaryOperation{Operator: operator(c.Value), Expression: exp}, nil
 	}
 	return nil, errors.Join(UnknownExpressionErr, fmt.Errorf(
 		"unknown type %s('%s'): excepting a valid literal expression",

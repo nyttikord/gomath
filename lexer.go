@@ -8,11 +8,13 @@ import (
 	"strings"
 )
 
+type lexType string
+
 const (
-	Literal   string = "literal"
-	Number    string = "number"
-	Separator string = "separator"
-	Operator  string = "operator"
+	Literal   lexType = "literal"
+	Number    lexType = "number"
+	Separator lexType = "separator"
+	Operator  lexType = "operator"
 )
 
 var (
@@ -22,71 +24,72 @@ var (
 	SameTypeFollowErr = errors.New("sequence of two with exclusively numbers")
 )
 
-type Lexer struct {
-	Type, Value string
+type lexer struct {
+	Type  lexType
+	Value string
 }
 
-func Lex(content string) ([]*Lexer, error) {
-	var lexer []*Lexer
+func lex(content string) ([]*lexer, error) {
+	var lexr []*lexer
 	for _, w := range strings.Split(content, " ") {
 		word, err := lexWord(w)
 		if err != nil {
 			return nil, err
 		}
-		lexer = append(lexer, word...)
-		for j := 0; j < len(lexer)-1; j++ {
-			if lexer[j].Type == Number && lexer[j].Type == lexer[j+1].Type {
+		lexr = append(lexr, word...)
+		for j := 0; j < len(lexr)-1; j++ {
+			if lexr[j].Type == Number && lexr[j].Type == lexr[j+1].Type {
 				return nil, errors.Join(
 					SameTypeFollowErr,
 					fmt.Errorf(
 						"not possible to have %s %s",
-						lexer[j].Value,
-						lexer[j+1].Value,
+						lexr[j].Value,
+						lexr[j+1].Value,
 					),
 				)
 			}
 		}
 	}
-	return lexer, nil
+	return lexr, nil
 }
 
-func lexWord(w string) ([]*Lexer, error) {
+func lexWord(w string) ([]*lexer, error) {
 	if isDigit(w) {
 		if []rune(w)[0] == '-' {
-			return []*Lexer{
+			return []*lexer{
 				{Operator, "-"},
 				{Number, w[1:]},
 			}, nil
 		} else if []rune(w)[0] == '+' {
-			return []*Lexer{
+			return []*lexer{
 				{Number, w[1:]},
 			}, nil
 		}
-		return []*Lexer{
+		return []*lexer{
 			{Number, w},
 		}, nil
 	}
-	var lexers []*Lexer
+	var lexers []*lexer
 	sel := ""
-	tpe := ""
+	var tpe lexType
 
-	fnUpdate := func(typ string) {
+	fnUpdate := func(typ lexType) {
 		if tpe == typ {
 			return
 		}
 		if tpe != "" {
-			lexers = append(lexers, &Lexer{tpe, sel})
+			lexers = append(lexers, &lexer{tpe, sel})
 		}
 		sel = ""
 		tpe = typ
 	}
 
-	fnUpdateUnique := func(typ string) {
+	fnUpdateUnique := func(typ lexType) {
 		if tpe == typ && sel == "" {
 			return
 		}
 		if tpe != "" {
-			lexers = append(lexers, &Lexer{tpe, sel})
+			lexers = append(lexers, &lexer{tpe, sel})
 		}
 		sel = ""
 		tpe = typ
@@ -104,7 +107,7 @@ func lexWord(w string) ([]*Lexer, error) {
 		}
 		sel += string(c)
 	}
-	lexers = append(lexers, &Lexer{tpe, sel})
+	lexers = append(lexers, &lexer{tpe, sel})
 	return lexers, nil
 }
 
@@ -121,6 +124,6 @@ func isSeparator(s rune) bool {
 	return slices.Contains(separators, string(s))
 }
 
-func (l *Lexer) String() string {
-	return l.Type + "(" + l.Value + ")"
+func (l *lexer) String() string {
+	return string(l.Type) + "(" + l.Value + ")"
 }

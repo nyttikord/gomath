@@ -12,40 +12,42 @@ var (
 	NumberNotInSpaceErr = errors.New("number is not in the definition space")
 )
 
-type ExpressionFunc func(l []*Lexer, i *int) (Expression, error)
+type expressionFunc func(l []*lexer, i *int) (expression, error)
 
-type Expression interface {
+type expression interface {
 	Eval() (*math2.Fraction, error)
 }
 
-type BinaryOperation struct {
-	Operator    string
-	Left, Right Expression
+type operator string
+
+type binaryOperation struct {
+	Operator    operator
+	Left, Right expression
 }
 
-type UnaryOperation struct {
-	Operator   string
-	Expression Expression
+type unaryOperation struct {
+	Operator   operator
+	Expression expression
 }
 
-type EvaluateOperation struct {
+type evaluateOperation struct {
 	FunctionName string
-	Expression   Expression
+	Expression   expression
 }
 
-type TLiteral struct {
+type literalExp struct {
 	Value *math2.Fraction
 }
 
-type Variable struct {
+type variable struct {
 	ID string
 }
 
-type PredefinedVariable Variable
+type predefinedVariable variable
 
-type Relation string
+type relation string
 
-func (b *BinaryOperation) Eval() (*math2.Fraction, error) {
+func (b *binaryOperation) Eval() (*math2.Fraction, error) {
 	lb, err := b.Left.Eval()
 	if err != nil {
 		return nil, err
@@ -66,11 +68,11 @@ func (b *BinaryOperation) Eval() (*math2.Fraction, error) {
 	case "^":
 		return lb.Pow(lr), nil
 	default:
-		return nil, errors.Join(UnknownOperationErr, errors.New("operation "+b.Operator+" is not supported"))
+		return nil, errors.Join(UnknownOperationErr, errors.New("operation "+string(b.Operator)+" is not supported"))
 	}
 }
 
-func (b *UnaryOperation) Eval() (*math2.Fraction, error) {
+func (b *unaryOperation) Eval() (*math2.Fraction, error) {
 	lb, err := b.Expression.Eval()
 	if err != nil {
 		return nil, err
@@ -81,11 +83,11 @@ func (b *UnaryOperation) Eval() (*math2.Fraction, error) {
 	case "-":
 		return lb.Mul(math2.IntToFraction(-1)), nil
 	default:
-		return nil, errors.Join(UnknownOperationErr, errors.New("operation "+b.Operator+" is not supported"))
+		return nil, errors.Join(UnknownOperationErr, errors.New("operation "+string(b.Operator)+" is not supported"))
 	}
 }
 
-func (e *EvaluateOperation) Eval() (*math2.Fraction, error) {
+func (e *evaluateOperation) Eval() (*math2.Fraction, error) {
 	f, ok := functions[e.FunctionName]
 	if !ok {
 		return nil, errors.Join(UnknownFunctionErr, fmt.Errorf("undefined function %s", e.FunctionName))
@@ -93,11 +95,11 @@ func (e *EvaluateOperation) Eval() (*math2.Fraction, error) {
 	return f.Relation.Eval(f.Definition, f.Variable, e.Expression)
 }
 
-func (l *TLiteral) Eval() (*math2.Fraction, error) {
+func (l *literalExp) Eval() (*math2.Fraction, error) {
 	return l.Value, nil
 }
 
-func (v *Variable) Eval() (*math2.Fraction, error) {
+func (v *variable) Eval() (*math2.Fraction, error) {
 	val, ok := variables[v.ID]
 	if !ok {
 		return nil, errors.Join(UnknownVariableErr, fmt.Errorf("undefined variable %s", v.ID))
@@ -105,7 +107,7 @@ func (v *Variable) Eval() (*math2.Fraction, error) {
 	return val, nil
 }
 
-func (v *PredefinedVariable) Eval() (*math2.Fraction, error) {
+func (v *predefinedVariable) Eval() (*math2.Fraction, error) {
 	val, ok := predefinedVariables[v.ID]
 	if !ok {
 		return nil, errors.Join(UnknownVariableErr, fmt.Errorf("undefined variable \\%s", v.ID))
@@ -113,27 +115,27 @@ func (v *PredefinedVariable) Eval() (*math2.Fraction, error) {
 	return val, nil
 }
 
-func LexToRel(lexers []*Lexer) *Relation {
-	var s Relation
+func LexToRel(lexers []*lexer) *relation {
+	var s relation
 	for _, l := range lexers {
-		s += Relation(l.Value)
+		s += relation(l.Value)
 	}
 	return &s
 }
 
-func (r *Relation) String() string {
+func (r *relation) String() string {
 	return string(*r)
 }
 
-func (r *Relation) Eval(def math2.Space, variable string, val Expression) (*math2.Fraction, error) {
-	lexed, err := Lex(r.String())
+func (r *relation) Eval(def math2.Space, variable string, val expression) (*math2.Fraction, error) {
+	lexed, err := lex(r.String())
 	if err != nil {
 		return nil, err
 	}
 	if len(lexed) != 1 {
 		return nil, LexerNotValidErr
 	}
-	var lex []*Lexer
+	var lexr []*lexer
 	for _, l := range lexed {
 		// replace all x by their value in brackets
 		if l.Type == Literal && l.Value == variable {
@@ -144,13 +146,13 @@ func (r *Relation) Eval(def math2.Space, variable string, val Expression) (*math
 			if !def.Contains(fr) {
 				return nil, errors.Join(NumberNotInSpaceErr, fmt.Errorf("%s is not in %s", fr.String(), def.String()))
 			}
-			lex = append(lex, &Lexer{Type: Separator, Value: "("})
+			lexr = append(lexr, &lexer{Type: Separator, Value: "("})
 			l.Type = Number
 			l.Value = fr.String()
-			lex = append(lex, l)
-			lex = append(lex, &Lexer{Type: Separator, Value: ")"})
+			lexr = append(lexr, l)
+			lexr = append(lexr, &lexer{Type: Separator, Value: ")"})
 		} else {
-			lex = append(lex, l)
+			lexr = append(lexr, l)
 		}
 	}
 	i := 0

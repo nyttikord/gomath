@@ -62,6 +62,7 @@ func lexWord(w string) ([]*lexer, error) {
 			}, nil
 		} else if []rune(w)[0] == '+' {
 			return []*lexer{
+				{Operator, "+"},
 				{Number, w[1:]},
 			}, nil
 		}

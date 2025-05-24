@@ -75,7 +75,7 @@ func NewFunction(l []*lexer, i *int) (*mathFunction, error) {
 		return nil, InvalidFunctionDeclarationErr
 	}
 	*i += 4
-	rel := LexToRel(l[*i:])
+	rel := lexToRel(l[*i:])
 	def, err := math2.ParseSpace(rawDef)
 	if err != nil {
 		return nil, err

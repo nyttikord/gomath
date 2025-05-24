@@ -48,25 +48,37 @@ type predefinedVariable variable
 type relation string
 
 func (b *binaryOperation) Eval() (*math2.Fraction, error) {
-	lb, err := b.Left.Eval()
-	if err != nil {
-		return nil, err
-	}
-	lr, err := b.Right.Eval()
-	if err != nil {
-		return nil, err
-	}
+	chanLf := make(chan *math2.Fraction)
+	chanLr := make(chan *math2.Fraction)
+	go func() {
+		lf, err := b.Left.Eval()
+		chanLf <- lf
+		if err != nil {
+			panic(err)
+		}
+	}()
+	go func() {
+		lr, err := b.Right.Eval()
+		chanLr <- lr
+		if err != nil {
+			panic(err)
+		}
+	}()
+	lf := <-chanLf
+	lr := <-chanLr
+	close(chanLf)
+	close(chanLr)
 	switch b.Operator {
 	case "+":
-		return lb.Add(lr), nil
+		return lf.Add(lr), nil
 	case "-":
-		return lb.Sub(lr), nil
+		return lf.Sub(lr), nil
 	case "*":
-		return lb.Mul(lr), nil
+		return lf.Mul(lr), nil
 	case "/":
-		return lb.Div(lr), nil
+		return lf.Div(lr), nil
 	case "^":
-		return lb.Pow(lr), nil
+		return lf.Pow(lr), nil
 	default:
 		return nil, errors.Join(UnknownOperationErr, errors.New("operation "+string(b.Operator)+" is not supported"))
 	}
@@ -115,7 +127,7 @@ func (v *predefinedVariable) Eval() (*math2.Fraction, error) {
 	return val, nil
 }
 
-func LexToRel(lexers []*lexer) *relation {
+func lexToRel(lexers []*lexer) *relation {
 	var s relation
 	for _, l := range lexers {
 		s += relation(l.Value)

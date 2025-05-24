@@ -3,6 +3,7 @@ package gomath
 import (
 	"errors"
 	"fmt"
+	"log/slog"
 	"math"
 	"strconv"
 	"strings"
@@ -93,12 +94,20 @@ func (f *fraction) Mul(a *fraction) *fraction {
 
 // Inv (invert) the fraction
 func (f *fraction) Inv() *fraction {
+	if f.Numerator == 0 {
+		slog.Error("cannot invert a null fraction")
+		return f
+	}
 	f.Numerator, f.Denominator = f.Denominator, f.Numerator
 	return f.Simplify()
 }
 
 // Div (divide) by a fraction
 func (f *fraction) Div(a *fraction) *fraction {
+	if a.Numerator == 0 {
+		slog.Error("cannot divide by a null fraction")
+		return f
+	}
 	return f.Mul(a.Inv()).Simplify()
 }
 
@@ -136,17 +145,19 @@ func (f *fraction) Pow(a *fraction) *fraction {
 			Denominator: int64(math.Pow(float64(f.Denominator), float64(n))),
 		}
 		*f = nf
-		return f
+		return f.Simplify()
 	}
-	fl := f.Float()
-	if fl == 0 {
+	afl := a.Float()
+	nf, err := floatToFraction(math.Pow(float64(f.Numerator), afl))
+	if err != nil {
+		slog.Error("impossible to converts numerator^a into a fraction", "numerator", f.Numerator, "a", afl)
 		return NullFraction
 	}
-	d := math.Pow(fl, a.Float())
-	ff, err := floatToFraction(d)
+	nff, err := floatToFraction(math.Pow(float64(f.Denominator), afl))
 	if err != nil {
-		panic(err)
+		slog.Error("impossible to converts denominator^a into a fraction", "denominator", f.Denominator, "a", afl)
+		return NullFraction
 	}
-	*f = *ff
-	return f
+	*f = *nf.Div(nff)
+	return f.Simplify()
 }

@@ -1,7 +1,6 @@
 package gomath
 
 import (
-	"errors"
 	"testing"
 )
 
@@ -55,10 +54,9 @@ func TestLexerSum(t *testing.T) {
 		t.Fatal(err)
 	}
 	fn(lexr)
-	t.Log("Testing error 1 +2")
+	t.Log("Testing 1 +2")
 	lexr, err = lex("1 +2")
-	if !errors.Is(err, SameTypeFollowErr) {
-		printLex(t, lexr)
+	if err != nil {
 		t.Fatal(err)
 	}
 }
@@ -113,10 +111,9 @@ func TestLexerSub(t *testing.T) {
 		t.Fatal(err)
 	}
 	fn(lexr)
-	t.Log("Testing error 1 -2")
+	t.Log("Testing 1 -2")
 	lexr, err = lex("1 -2")
-	if !errors.Is(err, SameTypeFollowErr) {
-		printLex(t, lexr)
+	if err != nil {
 		t.Fatal(err)
 	}
 }
@@ -150,7 +147,9 @@ func TestLexerUnary(t *testing.T) {
 			printLex(t, lexr)
 		}
 	}
+	t.Log("Testing +1")
 	fn(lexr, "+")
+	t.Log("Testing -1")
 	lexr, err = lex("-1")
 	if err != nil {
 		t.Fatal(err)

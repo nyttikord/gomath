@@ -1,4 +1,4 @@
-package interpreter
+package gomath
 
 import "fmt"
 

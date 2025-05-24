@@ -1,9 +1,8 @@
-package interpreter
+package gomath
 
 import (
 	"errors"
-	math "github.com/anhgelus/gomath/interpreter/math"
-	"github.com/anhgelus/gomath/lexer"
+	math2 "github.com/anhgelus/gomath/math"
 	m "math"
 )
 
@@ -16,15 +15,15 @@ var (
 )
 
 var (
-	variables           = map[string]*math.Fraction{}
-	predefinedVariables = map[string]*math.Fraction{}
+	variables           = map[string]*math2.Fraction{}
+	predefinedVariables = map[string]*math2.Fraction{}
 
 	functions = map[string]*Function{}
 )
 
 func init() {
 	add := func(n string, v float64) {
-		f, err := math.FloatToFraction(v)
+		f, err := math2.FloatToFraction(v)
 		if err != nil {
 			panic(err)
 		}
@@ -41,17 +40,17 @@ type Memory struct {
 }
 
 type Function struct {
-	Definition math.Space
+	Definition math2.Space
 	Relation   *Relation
 	Name       string
 	Variable   string
 }
 
-func NewMemory(l []*lexer.Lexer, i *int) (*Memory, error) {
+func NewMemory(l []*Lexer, i *int) (*Memory, error) {
 	if *i+2 >= len(l) {
 		return nil, InvalidVariableDeclarationErr
 	}
-	if l[*i+1].Type != lexer.Operator && l[*i+1].Value != "=" {
+	if l[*i+1].Type != Operator && l[*i+1].Value != "=" {
 		return nil, VariableMustHaveExpressionErr
 	}
 	id := l[*i].Value
@@ -59,42 +58,42 @@ func NewMemory(l []*lexer.Lexer, i *int) (*Memory, error) {
 	return &Memory{ID: id}, nil
 }
 
-func NewFunction(l []*lexer.Lexer, i *int) (*Function, error) {
+func NewFunction(l []*Lexer, i *int) (*Function, error) {
 	if *i+9 >= len(l) {
 		return nil, InvalidFunctionDeclarationErr
 	}
-	if l[*i+1].Type != lexer.Literal && l[*i+1].Value != "in" {
+	if l[*i+1].Type != Literal && l[*i+1].Value != "in" {
 		return nil, InvalidFunctionDeclarationErr
 	}
-	if l[*i+2].Type != lexer.Literal {
+	if l[*i+2].Type != Literal {
 		return nil, InvalidFunctionDeclarationErr
 	}
-	if l[*i+3].Type != lexer.Separator && l[*i+1].Value != "," {
+	if l[*i+3].Type != Separator && l[*i+1].Value != "," {
 		return nil, InvalidFunctionDeclarationErr
 	}
 	variable := l[*i].Value
 	rawDef := l[*i+2].Value
 	*i += 4
-	if l[*i].Type != lexer.Literal {
+	if l[*i].Type != Literal {
 		return nil, InvalidFunctionDeclarationErr
 	}
 	name := l[*i].Value
 	*i += 1
-	if l[*i].Type != lexer.Operator && l[*i].Value != "{" {
+	if l[*i].Type != Operator && l[*i].Value != "{" {
 		return nil, InvalidFunctionDeclarationErr
 	}
-	if l[*i+1].Type != lexer.Literal && l[*i].Value != variable {
+	if l[*i+1].Type != Literal && l[*i].Value != variable {
 		return nil, InvalidFunctionDeclarationErr
 	}
-	if l[*i+2].Type != lexer.Operator && l[*i+2].Value != "}" {
+	if l[*i+2].Type != Operator && l[*i+2].Value != "}" {
 		return nil, InvalidFunctionDeclarationErr
 	}
-	if l[*i+3].Type != lexer.Operator && l[*i+2].Value != "=" {
+	if l[*i+3].Type != Operator && l[*i+2].Value != "=" {
 		return nil, InvalidFunctionDeclarationErr
 	}
 	*i += 4
 	rel := LexToRel(l[*i:])
-	def, err := math.ParseSpace(rawDef)
+	def, err := math2.ParseSpace(rawDef)
 	if err != nil {
 		return nil, err
 	}

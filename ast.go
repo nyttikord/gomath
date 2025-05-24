@@ -1,11 +1,9 @@
-package interpreter
+package gomath
 
 import (
 	"errors"
 	"fmt"
-	"github.com/anhgelus/gomath/interpreter/math"
-	"github.com/anhgelus/gomath/lexer"
-	"github.com/anhgelus/gomath/utils"
+	"github.com/anhgelus/gomath/math"
 	"slices"
 	"strconv"
 	"strings"
@@ -26,61 +24,34 @@ type Ast struct {
 	Body []Statement
 }
 
-func Parse(lexed [][]*lexer.Lexer) (*Ast, error) {
+func Parse(lexed []*Lexer) (*Ast, error) {
 	tree := Ast{Type: "program"}
-	for j, l := range lexed {
-		i := 0
-		var stmt Statement
-
-		switch l[0].Value {
-		case "let":
-			i++
-			// create new variable
-			v, err := NewMemory(l, &i)
-			if err != nil {
-				return nil, errors.Join(utils.GenErrorLine(j), err)
-			}
-			// get variable expression
-			exp, err := termExpression(l, &i)
-			if err != nil {
-				return nil, errors.Join(utils.GenErrorLine(j), err)
-			}
-			v.Expression = exp
-			stmt = v
-		case "for":
-			i++
-			// create new function
-			f, err := NewFunction(l, &i)
-			if err != nil {
-				return nil, errors.Join(utils.GenErrorLine(j), err)
-			}
-			stmt = f
-		default:
-			exp, err := termExpression(l, &i)
-			if err != nil {
-				return nil, errors.Join(utils.GenErrorLine(j), err)
-			}
-			stmt = &PrintStatement{Expression: exp}
-		}
-		tree.Body = append(tree.Body, stmt)
+	i := 0
+	var stmt Statement
+	exp, err := termExpression(lexed, &i)
+	if err != nil {
+		return nil, err
 	}
+	stmt = &PrintStatement{Expression: exp}
+
+	tree.Body = append(tree.Body, stmt)
 	return &tree, nil
 }
 
-func termExpression(l []*lexer.Lexer, i *int) (Expression, error) {
+func termExpression(l []*Lexer, i *int) (Expression, error) {
 	return binExpression(termOperators, factorExpression)(l, i)
 }
 
-func factorExpression(l []*lexer.Lexer, i *int) (Expression, error) {
+func factorExpression(l []*Lexer, i *int) (Expression, error) {
 	return binExpression(factorOperators, expExpression)(l, i)
 }
 
-func expExpression(l []*lexer.Lexer, i *int) (Expression, error) {
+func expExpression(l []*Lexer, i *int) (Expression, error) {
 	return binExpression(expOperators, literalExpression)(l, i)
 }
 
 func binExpression(operators []string, sub ExpressionFunc) ExpressionFunc {
-	return func(l []*lexer.Lexer, i *int) (Expression, error) {
+	return func(l []*Lexer, i *int) (Expression, error) {
 		left, err := sub(l, i)
 		if err != nil {
 			return nil, err
@@ -102,9 +73,9 @@ func binExpression(operators []string, sub ExpressionFunc) ExpressionFunc {
 	}
 }
 
-func operatorExpression(l []*lexer.Lexer, i *int) (Expression, error) {
+func operatorExpression(l []*Lexer, i *int) (Expression, error) {
 	c := l[*i]
-	if c.Type == lexer.Operator && c.Value == "{" {
+	if c.Type == Operator && c.Value == "{" {
 		*i++
 		exp, err := termExpression(l, i)
 		if err != nil {
@@ -119,11 +90,11 @@ func operatorExpression(l []*lexer.Lexer, i *int) (Expression, error) {
 	return literalExpression(l, i)
 }
 
-func literalExpression(l []*lexer.Lexer, i *int) (Expression, error) {
+func literalExpression(l []*Lexer, i *int) (Expression, error) {
 	c := l[*i]
 	*i++
 	switch c.Type {
-	case lexer.Number:
+	case Number:
 		v, err := strconv.ParseFloat(c.Value, 64)
 		if err != nil {
 			return nil, err
@@ -132,11 +103,11 @@ func literalExpression(l []*lexer.Lexer, i *int) (Expression, error) {
 		if err != nil {
 			return nil, err
 		}
-		return &Literal{Value: f}, nil
-	case lexer.Literal:
+		return &TLiteral{Value: f}, nil
+	case Literal:
 		if strings.HasPrefix(c.Value, "\\") {
 			return &PredefinedVariable{ID: c.Value[1:]}, nil
-		} else if *i < len(l) && l[*i].Type == lexer.Operator && l[*i].Value == "{" {
+		} else if *i < len(l) && l[*i].Type == Operator && l[*i].Value == "{" {
 			name := c.Value
 			*i++
 			exp, err := operatorExpression(l, i)
@@ -146,7 +117,7 @@ func literalExpression(l []*lexer.Lexer, i *int) (Expression, error) {
 			return &EvaluateOperation{Expression: exp, FunctionName: name}, nil
 		}
 		return &Variable{ID: c.Value}, nil
-	case lexer.Separator:
+	case Separator:
 		if c.Value == "(" {
 			exp, err := termExpression(l, i)
 			if err != nil {
@@ -158,7 +129,7 @@ func literalExpression(l []*lexer.Lexer, i *int) (Expression, error) {
 			*i++
 			return exp, nil
 		}
-	case lexer.Operator:
+	case Operator:
 		exp, err := expExpression(l, i)
 		if err != nil {
 			return nil, err

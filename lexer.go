@@ -1,9 +1,8 @@
-package lexer
+package gomath
 
 import (
 	"errors"
 	"fmt"
-	"github.com/anhgelus/gomath/utils"
 	"slices"
 	"strconv"
 	"strings"
@@ -27,36 +26,28 @@ type Lexer struct {
 	Type, Value string
 }
 
-func Lex(content []string) ([][]*Lexer, error) {
-	var lexers [][]*Lexer
-	for i, line := range content {
-		if strings.HasPrefix(line, "#") {
-			continue
+func Lex(content string) ([]*Lexer, error) {
+	var lexer []*Lexer
+	for _, w := range strings.Split(content, " ") {
+		word, err := lexWord(w)
+		if err != nil {
+			return nil, err
 		}
-		var lexer []*Lexer
-		for _, w := range strings.Split(line, " ") {
-			word, err := lexWord(w)
-			if err != nil {
-				return nil, errors.Join(utils.GenErrorLine(i), err)
-			}
-			lexer = append(lexer, word...)
-			for j := 0; j < len(lexer)-1; j++ {
-				if lexer[j].Type == Number && lexer[j].Type == lexer[j+1].Type {
-					return nil, errors.Join(
-						utils.GenErrorLine(i),
-						SameTypeFollowErr,
-						fmt.Errorf(
-							"not possible to have %s %s",
-							lexer[j].Value,
-							lexer[j+1].Value,
-						),
-					)
-				}
+		lexer = append(lexer, word...)
+		for j := 0; j < len(lexer)-1; j++ {
+			if lexer[j].Type == Number && lexer[j].Type == lexer[j+1].Type {
+				return nil, errors.Join(
+					SameTypeFollowErr,
+					fmt.Errorf(
+						"not possible to have %s %s",
+						lexer[j].Value,
+						lexer[j+1].Value,
+					),
+				)
 			}
 		}
-		lexers = append(lexers, lexer)
 	}
-	return lexers, nil
+	return lexer, nil
 }
 
 func lexWord(w string) ([]*Lexer, error) {

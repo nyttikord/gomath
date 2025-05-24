@@ -1,11 +1,7 @@
-package main
+package gomath
 
 import (
-	"errors"
 	"flag"
-	"github.com/anhgelus/gomath/interpreter"
-	"github.com/anhgelus/gomath/lexer"
-	"github.com/anhgelus/gomath/utils"
 	"os"
 	"strings"
 )
@@ -27,7 +23,7 @@ func main() {
 		panic(err)
 	}
 	content := strings.Split(string(b), "\n")
-	lexed, err := lexer.Lex(content)
+	lexed, err := Lex(content)
 	if err != nil {
 		panic(err)
 	}
@@ -38,7 +34,7 @@ func main() {
 	//	}
 	//	println(s[:len(s)-1])
 	//}
-	p, err := interpreter.Parse(lexed)
+	p, err := Parse(lexed)
 	if err != nil {
 		panic(err)
 	}
@@ -47,10 +43,10 @@ func main() {
 	//	panic(err)
 	//}
 	//println(string(m))
-	for i, stmt := range p.Body {
-		err = stmt.Eval(&interpreter.Options{Decimal: decimal})
+	for _, stmt := range p.Body {
+		err = stmt.Eval(&Options{Decimal: decimal})
 		if err != nil {
-			panic(errors.Join(utils.GenErrorLine(i), err))
+			panic(err)
 		}
 	}
 }

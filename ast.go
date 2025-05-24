@@ -3,7 +3,6 @@ package gomath
 import (
 	"errors"
 	"fmt"
-	"github.com/anhgelus/gomath/math"
 	"slices"
 	"strconv"
 	"strings"
@@ -98,7 +97,7 @@ func literalExpression(l []*lexer, i *int) (expression, error) {
 		if err != nil {
 			return nil, err
 		}
-		f, err := math.FloatToFraction(v)
+		f, err := FloatToFraction(v)
 		if err != nil {
 			return nil, err
 		}

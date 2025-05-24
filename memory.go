@@ -2,7 +2,6 @@ package gomath
 
 import (
 	"errors"
-	math2 "github.com/anhgelus/gomath/math"
 	m "math"
 )
 
@@ -15,15 +14,15 @@ var (
 )
 
 var (
-	variables           = map[string]*math2.Fraction{}
-	predefinedVariables = map[string]*math2.Fraction{}
+	variables           = map[string]*Fraction{}
+	predefinedVariables = map[string]*Fraction{}
 
 	functions = map[string]*mathFunction{}
 )
 
 func init() {
 	add := func(n string, v float64) {
-		f, err := math2.FloatToFraction(v)
+		f, err := FloatToFraction(v)
 		if err != nil {
 			panic(err)
 		}
@@ -35,7 +34,7 @@ func init() {
 }
 
 type mathFunction struct {
-	Definition math2.Space
+	Definition Space
 	Relation   *relation
 	Name       string
 	Variable   string
@@ -76,7 +75,7 @@ func NewFunction(l []*lexer, i *int) (*mathFunction, error) {
 	}
 	*i += 4
 	rel := lexToRel(l[*i:])
-	def, err := math2.ParseSpace(rawDef)
+	def, err := ParseSpace(rawDef)
 	if err != nil {
 		return nil, err
 	}

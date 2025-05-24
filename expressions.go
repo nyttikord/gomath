@@ -3,7 +3,6 @@ package gomath
 import (
 	"errors"
 	"fmt"
-	math2 "github.com/anhgelus/gomath/math"
 )
 
 var (
@@ -15,7 +14,7 @@ var (
 type expressionFunc func(l []*lexer, i *int) (expression, error)
 
 type expression interface {
-	Eval() (*math2.Fraction, error)
+	Eval() (*Fraction, error)
 }
 
 type operator string
@@ -36,7 +35,7 @@ type evaluateOperation struct {
 }
 
 type literalExp struct {
-	Value *math2.Fraction
+	Value *Fraction
 }
 
 type variable struct {
@@ -47,9 +46,9 @@ type predefinedVariable variable
 
 type relation string
 
-func (b *binaryOperation) Eval() (*math2.Fraction, error) {
-	chanLf := make(chan *math2.Fraction)
-	chanLr := make(chan *math2.Fraction)
+func (b *binaryOperation) Eval() (*Fraction, error) {
+	chanLf := make(chan *Fraction)
+	chanLr := make(chan *Fraction)
 	go func() {
 		lf, err := b.Left.Eval()
 		chanLf <- lf
@@ -84,7 +83,7 @@ func (b *binaryOperation) Eval() (*math2.Fraction, error) {
 	}
 }
 
-func (b *unaryOperation) Eval() (*math2.Fraction, error) {
+func (b *unaryOperation) Eval() (*Fraction, error) {
 	lb, err := b.Expression.Eval()
 	if err != nil {
 		return nil, err
@@ -93,13 +92,13 @@ func (b *unaryOperation) Eval() (*math2.Fraction, error) {
 	case "+":
 		return lb, nil
 	case "-":
-		return lb.Mul(math2.IntToFraction(-1)), nil
+		return lb.Mul(IntToFraction(-1)), nil
 	default:
 		return nil, errors.Join(UnknownOperationErr, errors.New("operation "+string(b.Operator)+" is not supported"))
 	}
 }
 
-func (e *evaluateOperation) Eval() (*math2.Fraction, error) {
+func (e *evaluateOperation) Eval() (*Fraction, error) {
 	f, ok := functions[e.FunctionName]
 	if !ok {
 		return nil, errors.Join(UnknownFunctionErr, fmt.Errorf("undefined function %s", e.FunctionName))
@@ -107,11 +106,11 @@ func (e *evaluateOperation) Eval() (*math2.Fraction, error) {
 	return f.Relation.Eval(f.Definition, f.Variable, e.Expression)
 }
 
-func (l *literalExp) Eval() (*math2.Fraction, error) {
+func (l *literalExp) Eval() (*Fraction, error) {
 	return l.Value, nil
 }
 
-func (v *variable) Eval() (*math2.Fraction, error) {
+func (v *variable) Eval() (*Fraction, error) {
 	val, ok := variables[v.ID]
 	if !ok {
 		return nil, errors.Join(UnknownVariableErr, fmt.Errorf("undefined variable %s", v.ID))
@@ -119,7 +118,7 @@ func (v *variable) Eval() (*math2.Fraction, error) {
 	return val, nil
 }
 
-func (v *predefinedVariable) Eval() (*math2.Fraction, error) {
+func (v *predefinedVariable) Eval() (*Fraction, error) {
 	val, ok := predefinedVariables[v.ID]
 	if !ok {
 		return nil, errors.Join(UnknownVariableErr, fmt.Errorf("undefined variable \\%s", v.ID))
@@ -139,7 +138,7 @@ func (r *relation) String() string {
 	return string(*r)
 }
 
-func (r *relation) Eval(def math2.Space, variable string, val expression) (*math2.Fraction, error) {
+func (r *relation) Eval(def Space, variable string, val expression) (*Fraction, error) {
 	lexed, err := lex(r.String())
 	if err != nil {
 		return nil, err

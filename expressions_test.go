@@ -67,6 +67,15 @@ func TestEvalPriority(t *testing.T) {
 	genericTest(t, "2*(1+2)^2", "18")
 }
 
+func TestEvalOmitMultSigne(t *testing.T) {
+	t.Log("testing 2(3+2)")
+	genericTest(t, "2(3+2)", "10")
+	t.Log("testing 2^2(3+2)")
+	genericTest(t, "2^2(3+2)", "20")
+	t.Log("testing 2(3+2)^2")
+	genericTest(t, "2(3+2)^2", "50")
+}
+
 func genericTest(t *testing.T, exp string, excepted string) {
 	lexr, err := lex(exp)
 	if err != nil {

@@ -21,22 +21,19 @@ var (
 
 type astType string
 
-type Ast struct {
+type ast struct {
 	Type astType
-	Body []statement
+	Body statement
 }
 
-func astParse(lexed []*lexer, tpe astType) (*Ast, error) {
-	tree := Ast{Type: tpe}
+func astParse(lexed []*lexer, tpe astType) (*ast, error) {
+	tree := ast{Type: tpe}
 	i := 0
-	var stmt statement
 	exp, err := termExpression(lexed, &i)
 	if err != nil {
 		return nil, err
 	}
-	stmt = &PrintStatement{Expression: exp}
-
-	tree.Body = append(tree.Body, stmt)
+	tree.Body = &printStatement{Expression: exp}
 	return &tree, nil
 }
 

@@ -12,7 +12,7 @@ func Parse(content string, opt *Options) {
 	//	}
 	//	println(s[:len(s)-1])
 	//}
-	p, err := astParse(lexed)
+	p, err := astParse(lexed, "return")
 	if err != nil {
 		panic(err)
 	}

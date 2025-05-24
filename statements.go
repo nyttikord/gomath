@@ -6,7 +6,7 @@ type Options struct {
 	Decimal bool
 }
 
-type Statement interface {
+type statement interface {
 	Eval(*Options) error
 }
 

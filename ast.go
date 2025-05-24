@@ -10,24 +10,26 @@ import (
 )
 
 var (
-	termOperators   = []string{"+", "-"}
-	factorOperators = []string{"*", "/"}
-	expOperators    = []string{"^"}
+	termOperators   = []operator{"+", "-"}
+	factorOperators = []operator{"*", "/"}
+	expOperators    = []operator{"^"}
 
 	UnknownExpressionErr = errors.New("unknown expression")
 	UnknownStatementErr  = errors.New("unknown statement")
 	WrongExpressionErr   = errors.New("wrong expression")
 )
 
+type astType string
+
 type Ast struct {
-	Type string
-	Body []Statement
+	Type astType
+	Body []statement
 }
 
-func astParse(lexed []*lexer) (*Ast, error) {
-	tree := Ast{Type: "program"}
+func astParse(lexed []*lexer, tpe astType) (*Ast, error) {
+	tree := Ast{Type: tpe}
 	i := 0
-	var stmt Statement
+	var stmt statement
 	exp, err := termExpression(lexed, &i)
 	if err != nil {
 		return nil, err
@@ -50,21 +52,21 @@ func expExpression(l []*lexer, i *int) (expression, error) {
 	return binExpression(expOperators, literalExpression)(l, i)
 }
 
-func binExpression(operators []string, sub expressionFunc) expressionFunc {
+func binExpression(operators []operator, sub expressionFunc) expressionFunc {
 	return func(l []*lexer, i *int) (expression, error) {
 		left, err := sub(l, i)
 		if err != nil {
 			return nil, err
 		}
-		for *i < len(l) && slices.Contains(operators, l[*i].Value) {
-			op := l[*i].Value
+		for *i < len(l) && slices.Contains(operators, operator(l[*i].Value)) {
+			op := operator(l[*i].Value)
 			*i++
 			right, err := sub(l, i)
 			if err != nil {
 				return nil, err
 			}
 			left = &binaryOperation{
-				Operator: operator(op),
+				Operator: op,
 				Left:     left,
 				Right:    right,
 			}

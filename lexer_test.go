@@ -157,6 +157,64 @@ func TestLexerUnary(t *testing.T) {
 	fn(lexr, "-")
 }
 
+func TestLexerComplexe(t *testing.T) {
+	lexr, err := lex("2(2+3)^2")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(lexr) != 8 {
+		t.Errorf("lexer has wrong length, got %d, excepted %d", len(lexr), 8)
+	}
+	if lexr[0].Type != Number {
+		t.Errorf("got type %s; want Number", lexr[0].Type)
+	}
+	if lexr[0].Value != "2" {
+		t.Errorf("got %s; want 2", lexr[0].Value)
+	}
+	if lexr[1].Type != Separator {
+		t.Errorf("got type %s; want Operator", lexr[1].Type)
+	}
+	if lexr[1].Value != "(" {
+		t.Errorf("got %s; want (", lexr[1].Value)
+	}
+	if lexr[2].Type != Number {
+		t.Errorf("got type %s; want Number", lexr[2].Type)
+	}
+	if lexr[2].Value != "2" {
+		t.Errorf("got %s; want 2", lexr[2].Value)
+	}
+	if lexr[3].Type != Operator {
+		t.Errorf("got type %s; want Operator", lexr[3].Type)
+	}
+	if lexr[3].Value != "+" {
+		t.Errorf("got %s; want +", lexr[3].Value)
+	}
+	if lexr[4].Type != Number {
+		t.Errorf("got type %s; want Number", lexr[4].Type)
+	}
+	if lexr[4].Value != "3" {
+		t.Errorf("got %s; want 3", lexr[4].Value)
+	}
+	if lexr[5].Type != Separator {
+		t.Errorf("got type %s; want Operator", lexr[5].Type)
+	}
+	if lexr[5].Value != ")" {
+		t.Errorf("got %s; want )", lexr[5].Value)
+	}
+	if lexr[6].Type != Operator {
+		t.Errorf("got type %s; want Operator", lexr[6].Type)
+	}
+	if lexr[6].Value != "^" {
+		t.Errorf("got %s; want ^", lexr[6].Value)
+	}
+	if lexr[7].Type != Number {
+		t.Errorf("got type %s; want Number", lexr[7].Type)
+	}
+	if lexr[7].Value != "2" {
+		t.Errorf("got %s; want 2", lexr[7].Value)
+	}
+}
+
 func printLex(t *testing.T, lexr []*lexer) {
 	s := ""
 	for _, l := range lexr {

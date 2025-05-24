@@ -16,6 +16,7 @@ var (
 	ErrUnknownExpression = errors.New("unknown expression")
 	ErrUnknownStatement  = errors.New("unknown statement")
 	ErrWrongExpression   = errors.New("wrong expression")
+	ErrInvalidExpression = errors.New("invalid expression")
 )
 
 type astType string
@@ -42,20 +43,41 @@ func termExpression(l []*lexer, i *int) (expression, error) {
 }
 
 func factorExpression(l []*lexer, i *int) (expression, error) {
-	return binExpression(factorOperators, expExpression)(l, i)
+	return binExpression(factorOperators, omitExpression)(l, i)
+}
+
+func omitExpression(l []*lexer, i *int) (expression, error) {
+	sub := expExpression
+	left, err := sub(l, i)
+	if err != nil {
+		return nil, err
+	}
+	for *i < len(l) && l[*i].Value == "(" {
+		right, err := sub(l, i)
+		if err != nil {
+			return nil, err
+		}
+		left = &binaryOperation{
+			Operator: "*",
+			Left:     left,
+			Right:    right,
+		}
+	}
+	return left, nil
+
 }
 
 func expExpression(l []*lexer, i *int) (expression, error) {
 	return binExpression(expOperators, literalExpression)(l, i)
 }
 
-func binExpression(operators []operator, sub expressionFunc) expressionFunc {
+func binExpression(ops []operator, sub expressionFunc) expressionFunc {
 	return func(l []*lexer, i *int) (expression, error) {
 		left, err := sub(l, i)
 		if err != nil {
 			return nil, err
 		}
-		for *i < len(l) && slices.Contains(operators, operator(l[*i].Value)) {
+		for *i < len(l) && slices.Contains(ops, operator(l[*i].Value)) {
 			op := operator(l[*i].Value)
 			*i++
 			right, err := sub(l, i)
@@ -104,7 +126,7 @@ func literalExpression(l []*lexer, i *int) (expression, error) {
 		}
 		return &literalExp{Value: f}, nil
 	case Literal:
-		if strings.HasPrefix(c.Value, "\\") {
+		if strings.HasPrefix(c.Value, `\`) {
 			return &predefinedVariable{ID: c.Value[1:]}, nil
 		} else if *i < len(l) && l[*i].Type == Operator && l[*i].Value == "{" {
 			name := c.Value

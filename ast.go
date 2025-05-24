@@ -33,7 +33,7 @@ func astParse(lexed []*lexer, tpe astType) (*ast, error) {
 	if err != nil {
 		return nil, err
 	}
-	tree.Body = &printStatement{Expression: exp}
+	tree.Body = &returnStatement{Expression: exp}
 	return &tree, nil
 }
 

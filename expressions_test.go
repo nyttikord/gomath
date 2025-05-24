@@ -5,35 +5,36 @@ import (
 	"testing"
 )
 
-func TestAstSum(t *testing.T) {
+func TestEvalSum(t *testing.T) {
 	genericTest(t, "1+2", "3")
 }
 
-func TestAstSub(t *testing.T) {
+func TestEvalSub(t *testing.T) {
 	genericTest(t, "1-2", "-1")
 }
 
-func TestAstAddUnary(t *testing.T) {
+func TestEvalAddUnary(t *testing.T) {
 	genericTest(t, "1+-2", "-1")
 }
 
-func TestAstMult(t *testing.T) {
+func TestEvalMult(t *testing.T) {
+	t.Log("Testing 1+2")
 	genericTest(t, "2*3", "6")
 }
 
-func TestAstMultUnary(t *testing.T) {
+func TestEvalMultUnary(t *testing.T) {
 	genericTest(t, "2*-3", "-6")
 }
 
-func TestAstDiv(t *testing.T) {
+func TestEvalDiv(t *testing.T) {
 	genericTest(t, "2/3", "2/3")
 }
 
-func TestAstDivUnary(t *testing.T) {
+func TestEvalDivUnary(t *testing.T) {
 	genericTest(t, "2/-3", "-2/3")
 }
 
-func TestAstDivDecimal(t *testing.T) {
+func TestEvalDivDecimal(t *testing.T) {
 	lexr, err := lex("1/10")
 	if err != nil {
 		t.Fatal(err)

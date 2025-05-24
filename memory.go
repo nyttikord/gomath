@@ -6,11 +6,11 @@ import (
 )
 
 var (
-	InvalidVariableDeclarationErr = errors.New("invalid variable declaration")
-	InvalidFunctionDeclarationErr = errors.New("invalid function declaration")
-	VariableMustHaveExpressionErr = errors.New("variable must have an expression")
-	UnknownVariableErr            = errors.New("unknown variable")
-	UnknownFunctionErr            = errors.New("unknown function")
+	ErrInvalidVariableDeclaration = errors.New("invalid variable declaration")
+	ErrInvalidFunctionDeclaration = errors.New("invalid function declaration")
+	ErrVariableMustHaveExpression = errors.New("variable must have an expression")
+	ErrUnknownVariable            = errors.New("unknown variable")
+	ErrUnknownFunction            = errors.New("unknown function")
 )
 
 var (
@@ -42,36 +42,36 @@ type mathFunction struct {
 
 func NewFunction(l []*lexer, i *int) (*mathFunction, error) {
 	if *i+9 >= len(l) {
-		return nil, InvalidFunctionDeclarationErr
+		return nil, ErrInvalidFunctionDeclaration
 	}
 	if l[*i+1].Type != Literal && l[*i+1].Value != "in" {
-		return nil, InvalidFunctionDeclarationErr
+		return nil, ErrInvalidFunctionDeclaration
 	}
 	if l[*i+2].Type != Literal {
-		return nil, InvalidFunctionDeclarationErr
+		return nil, ErrInvalidFunctionDeclaration
 	}
 	if l[*i+3].Type != Separator && l[*i+1].Value != "," {
-		return nil, InvalidFunctionDeclarationErr
+		return nil, ErrInvalidFunctionDeclaration
 	}
 	variable := l[*i].Value
 	rawDef := l[*i+2].Value
 	*i += 4
 	if l[*i].Type != Literal {
-		return nil, InvalidFunctionDeclarationErr
+		return nil, ErrInvalidFunctionDeclaration
 	}
 	name := l[*i].Value
 	*i += 1
 	if l[*i].Type != Operator && l[*i].Value != "{" {
-		return nil, InvalidFunctionDeclarationErr
+		return nil, ErrInvalidFunctionDeclaration
 	}
 	if l[*i+1].Type != Literal && l[*i].Value != variable {
-		return nil, InvalidFunctionDeclarationErr
+		return nil, ErrInvalidFunctionDeclaration
 	}
 	if l[*i+2].Type != Operator && l[*i+2].Value != "}" {
-		return nil, InvalidFunctionDeclarationErr
+		return nil, ErrInvalidFunctionDeclaration
 	}
 	if l[*i+3].Type != Operator && l[*i+2].Value != "=" {
-		return nil, InvalidFunctionDeclarationErr
+		return nil, ErrInvalidFunctionDeclaration
 	}
 	*i += 4
 	rel := lexToRel(l[*i:])

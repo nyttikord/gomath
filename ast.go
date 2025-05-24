@@ -13,9 +13,9 @@ var (
 	factorOperators = []operator{"*", "/"}
 	expOperators    = []operator{"^"}
 
-	UnknownExpressionErr = errors.New("unknown expression")
-	UnknownStatementErr  = errors.New("unknown statement")
-	WrongExpressionErr   = errors.New("wrong expression")
+	ErrUnknownExpression = errors.New("unknown expression")
+	ErrUnknownStatement  = errors.New("unknown statement")
+	ErrWrongExpression   = errors.New("wrong expression")
 )
 
 type astType string
@@ -80,7 +80,7 @@ func operatorExpression(l []*lexer, i *int) (expression, error) {
 			return nil, err
 		}
 		if l[*i].Value != "}" {
-			return exp, errors.Join(WrongExpressionErr, errors.New("} excepted"))
+			return exp, errors.Join(ErrWrongExpression, errors.New("} excepted"))
 		}
 		*i++
 		return exp, nil
@@ -122,7 +122,7 @@ func literalExpression(l []*lexer, i *int) (expression, error) {
 				return nil, err
 			}
 			if l[*i].Value != ")" {
-				return nil, errors.Join(WrongExpressionErr, errors.New(") excepted"))
+				return nil, errors.Join(ErrWrongExpression, errors.New(") excepted"))
 			}
 			*i++
 			return exp, nil
@@ -134,7 +134,7 @@ func literalExpression(l []*lexer, i *int) (expression, error) {
 		}
 		return &unaryOperation{Operator: operator(c.Value), Expression: exp}, nil
 	}
-	return nil, errors.Join(UnknownExpressionErr, fmt.Errorf(
+	return nil, errors.Join(ErrUnknownExpression, fmt.Errorf(
 		"unknown type %s('%s'): excepting a valid literal expression",
 		c.Type,
 		c.Value,

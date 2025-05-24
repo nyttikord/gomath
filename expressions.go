@@ -6,9 +6,9 @@ import (
 )
 
 var (
-	UnknownOperationErr = errors.New("unknown operation")
-	LexerNotValidErr    = errors.New("lexer is not valid")
-	NumberNotInSpaceErr = errors.New("number is not in the definition space")
+	ErrUnknownOperation = errors.New("unknown operation")
+	ErrLexerNotValid    = errors.New("lexer is not valid")
+	ErrNumberNotInSpace = errors.New("number is not in the definition space")
 )
 
 type expressionFunc func(l []*lexer, i *int) (expression, error)
@@ -79,7 +79,7 @@ func (b *binaryOperation) Eval() (*Fraction, error) {
 	case "^":
 		return lf.Pow(lr), nil
 	default:
-		return nil, errors.Join(UnknownOperationErr, errors.New("operation "+string(b.Operator)+" is not supported"))
+		return nil, errors.Join(ErrUnknownOperation, errors.New("operation "+string(b.Operator)+" is not supported"))
 	}
 }
 
@@ -94,14 +94,14 @@ func (b *unaryOperation) Eval() (*Fraction, error) {
 	case "-":
 		return lb.Mul(IntToFraction(-1)), nil
 	default:
-		return nil, errors.Join(UnknownOperationErr, errors.New("operation "+string(b.Operator)+" is not supported"))
+		return nil, errors.Join(ErrUnknownOperation, errors.New("operation "+string(b.Operator)+" is not supported"))
 	}
 }
 
 func (e *evaluateOperation) Eval() (*Fraction, error) {
 	f, ok := functions[e.FunctionName]
 	if !ok {
-		return nil, errors.Join(UnknownFunctionErr, fmt.Errorf("undefined function %s", e.FunctionName))
+		return nil, errors.Join(ErrUnknownFunction, fmt.Errorf("undefined function %s", e.FunctionName))
 	}
 	return f.Relation.Eval(f.Definition, f.Variable, e.Expression)
 }
@@ -113,7 +113,7 @@ func (l *literalExp) Eval() (*Fraction, error) {
 func (v *variable) Eval() (*Fraction, error) {
 	val, ok := variables[v.ID]
 	if !ok {
-		return nil, errors.Join(UnknownVariableErr, fmt.Errorf("undefined variable %s", v.ID))
+		return nil, errors.Join(ErrUnknownVariable, fmt.Errorf("undefined variable %s", v.ID))
 	}
 	return val, nil
 }
@@ -121,7 +121,7 @@ func (v *variable) Eval() (*Fraction, error) {
 func (v *predefinedVariable) Eval() (*Fraction, error) {
 	val, ok := predefinedVariables[v.ID]
 	if !ok {
-		return nil, errors.Join(UnknownVariableErr, fmt.Errorf("undefined variable \\%s", v.ID))
+		return nil, errors.Join(ErrUnknownVariable, fmt.Errorf("undefined variable \\%s", v.ID))
 	}
 	return val, nil
 }
@@ -144,7 +144,7 @@ func (r *relation) Eval(def Space, variable string, val expression) (*Fraction, 
 		return nil, err
 	}
 	if len(lexed) != 1 {
-		return nil, LexerNotValidErr
+		return nil, ErrLexerNotValid
 	}
 	var lexr []*lexer
 	for _, l := range lexed {
@@ -155,7 +155,7 @@ func (r *relation) Eval(def Space, variable string, val expression) (*Fraction, 
 				return nil, err
 			}
 			if !def.Contains(fr) {
-				return nil, errors.Join(NumberNotInSpaceErr, fmt.Errorf("%s is not in %s", fr.String(), def.String()))
+				return nil, errors.Join(ErrNumberNotInSpace, fmt.Errorf("%s is not in %s", fr.String(), def.String()))
 			}
 			lexr = append(lexr, &lexer{Type: Separator, Value: "("})
 			l.Type = Number

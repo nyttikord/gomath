@@ -17,7 +17,7 @@ var (
 	NullFraction = &Fraction{Numerator: 0, Denominator: 1}
 	OneFraction  = &Fraction{Numerator: 1, Denominator: 1}
 
-	FractionNotIntErr = errors.New("fraction is not an int")
+	ErrFractionNotInt = errors.New("fraction is not an int")
 )
 
 func IntToFraction(n int64) *Fraction {
@@ -35,7 +35,7 @@ func FloatToFraction(f float64) (*Fraction, error) {
 	sp := strings.Split(s, ".")
 	i, err := strconv.ParseInt(sp[0]+sp[1], 10, 64)
 	if err != nil {
-		return nil, FractionNotIntErr
+		return nil, ErrFractionNotInt
 	}
 	return &Fraction{
 		Numerator:   i,
@@ -98,9 +98,11 @@ func (f *Fraction) IsInt() bool {
 	return f.Numerator%f.Denominator == 0
 }
 
+// Int convers the fraction to an int.
+// Returns ErrFractionNotInt if the fraction isn't an int (check before with Fraction.IsInt)
 func (f *Fraction) Int() (int64, error) {
 	if !f.IsInt() {
-		return 0, errors.Join(FractionNotIntErr, errors.New(f.String()+" is not an int"))
+		return 0, errors.Join(ErrFractionNotInt, errors.New(f.String()+" is not an int"))
 	}
 	return f.Numerator / f.Denominator, nil
 }

@@ -117,7 +117,7 @@ func (f fraction) SmallerOrEqualThan(b *fraction) bool {
 }
 
 func (f fraction) SmallerThan(b *fraction) bool {
-	return f.SmallerOrEqualThan(b) && f == *b
+	return f.SmallerOrEqualThan(b) && f != *b
 }
 
 func (f fraction) GreaterOrEqualThan(b *fraction) bool {

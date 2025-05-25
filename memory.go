@@ -52,8 +52,14 @@ func init() {
 	addFunc("sin", createMathFunction(&realSet{}, math.Sin))
 	addFunc("cos", createMathFunction(&realSet{}, math.Cos))
 
-	pi, _ := floatToFraction(math.Pi)
-	piOverTwo, _ := pi.Div(intToFraction(2))
+	pi, err := floatToFraction(math.Pi)
+	if err != nil {
+		panic(err)
+	}
+	piOverTwo, err := pi.Div(intToFraction(2))
+	if err != nil {
+		panic(err)
+	}
 	tanDef := &periodicInterval{
 		Interval: &realInterval{
 			LowerBound: &intervalBound{
@@ -82,7 +88,7 @@ func init() {
 			Infinite: true,
 			Positive: true,
 		},
-		CustomName: "R \\ { 0 }",
+		CustomName: `R \ { 0 }`,
 	}, math.Log))
 	addFunc("log2", createMathFunction(&realInterval{
 		LowerBound: &intervalBound{
@@ -94,7 +100,7 @@ func init() {
 			Infinite: true,
 			Positive: true,
 		},
-		CustomName: "R \\ { 0 }",
+		CustomName: `R \ { 0 }`,
 	}, math.Log2))
 
 	log10 := createMathFunction(&realInterval{
@@ -107,7 +113,7 @@ func init() {
 			Infinite: true,
 			Positive: true,
 		},
-		CustomName: "R \\ { 0 }",
+		CustomName: `R \ { 0 }`,
 	}, math.Log10)
 	addFunc("log", log10)
 	addFunc("log10", log10)

@@ -117,7 +117,7 @@ func literalExpression(l []*lexer, i *int) (expression, error) {
 		}
 		return &literalExp{Value: f}, nil
 	case Literal:
-		return predefinedExpression(l, i, c.Value[1:])
+		return predefinedExpression(l, i, c.Value)
 	case Separator:
 		if c.Value == "(" {
 			exp, err := termExpression(l, i)

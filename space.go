@@ -34,7 +34,7 @@ func (RealSet) String() string {
 }
 
 func (set RealInterval) Contains(f *fraction) bool {
-	return f.SmallerOrEqualThan(set.upperBound) && f.GreaterOrEqualThan(set.upperBound)
+	return f.SmallerOrEqualThan(set.upperBound) && f.GreaterOrEqualThan(set.lowerBound)
 }
 func (set RealInterval) String() string {
 	if set.customName != "" {

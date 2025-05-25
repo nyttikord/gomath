@@ -62,6 +62,24 @@ func (f *fraction) String() string {
 	return fmt.Sprintf("%d", f.Numerator)
 }
 
+func (f *fraction) Approx(precision int) string {
+	rest := f.Numerator % f.Denominator
+	quotient := strconv.FormatInt(f.Numerator/f.Denominator, 10)
+
+	if precision == 0 {
+		return quotient
+	}
+
+	quotient += "."
+
+	for n := 1; n <= precision && rest > 0; n++ {
+		quotient += strconv.FormatInt((rest*10)/f.Denominator, 10)
+		rest = (rest * 10) % f.Denominator
+	}
+
+	return quotient
+}
+
 // Simplify the fraction
 func (f *fraction) Simplify() *fraction {
 	pgcd := gcd(f.Numerator, f.Denominator)

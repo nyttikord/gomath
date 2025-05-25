@@ -19,7 +19,6 @@ type UnionSet struct {
 	sets       []Space
 	customName string
 }
-
 type PeriodicInterval struct {
 	interval   RealInterval
 	period     *fraction
@@ -83,7 +82,6 @@ func (set *PeriodicInterval) Contains(f *fraction) bool {
 	}
 	return set.interval.Contains(f)
 }
-
 func (set *PeriodicInterval) String() string {
 	if set.customName != "" {
 		return set.customName

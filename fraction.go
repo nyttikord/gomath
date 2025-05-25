@@ -92,24 +92,24 @@ func (f *fraction) Simplify() *fraction {
 }
 
 // Add a fraction
-func (f *fraction) Add(a *fraction) (*fraction, error) {
+func (f *fraction) Add(a *fraction) *fraction {
 	f.Numerator = f.Numerator*a.Denominator + a.Numerator*f.Denominator
 	f.Denominator = f.Denominator * a.Denominator
-	return f.Simplify(), nil
+	return f.Simplify()
 }
 
-// Sub (subtrack) a fraction
-func (f *fraction) Sub(a *fraction) (*fraction, error) {
+// Sub (subtract) a fraction
+func (f *fraction) Sub(a *fraction) *fraction {
 	f.Numerator = f.Numerator*a.Denominator - a.Numerator*f.Denominator
 	f.Denominator = f.Denominator * a.Denominator
-	return f.Simplify(), nil
+	return f.Simplify()
 }
 
 // Mul (multiply) by fraction
-func (f *fraction) Mul(a *fraction) (*fraction, error) {
+func (f *fraction) Mul(a *fraction) *fraction {
 	f.Numerator = f.Numerator * a.Numerator
 	f.Denominator = f.Denominator * a.Denominator
-	return f.Simplify(), nil
+	return f.Simplify()
 }
 
 // Inv (invert) the fraction
@@ -123,11 +123,11 @@ func (f *fraction) Inv() (*fraction, error) {
 
 // Div (divide) by a fraction
 func (f *fraction) Div(a *fraction) (*fraction, error) {
-	inva, err := a.Inv()
+	invA, err := a.Inv()
 	if err != nil {
 		return f, errors.Join(err, errors.New("cannot divide by a null fraction"))
 	}
-	mul, _ := f.Mul(inva) // avoid checking error because it's always nil for fraction.Mul
+	mul := f.Mul(invA)
 	return mul.Simplify(), nil
 }
 

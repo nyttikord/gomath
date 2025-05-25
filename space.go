@@ -11,9 +11,11 @@ type space interface {
 
 type realSet struct{}
 type realInterval struct {
-	LowerBound *fraction
-	UpperBound *fraction
-	CustomName string
+	LowerBound         *fraction
+	UpperBound         *fraction
+	CustomName         string
+	ContainsLowerBound bool
+	ContainsUpperBound bool
 }
 type unionSet struct {
 	Sets       []space
@@ -33,7 +35,18 @@ func (*realSet) String() string {
 }
 
 func (i *realInterval) Contains(f *fraction) bool {
-	return f.SmallerOrEqualThan(i.UpperBound) && f.GreaterOrEqualThan(i.LowerBound)
+	var b1, b2 bool
+	if i.ContainsUpperBound {
+		b1 = f.SmallerOrEqualThan(i.UpperBound)
+	} else {
+		b1 = f.SmallerThan(i.UpperBound)
+	}
+	if i.ContainsLowerBound {
+		b2 = f.SmallerOrEqualThan(i.LowerBound)
+	} else {
+		b2 = f.SmallerThan(i.LowerBound)
+	}
+	return b1 && b2
 }
 func (i *realInterval) String() string {
 	if i.CustomName != "" {

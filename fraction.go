@@ -80,14 +80,29 @@ func (f *fraction) Approx(precision int) string {
 	return quotient
 }
 
+func abs(a int64) int64 {
+	if a >= 0 {
+		return a
+	}
+	return -a
+}
+
 // Simplify the fraction
 func (f *fraction) Simplify() *fraction {
-	pgcd := gcd(f.Numerator, f.Denominator)
-	if pgcd == 0 {
+	if f.Numerator*f.Denominator < 0 {
+		f.Numerator = -abs(f.Numerator)
+		f.Denominator = abs(f.Denominator)
+	} else {
+		f.Numerator = abs(f.Numerator)
+		f.Denominator = abs(f.Denominator)
+	}
+
+	divisor := gcd(f.Numerator, f.Denominator)
+	if divisor == 0 {
 		return f
 	}
-	f.Numerator = f.Numerator / pgcd
-	f.Denominator = f.Denominator / pgcd
+	f.Numerator = f.Numerator / divisor
+	f.Denominator = f.Denominator / divisor
 	return f
 }
 

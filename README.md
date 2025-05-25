@@ -1,6 +1,6 @@
 # GoMath
 
-GoMath is a library parsing and interpreting math expression.
+GoMath is a library for parsing and interpreting math expression.
 
 ## Usage
 
@@ -22,7 +22,7 @@ res == "3" // true
 
 You can modify the result's type with `gomath.Options`.
 Set `Decimal` to `true` if you want to have a decimal approximation.
-You can specify the number of decimals with `Precision`.
+You can specify the number of digits with `Precision`.
 
 ### Special case
 
@@ -47,7 +47,7 @@ These cases are listed on [Wikipedia](https://en.wikipedia.org/wiki/Order_of_ope
 All common operators (`+`, `-`, `*`, `/`, `^`) are supported.
 Parenthesis (`(`, `)`) are also supported.
 
-We plan to add the support for the factoriel (`!`) and for the modulo (`%`).
+We plan to add the support for the factorial (`!`) and the modulo (`%`).
 
 ### Supported variables
 

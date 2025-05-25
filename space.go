@@ -4,87 +4,87 @@ import (
 	"fmt"
 )
 
-type Space interface {
+type space interface {
 	Contains(f *fraction) bool
 	String() string
 }
 
-type RealSet struct{}
-type RealInterval struct {
-	lowerBound *fraction
-	upperBound *fraction
-	customName string
+type realSet struct{}
+type realInterval struct {
+	LowerBound *fraction
+	UpperBound *fraction
+	CustomName string
 }
-type UnionSet struct {
-	sets       []Space
-	customName string
+type unionSet struct {
+	Sets       []space
+	CustomName string
 }
-type PeriodicInterval struct {
-	interval   RealInterval
-	period     *fraction
-	customName string
+type periodicInterval struct {
+	Interval   *realInterval
+	Period     *fraction
+	CustomName string
 }
 
-func (RealSet) Contains(*fraction) bool {
+func (*realSet) Contains(*fraction) bool {
 	return true
 }
-func (RealSet) String() string {
+func (*realSet) String() string {
 	return "R"
 }
 
-func (set RealInterval) Contains(f *fraction) bool {
-	return f.SmallerOrEqualThan(set.upperBound) && f.GreaterOrEqualThan(set.lowerBound)
+func (i *realInterval) Contains(f *fraction) bool {
+	return f.SmallerOrEqualThan(i.UpperBound) && f.GreaterOrEqualThan(i.LowerBound)
 }
-func (set RealInterval) String() string {
-	if set.customName != "" {
-		return set.customName
+func (i *realInterval) String() string {
+	if i.CustomName != "" {
+		return i.CustomName
 	}
-	return fmt.Sprintf("[%s, %s]", set.lowerBound.String(), set.upperBound.String())
+	return fmt.Sprintf("[%s, %s]", i.LowerBound.String(), i.UpperBound.String())
 }
 
-func (set *UnionSet) Contains(f *fraction) bool {
-	for _, space := range set.sets {
+func (s *unionSet) Contains(f *fraction) bool {
+	for _, space := range s.Sets {
 		if !space.Contains(f) {
 			return false
 		}
 	}
 	return true
 }
-func (set *UnionSet) String() string {
-	if set.customName != "" {
-		return set.customName
+func (s *unionSet) String() string {
+	if s.CustomName != "" {
+		return s.CustomName
 	}
-	s := ""
-	for i, space := range set.sets {
-		if i < len(set.sets)-1 {
-			s += space.String() + " ∪ "
+	st := ""
+	for i, space := range s.Sets {
+		if i < len(s.Sets)-1 {
+			st += space.String() + " ∪ "
 		} else {
-			s += space.String()
+			st += space.String()
 		}
 	}
-	return s
+	return st
 }
 
-func (set *PeriodicInterval) Contains(f *fraction) bool {
-	if set.interval.Contains(f) {
+func (set *periodicInterval) Contains(f *fraction) bool {
+	if set.Interval.Contains(f) {
 		return true
 	}
 
-	if f.GreaterThan(set.interval.upperBound) {
-		for f.GreaterThan(set.interval.upperBound) {
-			f = f.Sub(set.period)
+	if f.GreaterThan(set.Interval.UpperBound) {
+		for f.GreaterThan(set.Interval.UpperBound) {
+			f = f.Sub(set.Period)
 		}
-		return set.interval.Contains(f)
+		return set.Interval.Contains(f)
 	}
 	// here f is necessarily smaller than the lower bound
-	for f.SmallerThan(set.interval.lowerBound) {
-		f = f.Add(set.period)
+	for f.SmallerThan(set.Interval.LowerBound) {
+		f = f.Add(set.Period)
 	}
-	return set.interval.Contains(f)
+	return set.Interval.Contains(f)
 }
-func (set *PeriodicInterval) String() string {
-	if set.customName != "" {
-		return set.customName
+func (set *periodicInterval) String() string {
+	if set.CustomName != "" {
+		return set.CustomName
 	}
-	return set.interval.String() + " mod " + set.period.String()
+	return set.Interval.String() + " mod " + set.Period.String()
 }

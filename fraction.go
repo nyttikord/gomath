@@ -66,7 +66,7 @@ func (f *fraction) Approx(precision int) string {
 	rest := f.Numerator % f.Denominator
 	quotient := strconv.FormatInt(f.Numerator/f.Denominator, 10)
 
-	if precision == 0 {
+	if precision == 0 || rest == 0 {
 		return quotient
 	}
 

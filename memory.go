@@ -3,7 +3,7 @@ package gomath
 import (
 	"errors"
 	"fmt"
-	m "math"
+	"math"
 )
 
 var (
@@ -24,9 +24,9 @@ func init() {
 		}
 		predefinedVariables[n] = f
 	}
-	add("pi", m.Pi)
-	add("e", m.E)
-	add("phi", m.Phi)
+	add("pi", math.Pi)
+	add("e", math.E)
+	add("phi", math.Phi)
 }
 
 type mathFunction struct {

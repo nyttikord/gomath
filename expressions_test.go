@@ -76,11 +76,12 @@ func TestEvalOmitMultSigne(t *testing.T) {
 }
 
 func TestEvalPrioritySpecialCase(t *testing.T) {
-	t.Log("testing -3^2")
+	// check https://en.wikipedia.org/wiki/Order_of_operations#Special_cases
+	t.Log("testing -3^2") // must be interpreted as -(3^2)
 	genericTest(t, "-3^2", "-9")
-	t.Log("testing 6/2(1+2)")
+	t.Log("testing 6/2(1+2)") // must be interpreted as (6/2)(1+2)
 	genericTest(t, "6/2(1+2)", "9")
-	t.Log("testing 3^2^3")
+	t.Log("testing 3^2^3") // must be interpreted as (3^2)^3
 	genericTest(t, "3^2^3", "729")
 }
 

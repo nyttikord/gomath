@@ -75,6 +75,15 @@ func TestEvalOmitMultSigne(t *testing.T) {
 	genericTest(t, "2(3+2)^2", "50")
 }
 
+func TestEvalPrioritySpecialCase(t *testing.T) {
+	t.Log("testing -3^2")
+	genericTest(t, "-3^2", "-9")
+	t.Log("testing 6/2(1+2)")
+	genericTest(t, "6/2(1+2)", "9")
+	t.Log("testing 3^2^3")
+	genericTest(t, "3^2^3", "729")
+}
+
 func genericTest(t *testing.T, exp string, excepted string) {
 	lexr, err := lex(exp)
 	if err != nil {

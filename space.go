@@ -40,18 +40,38 @@ func (set RealInterval) String() string {
 	}
 	s := ""
 
-	if set.lowerBound.includeValue {
-		s = "[ "
-	} else {
+	if set.lowerBound.infinite {
 		s = "] "
-	}
-	s += set.lowerBound.value.String() + " ; " + set.upperBound.value.String()
-
-	if set.upperBound.includeValue {
-		s += " ]"
+		if set.upperBound.positive {
+			s += "+inf"
+		} else {
+			s += "-inf"
+		}
 	} else {
-		s += " ["
+		if set.lowerBound.includeValue {
+			s = "[ "
+		} else {
+			s = "] "
+		}
+		s += set.lowerBound.value.String() + " ; "
 	}
+
+	if set.upperBound.infinite {
+		if set.upperBound.positive {
+			s += "+inf"
+		} else {
+			s += "-inf"
+		}
+		s += " ["
+	} else {
+		s += set.upperBound.value.String()
+		if set.upperBound.includeValue {
+			s += " ]"
+		} else {
+			s += " ["
+		}
+	}
+
 	return s
 }
 
@@ -83,14 +103,14 @@ func (set PeriodicInterval) Contains(f *fraction) bool {
 		return true
 	}
 
-	if f.StrictlyGreaterThanBound(set.interval.upperBound) {
-		for f.StrictlyGreaterThanBound(set.interval.upperBound) {
+	if f.strictlyGreaterThanBound(set.interval.upperBound) {
+		for f.strictlyGreaterThanBound(set.interval.upperBound) {
 			f = f.Sub(set.period)
 		}
 		return set.interval.Contains(f)
 	}
 	// here f is necessarily smaller than the lower bound
-	for f.StrictlySmallerThanBound(set.interval.lowerBound) {
+	for f.strictlySmallerThanBound(set.interval.lowerBound) {
 		f = f.Add(set.period)
 	}
 	return set.interval.Contains(f)
@@ -129,14 +149,14 @@ func (f fraction) greaterThanBound(b IntervalBound) bool {
 	return f.GreaterThan(b.value)
 }
 
-func (f fraction) StrictlySmallerThanBound(b IntervalBound) bool {
+func (f fraction) strictlySmallerThanBound(b IntervalBound) bool {
 	if b.infinite {
 		return b.positive
 	}
 	return f.SmallerThan(b.value)
 }
 
-func (f fraction) StrictlyGreaterThanBound(b IntervalBound) bool {
+func (f fraction) strictlyGreaterThanBound(b IntervalBound) bool {
 	if b.infinite {
 		return !b.positive
 	}

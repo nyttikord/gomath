@@ -157,7 +157,7 @@ func TestLexerUnary(t *testing.T) {
 	fn(lexr, "-")
 }
 
-func TestLexerComplexe(t *testing.T) {
+func TestLexerComplex(t *testing.T) {
 	lexr, err := lex("2(2+3)^2")
 	if err != nil {
 		t.Fatal(err)
@@ -212,6 +212,34 @@ func TestLexerComplexe(t *testing.T) {
 	}
 	if lexr[7].Value != "2" {
 		t.Errorf("got %s; want 2", lexr[7].Value)
+	}
+}
+
+func TestLexer_Word(t *testing.T) {
+	lexr, err := lex("cos sin exp")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(lexr) != 3 {
+		t.Errorf("lexer has wrong length, got %d, excepted %d", len(lexr), 3)
+	}
+	if lexr[0].Type != Literal {
+		t.Errorf("got type %s; want Literal", lexr[0].Type)
+	}
+	if lexr[0].Value != "cos" {
+		t.Errorf("got %s; want 'cos'", lexr[0].Value)
+	}
+	if lexr[1].Type != Literal {
+		t.Errorf("got type %s; want Literal", lexr[1].Type)
+	}
+	if lexr[1].Value != "sin" {
+		t.Errorf("got %s; want 'sin'", lexr[1].Value)
+	}
+	if lexr[2].Type != Literal {
+		t.Errorf("got type %s; want Literal", lexr[2].Type)
+	}
+	if lexr[2].Value != "exp" {
+		t.Errorf("got %s; want 'exp'", lexr[2].Value)
 	}
 }
 

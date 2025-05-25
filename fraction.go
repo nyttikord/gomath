@@ -55,7 +55,7 @@ func gcd(a, b int64) int64 {
 	return a
 }
 
-func (f *fraction) String() string {
+func (f fraction) String() string {
 	if f.Denominator != 1 {
 		return fmt.Sprintf("%d/%d", f.Numerator, f.Denominator)
 	}
@@ -63,64 +63,64 @@ func (f *fraction) String() string {
 }
 
 // Simplify the fraction
-func (f *fraction) Simplify() *fraction {
+func (f fraction) Simplify() *fraction {
 	pgcd := gcd(f.Numerator, f.Denominator)
 	if pgcd == 0 {
-		return f
+		return &f
 	}
 	f.Numerator = f.Numerator / pgcd
 	f.Denominator = f.Denominator / pgcd
-	return f
+	return &f
 }
 
 // Add a fraction
-func (f *fraction) Add(a *fraction) (*fraction, error) {
+func (f fraction) Add(a *fraction) (*fraction, error) {
 	f.Numerator = f.Numerator*a.Denominator + a.Numerator*f.Denominator
 	f.Denominator = f.Denominator * a.Denominator
 	return f.Simplify(), nil
 }
 
 // Sub (subtrack) a fraction
-func (f *fraction) Sub(a *fraction) (*fraction, error) {
+func (f fraction) Sub(a *fraction) (*fraction, error) {
 	f.Numerator = f.Numerator*a.Denominator - a.Numerator*f.Denominator
 	f.Denominator = f.Denominator * a.Denominator
 	return f.Simplify(), nil
 }
 
 // Mul (multiply) by fraction
-func (f *fraction) Mul(a *fraction) (*fraction, error) {
+func (f fraction) Mul(a *fraction) (*fraction, error) {
 	f.Numerator = f.Numerator * a.Numerator
 	f.Denominator = f.Denominator * a.Denominator
 	return f.Simplify(), nil
 }
 
 // Inv (invert) the fraction
-func (f *fraction) Inv() (*fraction, error) {
+func (f fraction) Inv() (*fraction, error) {
 	if f.Numerator == 0 {
-		return f, errors.Join(ErrIllegalOperation, errors.New("cannot invert a null fraction"))
+		return &f, errors.Join(ErrIllegalOperation, errors.New("cannot invert a null fraction"))
 	}
 	f.Numerator, f.Denominator = f.Denominator, f.Numerator
 	return f.Simplify(), nil
 }
 
 // Div (divide) by a fraction
-func (f *fraction) Div(a *fraction) (*fraction, error) {
+func (f fraction) Div(a *fraction) (*fraction, error) {
 	inva, err := a.Inv()
 	if err != nil {
-		return f, errors.Join(err, errors.New("cannot divide by a null fraction"))
+		return &f, errors.Join(err, errors.New("cannot divide by a null fraction"))
 	}
 	mul, _ := f.Mul(inva) // avoid checking error because it's always nil for fraction.Mul
 	return mul.Simplify(), nil
 }
 
 // IsInt returns true if the fraction is an int
-func (f *fraction) IsInt() bool {
+func (f fraction) IsInt() bool {
 	return f.Numerator%f.Denominator == 0
 }
 
 // Int convers the fraction to an int.
 // Returns ErrFractionNotInt if the fraction isn't an int (check before with fraction.IsInt)
-func (f *fraction) Int() (int64, error) {
+func (f fraction) Int() (int64, error) {
 	if !f.IsInt() {
 		return 0, errors.Join(ErrFractionNotInt, errors.New(f.String()+" is not an int"))
 	}
@@ -128,12 +128,12 @@ func (f *fraction) Int() (int64, error) {
 }
 
 // Float converts the fraction to a float
-func (f *fraction) Float() float64 {
+func (f fraction) Float() float64 {
 	return float64(f.Numerator) / float64(f.Denominator)
 }
 
 // Pow the fraction by another
-func (f *fraction) Pow(a *fraction) (*fraction, error) {
+func (f fraction) Pow(a *fraction) (*fraction, error) {
 	if a.IsInt() {
 		n, _ := a.Int()
 		if f.Float() == 0 {
@@ -142,12 +142,10 @@ func (f *fraction) Pow(a *fraction) (*fraction, error) {
 			}
 			return NullFraction, nil
 		}
-		nf := fraction{
+		return fraction{
 			Numerator:   int64(math.Pow(float64(f.Numerator), float64(n))),
 			Denominator: int64(math.Pow(float64(f.Denominator), float64(n))),
-		}
-		*f = nf
-		return f.Simplify(), nil
+		}.Simplify(), nil
 	}
 	afl := a.Float()
 	nf, err := floatToFraction(math.Pow(float64(f.Numerator), afl))
@@ -162,6 +160,5 @@ func (f *fraction) Pow(a *fraction) (*fraction, error) {
 	if err != nil {
 		return NullFraction, err
 	}
-	*f = *pf
-	return f.Simplify(), nil
+	return pf.Simplify(), nil
 }

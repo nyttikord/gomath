@@ -17,16 +17,100 @@ var (
 )
 
 func init() {
-	add := func(n string, v float64) {
+	addVar := func(n string, v float64) {
 		f, err := floatToFraction(v)
 		if err != nil {
 			panic(err)
 		}
 		predefinedVariables[n] = f
 	}
-	add("pi", math.Pi)
-	add("e", math.E)
-	add("phi", math.Phi)
+	addVar("pi", math.Pi)
+	addVar("e", math.E)
+	addVar("phi", math.Phi)
+
+	addFunc := func(n string, f *mathFunction) {
+		predefinedFunctions[n] = f
+	}
+	createMathFunction := func(def space, mathFunc func(float64) float64) *mathFunction {
+		rel := func(f *fraction) *fraction {
+			x := f.Float()
+			result, err := floatToFraction(mathFunc(x))
+			if err != nil {
+				panic(err)
+			}
+			return result
+		}
+
+		return &mathFunction{
+			Definition: def,
+			Relation:   (*relation)(&rel),
+		}
+	}
+
+	addFunc("exp", createMathFunction(&realSet{}, math.Exp))
+	addFunc("sqrt", createMathFunction(&realSet{}, math.Sqrt))
+	addFunc("sin", createMathFunction(&realSet{}, math.Sin))
+	addFunc("cos", createMathFunction(&realSet{}, math.Cos))
+
+	pi, _ := floatToFraction(math.Pi)
+	piOverTwo, _ := pi.Div(intToFraction(2))
+	tanDef := &periodicInterval{
+		Interval: &realInterval{
+			LowerBound: &intervalBound{
+				Value:        piOverTwo.Mul(intToFraction(-1)),
+				IncludeValue: false,
+				Infinite:     false,
+			},
+			UpperBound: &intervalBound{
+				Value:        piOverTwo,
+				IncludeValue: false,
+				Infinite:     false,
+			},
+			CustomName: "",
+		},
+		Period:     pi,
+		CustomName: "] -pi/2 ; pi/2 [ mod pi",
+	}
+	addFunc("tan", createMathFunction(tanDef, math.Tan))
+	addFunc("ln", createMathFunction(&realInterval{
+		LowerBound: &intervalBound{
+			Value:        NullFraction,
+			IncludeValue: false,
+			Infinite:     false,
+		},
+		UpperBound: &intervalBound{
+			Infinite: true,
+			Positive: true,
+		},
+		CustomName: "R \\ { 0 }",
+	}, math.Log))
+	addFunc("log2", createMathFunction(&realInterval{
+		LowerBound: &intervalBound{
+			Value:        NullFraction,
+			IncludeValue: false,
+			Infinite:     false,
+		},
+		UpperBound: &intervalBound{
+			Infinite: true,
+			Positive: true,
+		},
+		CustomName: "R \\ { 0 }",
+	}, math.Log2))
+
+	log10 := createMathFunction(&realInterval{
+		LowerBound: &intervalBound{
+			Value:        NullFraction,
+			IncludeValue: false,
+			Infinite:     false,
+		},
+		UpperBound: &intervalBound{
+			Infinite: true,
+			Positive: true,
+		},
+		CustomName: "R \\ { 0 }",
+	}, math.Log10)
+	addFunc("log", log10)
+	addFunc("log10", log10)
 }
 
 type mathFunction struct {

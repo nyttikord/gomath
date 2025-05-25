@@ -45,7 +45,7 @@ func TestEvalDivDecimal(t *testing.T) {
 	if tree.Type != "return" {
 		t.Errorf("got type %s; want return", tree.Type)
 	}
-	val, err := tree.Body.Eval(&Options{true})
+	val, err := tree.Body.Eval(&Options{true, 3})
 	if err != nil {
 		t.Fatal(err)
 	}

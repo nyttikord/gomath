@@ -108,6 +108,26 @@ func (f fraction) Simplify() *fraction {
 	return &f
 }
 
+func (f fraction) SmallerOrEqualThan(b *fraction) bool {
+	a := f.Simplify()
+	b = b.Simplify()
+
+	// With the Simplify call, both denominators are positive
+	return a.Numerator*b.Denominator <= b.Numerator*a.Denominator
+}
+
+func (f fraction) SmallerThan(b *fraction) bool {
+	return f.SmallerOrEqualThan(b) && f == *b
+}
+
+func (f fraction) GreaterOrEqualThan(b *fraction) bool {
+	return !f.SmallerThan(b)
+}
+
+func (f fraction) GreaterThan(b *fraction) bool {
+	return !f.SmallerOrEqualThan(b)
+}
+
 // Add a fraction
 func (f fraction) Add(a *fraction) *fraction {
 	f.Numerator = f.Numerator*a.Denominator + a.Numerator*f.Denominator

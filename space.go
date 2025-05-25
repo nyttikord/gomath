@@ -6,7 +6,7 @@ import (
 )
 
 var (
-	UnknownSpaceErr = errors.New("unknown space")
+	ErrUnknownSpace = errors.New("unknown space")
 )
 
 type Space interface {
@@ -33,7 +33,7 @@ func parseSpace(s string) (Space, error) {
 	case "N":
 		return NaturalSet{}, nil
 	}
-	return nil, errors.Join(UnknownSpaceErr, fmt.Errorf("unknown space %s", s))
+	return nil, errors.Join(ErrUnknownSpace, fmt.Errorf("unknown space %s", s))
 }
 
 func (RealSet) Contains(f *fraction) bool {

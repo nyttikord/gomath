@@ -13,9 +13,9 @@ var (
 	factorOperators = []operator{"*", "/"}
 	expOperators    = []operator{"^"}
 
+	// ErrUnknownExpression is thrown when GoMath does not know the expression
 	ErrUnknownExpression = errors.New("unknown expression")
-	ErrUnknownStatement  = errors.New("unknown statement")
-	ErrWrongExpression   = errors.New("wrong expression")
+	// ErrInvalidExpression is thrown when the given expression's syntax is invalid
 	ErrInvalidExpression = errors.New("invalid expression")
 )
 
@@ -94,23 +94,6 @@ func binExpression(ops []operator, sub expressionFunc) expressionFunc {
 	}
 }
 
-func operatorExpression(l []*lexer, i *int) (expression, error) {
-	c := l[*i]
-	if c.Type == Operator && c.Value == "{" {
-		*i++
-		exp, err := termExpression(l, i)
-		if err != nil {
-			return nil, err
-		}
-		if l[*i].Value != "}" {
-			return exp, errors.Join(ErrWrongExpression, errors.New("} excepted"))
-		}
-		*i++
-		return exp, nil
-	}
-	return literalExpression(l, i)
-}
-
 func literalExpression(l []*lexer, i *int) (expression, error) {
 	c := l[*i]
 	*i++
@@ -127,17 +110,9 @@ func literalExpression(l []*lexer, i *int) (expression, error) {
 		return &literalExp{Value: f}, nil
 	case Literal:
 		if strings.HasPrefix(c.Value, `\`) {
-			return &predefinedVariable{ID: c.Value[1:]}, nil
-		} else if *i < len(l) && l[*i].Type == Operator && l[*i].Value == "{" {
-			name := c.Value
-			*i++
-			exp, err := operatorExpression(l, i)
-			if err != nil {
-				return nil, err
-			}
-			return &evaluateOperation{Expression: exp, FunctionName: name}, nil
+			return predefinedExpression(l, i, c.Value[1:])
 		}
-		return &variable{ID: c.Value}, nil
+		return nil, errors.Join(ErrUnknownExpression, fmt.Errorf("unknown literal %s", c.Value))
 	case Separator:
 		if c.Value == "(" {
 			exp, err := termExpression(l, i)
@@ -145,7 +120,7 @@ func literalExpression(l []*lexer, i *int) (expression, error) {
 				return nil, err
 			}
 			if l[*i].Value != ")" {
-				return nil, errors.Join(ErrWrongExpression, errors.New(") excepted"))
+				return nil, errors.Join(ErrInvalidExpression, errors.New(") excepted"))
 			}
 			*i++
 			return exp, nil
@@ -155,11 +130,42 @@ func literalExpression(l []*lexer, i *int) (expression, error) {
 		if err != nil {
 			return nil, err
 		}
-		return &unaryOperation{Operator: operator(c.Value), Expression: exp}, nil
+		return &unaryOperation{operator(c.Value), exp}, nil
 	}
 	return nil, errors.Join(ErrUnknownExpression, fmt.Errorf(
 		"unknown type %s('%s'): excepting a valid literal expression",
 		c.Type,
 		c.Value,
 	))
+}
+
+func predefinedExpression(l []*lexer, i *int, id string) (expression, error) {
+	if isPredefinedVariable(id) {
+		return &predefinedVariable{id}, nil
+	}
+	if isPredefinedFunction(id) {
+		exp, err := operatorExpression(l, i)
+		if err != nil {
+			return nil, err
+		}
+		return &predefinedFunction{id, exp}, nil
+	}
+	return nil, ErrUnknownVariable
+}
+
+func operatorExpression(l []*lexer, i *int) (expression, error) {
+	c := l[*i]
+	if c.Type == Separator && c.Value == "(" {
+		*i++
+		exp, err := termExpression(l, i)
+		if err != nil {
+			return nil, err
+		}
+		if l[*i].Value != ")" {
+			return exp, errors.Join(ErrInvalidExpression, errors.New(") excepted"))
+		}
+		*i++
+		return exp, nil
+	}
+	return nil, ErrInvalidExpression
 }

@@ -18,7 +18,7 @@ const (
 )
 
 var (
-	operators  = []operator{"+", "-", "*", "/", "^", "%", "=", "{", "}"}
+	operators  = []operator{"+", "-", "*", "/", "^", "%", "="}
 	separators = []separator{",", "(", ")"}
 
 	ErrSameTypeFollow = errors.New("sequence of two with exclusively numbers")

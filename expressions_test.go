@@ -1,7 +1,6 @@
 package gomath
 
 import (
-	"encoding/json"
 	"testing"
 )
 
@@ -54,7 +53,7 @@ func TestEvalDivDecimal(t *testing.T) {
 		t.Errorf("got %s; want %s", val, "0.1")
 	}
 	if t.Failed() {
-		printAst(t, tree)
+		t.Log(tree)
 	}
 }
 
@@ -96,14 +95,6 @@ func genericTest(t *testing.T, exp string, excepted string) {
 		t.Errorf("got %s; want %s", val, excepted)
 	}
 	if t.Failed() {
-		printAst(t, tree)
+		t.Log(tree)
 	}
-}
-
-func printAst(t *testing.T, tree *ast) {
-	m, err := json.MarshalIndent(tree, "", "  ")
-	if err != nil {
-		t.Fatal(err)
-	}
-	t.Log(string(m))
 }

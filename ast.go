@@ -1,6 +1,7 @@
 package gomath
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"slices"
@@ -24,6 +25,14 @@ type astType string
 type ast struct {
 	Type astType
 	Body statement
+}
+
+func (a *ast) String() string {
+	m, err := json.MarshalIndent(a, "", "  ")
+	if err != nil {
+		return ""
+	}
+	return string(m)
 }
 
 // astParse the given lexer and returns an ast

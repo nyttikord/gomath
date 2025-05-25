@@ -4,18 +4,18 @@ import "testing"
 
 func TestRealInterval_Contains(t *testing.T) {
 	t.Log("testing inclusive bounds")
-	set := RealInterval{
-		lowerBound: IntervalBound{
-			value:        OneFraction.Mul(intToFraction(-1)),
-			includeValue: true,
-			infinite:     false,
+	set := realInterval{
+		LowerBound: &intervalBound{
+			Value:        OneFraction.Mul(intToFraction(-1)),
+			IncludeValue: true,
+			Infinite:     false,
 		},
-		upperBound: IntervalBound{
-			value:        OneFraction,
-			includeValue: true,
-			infinite:     false,
+		UpperBound: &intervalBound{
+			Value:        OneFraction,
+			IncludeValue: true,
+			Infinite:     false,
 		},
-		customName: "",
+		CustomName: "",
 	}
 
 	if !set.Contains(NullFraction) {
@@ -26,18 +26,18 @@ func TestRealInterval_Contains(t *testing.T) {
 	}
 
 	t.Log("testing exclusive bounds")
-	set = RealInterval{
-		lowerBound: IntervalBound{
-			value:        OneFraction.Mul(intToFraction(-1)),
-			includeValue: false,
-			infinite:     false,
+	set = realInterval{
+		LowerBound: &intervalBound{
+			Value:        OneFraction.Mul(intToFraction(-1)),
+			IncludeValue: false,
+			Infinite:     false,
 		},
-		upperBound: IntervalBound{
-			value:        OneFraction,
-			includeValue: false,
-			infinite:     false,
+		UpperBound: &intervalBound{
+			Value:        OneFraction,
+			IncludeValue: false,
+			Infinite:     false,
 		},
-		customName: "",
+		CustomName: "",
 	}
 	if !set.Contains(NullFraction) {
 		t.Fatalf("0 should be in [-1, 1]")
@@ -47,17 +47,17 @@ func TestRealInterval_Contains(t *testing.T) {
 	}
 
 	t.Log("testing infinite bounds")
-	set = RealInterval{
-		lowerBound: IntervalBound{
-			value:        OneFraction,
-			infinite:     false,
-			includeValue: true,
+	set = realInterval{
+		LowerBound: &intervalBound{
+			Value:        OneFraction,
+			Infinite:     false,
+			IncludeValue: true,
 		},
-		upperBound: IntervalBound{
-			infinite: true,
-			positive: true,
+		UpperBound: &intervalBound{
+			Infinite: true,
+			Positive: true,
 		},
-		customName: "",
+		CustomName: "",
 	}
 	if set.Contains(NullFraction) {
 		t.Fatalf("0 should not be in [1, +inf[")

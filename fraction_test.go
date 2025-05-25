@@ -1,19 +1,20 @@
 package gomath
 
-import "testing"
+import (
+	"errors"
+	"testing"
+)
 
 func TestFraction_Simplify(t *testing.T) {
 	t.Log("testing positive denominator")
-	f := &fraction{Numerator: 6, Denominator: 8}
-	f = f.Simplify()
+	f := fraction{Numerator: 6, Denominator: 8}.Simplify()
 	expected := fraction{Numerator: 3, Denominator: 4}
 	if *f != expected {
 		t.Errorf("got %s; want %s", f.String(), expected.String())
 	}
 
 	t.Log("testing negative denominator")
-	f = &fraction{Numerator: 6, Denominator: -5}
-	f = f.Simplify()
+	f = fraction{Numerator: 6, Denominator: -5}.Simplify()
 	expected = fraction{Numerator: -6, Denominator: 5}
 	if *f != expected {
 		t.Errorf("got %s; want %s", f.String(), expected.String())
@@ -75,8 +76,8 @@ func TestFraction_Div(t *testing.T) {
 	a = *OneFraction
 	b = *NullFraction
 	_, err = a.Div(&b)
-	if err == nil {
-		t.Errorf("expected error")
+	if !errors.Is(err, ErrIllegalOperation) {
+		t.Errorf("expected illegal operation error, not %s", err)
 	}
 }
 
@@ -95,8 +96,8 @@ func TestFraction_Inv(t *testing.T) {
 	t.Log("testing division by null fraction")
 	a = *NullFraction
 	_, err = a.Inv()
-	if err == nil {
-		t.Errorf("expected error")
+	if !errors.Is(err, ErrIllegalOperation) {
+		t.Errorf("expected illegal operation error, not %s", err)
 	}
 }
 

@@ -155,7 +155,7 @@ func predefinedExpression(l []*lexer, i *int, id string) (expression, error) {
 		}
 		return &predefinedFunction{id, exp}, nil
 	}
-	return nil, ErrUnknownVariable
+	return nil, ErrUnknownVariable(id)
 }
 
 func operatorExpression(l []*lexer, i *int) (expression, error) {

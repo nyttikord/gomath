@@ -109,7 +109,7 @@ func (l *literalExp) Eval() (*fraction, error) {
 func (v *predefinedVariable) Eval() (*fraction, error) {
 	val, ok := predefinedVariables[v.ID]
 	if !ok {
-		return nil, errors.Join(ErrUnknownVariable, fmt.Errorf("undefined variable \\%s", v.ID))
+		return nil, errors.Join(ErrUnknownVariable(v.ID), fmt.Errorf("undefined variable \\%s", v.ID))
 	}
 	return val, nil
 }
@@ -117,7 +117,7 @@ func (v *predefinedVariable) Eval() (*fraction, error) {
 func (f *predefinedFunction) Eval() (*fraction, error) {
 	fn, ok := predefinedFunctions[f.ID]
 	if !ok {
-		return nil, errors.Join(ErrUnknownVariable, fmt.Errorf("undefined variable \\%s", f.ID))
+		return nil, errors.Join(ErrUnknownVariable(f.ID), fmt.Errorf("undefined variable \\%s", f.ID))
 	}
 	val, err := f.exp.Eval()
 	if err != nil {

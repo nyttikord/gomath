@@ -89,6 +89,14 @@ func abs(a int64) int64 {
 
 // Simplify the fraction
 func (f *fraction) Simplify() *fraction {
+	divisor := gcd(f.Numerator, f.Denominator)
+	if divisor == 0 {
+		return f
+	}
+	f.Numerator = f.Numerator / divisor
+	f.Denominator = f.Denominator / divisor
+
+	// Ensure a positive denominator
 	if f.Numerator*f.Denominator < 0 {
 		f.Numerator = -abs(f.Numerator)
 		f.Denominator = abs(f.Denominator)
@@ -97,12 +105,6 @@ func (f *fraction) Simplify() *fraction {
 		f.Denominator = abs(f.Denominator)
 	}
 
-	divisor := gcd(f.Numerator, f.Denominator)
-	if divisor == 0 {
-		return f
-	}
-	f.Numerator = f.Numerator / divisor
-	f.Denominator = f.Denominator / divisor
 	return f
 }
 

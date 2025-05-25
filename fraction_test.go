@@ -29,6 +29,48 @@ func TestFraction_Simplify(t *testing.T) {
 	}
 }
 
+func TestFractionComparison(t *testing.T) {
+	t.Log("testing equal fraction")
+	f := fraction{Numerator: 5, Denominator: 3}
+	t.Log("smaller or equal")
+	if !f.SmallerOrEqualThan(&f) {
+		t.Errorf("fractions should be equal")
+	}
+	t.Log("smaller")
+	if f.SmallerThan(&f) {
+		t.Errorf("fractions should be equal")
+	}
+	t.Log("greater or equal")
+	if !f.GreaterOrEqualThan(&f) {
+		t.Errorf("fractions should be equal")
+	}
+	t.Log("greater")
+	if f.GreaterThan(&f) {
+		t.Errorf("fractions should be equal")
+	}
+
+	t.Log("testing unequal fractions")
+	// a < b
+	a := f
+	b := fraction{Numerator: 7, Denominator: 4}
+	t.Log("smaller or equal")
+	if !a.SmallerOrEqualThan(&b) {
+		t.Errorf("a should be smaller than b")
+	}
+	t.Log("smaller")
+	if !a.SmallerThan(&b) {
+		t.Errorf("a should be smaller than b")
+	}
+	t.Log("greater or equal")
+	if a.GreaterOrEqualThan(&b) {
+		t.Errorf("a should be smaller than b")
+	}
+	t.Log("greater")
+	if b.GreaterThan(&b) {
+		t.Errorf("a should be smaller than b")
+	}
+}
+
 func TestFraction_Add(t *testing.T) {
 	a := fraction{Numerator: 5, Denominator: 6}
 	b := fraction{Numerator: 8, Denominator: 3}

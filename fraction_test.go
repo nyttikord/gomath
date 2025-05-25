@@ -4,26 +4,26 @@ import "testing"
 
 func TestFraction_Simplify(t *testing.T) {
 	t.Log("testing positive denominator")
-	f := fraction{Numerator: 6, Denominator: 8}
-	f.Simplify()
+	f := &fraction{Numerator: 6, Denominator: 8}
+	f = f.Simplify()
 	expected := fraction{Numerator: 3, Denominator: 4}
-	if f != expected {
+	if *f != expected {
 		t.Errorf("got %s; want %s", f.String(), expected.String())
 	}
 
 	t.Log("testing negative denominator")
-	f = fraction{Numerator: 6, Denominator: -5}
-	f.Simplify()
+	f = &fraction{Numerator: 6, Denominator: -5}
+	f = f.Simplify()
 	expected = fraction{Numerator: -6, Denominator: 5}
-	if f != expected {
+	if *f != expected {
 		t.Errorf("got %s; want %s", f.String(), expected.String())
 	}
 
 	t.Log("testing double negative fraction")
-	f = fraction{Numerator: -6, Denominator: -5}
-	f.Simplify()
+	f = &fraction{Numerator: -6, Denominator: -5}
+	f = f.Simplify()
 	expected = fraction{Numerator: 6, Denominator: 5}
-	if f != expected {
+	if *f != expected {
 		t.Errorf("got %s; want %s", f.String(), expected.String())
 	}
 }

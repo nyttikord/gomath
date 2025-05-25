@@ -7,6 +7,7 @@ import (
 )
 
 var (
+	// ErrUnknownVariable is thrown when GoMath doesn't know the variable used
 	ErrUnknownVariable = errors.New("unknown variable")
 )
 

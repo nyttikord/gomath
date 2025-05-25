@@ -6,7 +6,9 @@ import (
 )
 
 var (
+	// ErrUnknownOperation is thrown when GoMath doesn't know the operation used
 	ErrUnknownOperation = errors.New("unknown operation")
+	// ErrNumberNotInSpace is thrown when the number is not in the definition space
 	ErrNumberNotInSpace = errors.New("number is not in the definition space")
 )
 

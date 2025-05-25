@@ -120,7 +120,7 @@ func literalExpression(l []*lexer, i *int) (expression, error) {
 				return nil, err
 			}
 			if l[*i].Value != ")" {
-				return nil, errors.Join(ErrInvalidExpression, errors.New(") excepted"))
+				return nil, errors.Join(ErrInvalidExpression, fmt.Errorf(") excepted, not %s", l[*i].Value))
 			}
 			*i++
 			return exp, nil
@@ -162,7 +162,7 @@ func operatorExpression(l []*lexer, i *int) (expression, error) {
 			return nil, err
 		}
 		if l[*i].Value != ")" {
-			return exp, errors.Join(ErrInvalidExpression, errors.New(") excepted"))
+			return exp, errors.Join(ErrInvalidExpression, fmt.Errorf(") excepted, not %s", l[*i].Value))
 		}
 		*i++
 		return exp, nil

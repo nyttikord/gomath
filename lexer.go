@@ -21,6 +21,7 @@ var (
 	operators  = []operator{"+", "-", "*", "/", "^", "%", "="}
 	separators = []separator{",", "(", ")"}
 
+	// ErrSameTypeFollow is thrown when two numbers follow each others
 	ErrSameTypeFollow = errors.New("sequence of two with exclusively numbers")
 )
 

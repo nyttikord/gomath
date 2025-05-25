@@ -17,7 +17,9 @@ var (
 	NullFraction = &fraction{Numerator: 0, Denominator: 1}
 	OneFraction  = &fraction{Numerator: 1, Denominator: 1}
 
-	ErrFractionNotInt   = errors.New("fraction is not an int")
+	// ErrFractionNotInt is thrown when a non-integer fraction is converted into an int
+	ErrFractionNotInt = errors.New("fraction is not an int")
+	// ErrIllegalOperation is thrown when an illegal operation is performed (like dividing by 0)
 	ErrIllegalOperation = errors.New("illegal operation")
 )
 

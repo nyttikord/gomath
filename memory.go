@@ -30,7 +30,7 @@ func init() {
 }
 
 type mathFunction struct {
-	Definition Space
+	Definition space
 	Relation   *relation
 }
 

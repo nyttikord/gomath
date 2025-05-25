@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"slices"
 	"strconv"
-	"strings"
 )
 
 var (
@@ -118,10 +117,7 @@ func literalExpression(l []*lexer, i *int) (expression, error) {
 		}
 		return &literalExp{Value: f}, nil
 	case Literal:
-		if strings.HasPrefix(c.Value, `\`) {
-			return predefinedExpression(l, i, c.Value[1:])
-		}
-		return nil, errors.Join(ErrUnknownExpression, fmt.Errorf("unknown literal %s", c.Value))
+		return predefinedExpression(l, i, c.Value[1:])
 	case Separator:
 		if c.Value == "(" {
 			exp, err := termExpression(l, i)

@@ -57,7 +57,7 @@ func init() {
 	tanDef := &periodicInterval{
 		Interval: &realInterval{
 			LowerBound: &intervalBound{
-				Value:        piOverTwo.Mul(intToFraction(-1)),
+				Value:        piOverTwo.Neg(),
 				IncludeValue: false,
 				Infinite:     false,
 			},

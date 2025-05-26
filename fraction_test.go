@@ -101,6 +101,15 @@ func TestFraction_Mul(t *testing.T) {
 	}
 }
 
+func TestFraction_Neg(t *testing.T) {
+	f := fraction{Numerator: 5, Denominator: 6}
+	expected := fraction{Numerator: -5, Denominator: 6}
+	res := *f.Neg()
+	if res != expected {
+		t.Errorf("got %s; want %s", res.String(), expected.String())
+	}
+}
+
 func TestFraction_Div(t *testing.T) {
 	t.Log("testing division")
 	a := fraction{Numerator: 5, Denominator: 6}

@@ -54,19 +54,19 @@ func TestFractionComparison(t *testing.T) {
 	b := newFraction(7, 4)
 	t.Log("smaller or equal")
 	if !a.SmallerOrEqualThan(b) {
-		t.Errorf("a should be smaller than b")
+		t.Errorf("%s should be smaller or equal than %s", b, a)
 	}
 	t.Log("smaller")
 	if !a.SmallerThan(b) {
-		t.Errorf("a should be smaller than b")
+		t.Errorf("%s should be smaller than %s", b, a)
 	}
 	t.Log("greater or equal")
 	if a.GreaterOrEqualThan(b) {
-		t.Errorf("a should be smaller than b")
+		t.Errorf("%s should be greater or equal than %s", a, b)
 	}
 	t.Log("greater")
 	if b.GreaterThan(b) {
-		t.Errorf("a should be smaller than b")
+		t.Errorf("%s should be greater than %s", a, b)
 	}
 }
 

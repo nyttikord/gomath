@@ -38,12 +38,12 @@ func TestEvalDivDecimal(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	tree, err := astParse(lexr, "return")
+	tree, err := astParse(lexr, astTypeCalculation)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if tree.Type != "return" {
-		t.Errorf("got type %s; want return", tree.Type)
+	if tree.Type != astTypeCalculation {
+		t.Errorf("got type %d; want %d", tree.Type, astTypeCalculation)
 	}
 	val, err := tree.Body.Eval(&Options{true, 3})
 	if err != nil {
@@ -90,12 +90,49 @@ func genericTest(t *testing.T, exp string, excepted string) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	tree, err := astParse(lexr, "return")
+	tree, err := astParse(lexr, astTypeCalculation)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if tree.Type != "return" {
-		t.Errorf("got type %s; want return", tree.Type)
+	if tree.Type != astTypeCalculation {
+		t.Errorf("got type %d; want %d", tree.Type, astTypeCalculation)
+	}
+	val, err := tree.Body.Eval(&Options{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if val != excepted {
+		t.Errorf("got %s; want %s", val, excepted)
+	}
+	if t.Failed() {
+		t.Log(tree)
+	}
+}
+
+func TestEvalLatex(t *testing.T) {
+	genericTestRenderLatex(t, "(1+2)/3", `\frac{1 + 2}{3}`)
+	genericTestRenderLatex(t, "3/(1+2)", `\frac{3}{1 + 2}`)
+	genericTestRenderLatex(t, "cos(2*pi)", `\cos\left(2 \times \pi\right)`)
+	genericTestRenderLatex(t, "e^(5+2)", `e^{5 + 2}`)
+	genericTestRenderLatex(t, "e^5", `e^5`)
+	genericTestRenderLatex(t, "(1+2)^5", `\left(1 + 2\right)^5`)
+	genericTestRenderLatex(t, "5*(1+2)^5", `5 \times \left(1 + 2\right)^5`)
+	genericTestRenderLatex(t, "5(1+2)^5", `5 \times \left(1 + 2\right)^5`)
+	genericTestRenderLatex(t, "(1+2/3)/2", `\frac{1 + \frac{2}{3}}{2}`)
+	genericTestRenderLatex(t, "2*(1+2)", `2 \times \left(1 + 2\right)`)
+}
+
+func genericTestRenderLatex(t *testing.T, exp string, excepted string) {
+	lexr, err := lex(exp)
+	if err != nil {
+		t.Fatal(err)
+	}
+	tree, err := astParse(lexr, astTypeLatex)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if tree.Type != astTypeLatex {
+		t.Errorf("got type %d; want %d", tree.Type, astTypeLatex)
 	}
 	val, err := tree.Body.Eval(&Options{})
 	if err != nil {

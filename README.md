@@ -10,12 +10,14 @@ $ go get -u github.com/nyttikord/gomath@latest
 ```
 You can replace `latest` with any valid tags.
 
-To parse an expression, use `gomath.Parse(string, *gomath.Options) (string, error)`.
+### Calculate
+
+To parse an expression and calculate it, use `gomath.ParseAndCalculate(string, *gomath.Options) (string, error)`.
 The string is a valid expression, like `1+2` or `2(1/3+4)^5`.
 It returns the result of the expression in a string according to the given options.
 
 ```go
-res, err := gomath.Parse("1+2", &gomath.Options{})
+res, err := gomath.ParseAndCalculate("1+2", &gomath.Options{})
 err == nil // true
 res == "3" // true
 ```
@@ -24,13 +26,25 @@ You can modify the result's type with `gomath.Options`.
 Set `Decimal` to `true` if you want to have a decimal approximation.
 You can specify the number of digits with `Precision`.
 
+### Convert to LaTeX
+
+To parse an expression and convert it into $\LaTeX$, use `gomath.ParseAndConvertToLatex(string, *gomath.Options) (string, error)`.
+The string is a valid expression like `1+2` or `2(1/3+4)^5`.
+It returns the result of the expression in a string according to the given options.
+
+```go
+res, err := gomath.ParseAndConvertToLatex("(1+2/3)/2", &gomath.Options{})
+err == nil // true
+res == `\frac{1 + \frac{2}{3}}{2}` // true
+```
+
 ### Special case
 
-The written representation of calculus is definitely not compatible with computers.
+The written representation of calculation is definitely not compatible with computers.
 We use common signes and common conventions to prevent unwanted behaviors.
 For example, the multiplication is represented by `*` and not by `×`.
 
-The computer representation of calculus has some special cases.
+The computer representation of calculation has some special cases.
 How to interpret `5/2(1+2)`? And `-3^2`?
 All special cases and how they are interpreted are listed below.
 

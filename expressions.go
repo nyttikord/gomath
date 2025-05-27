@@ -3,6 +3,7 @@ package gomath
 import (
 	"errors"
 	"fmt"
+	"strings"
 )
 
 var (
@@ -17,10 +18,22 @@ type expressionFunc func(l []*lexer, i *int) (expression, error)
 type expression interface {
 	// Eval the expression
 	Eval() (*fraction, error)
+	// RenderLatex the expression
+	RenderLatex() (string, priority, error)
 }
 
 type operator string
 type separator string
+
+type priority uint8
+
+const (
+	termPriority    priority = 0
+	factorPriority  priority = 1
+	expPriority     priority = 2
+	unaryPriority   priority = 3
+	literalPriority priority = 4
+)
 
 type binaryOperation struct {
 	Operator    operator
@@ -37,7 +50,8 @@ type literalExp struct {
 }
 
 type variable struct {
-	ID string
+	ID        string
+	OmitSlash bool
 }
 
 type function struct {
@@ -87,6 +101,69 @@ func (b *binaryOperation) Eval() (*fraction, error) {
 	}
 }
 
+func (b *binaryOperation) RenderLatex() (string, priority, error) {
+	chanLf := make(chan string)
+	chanLr := make(chan string)
+	chanLfp := make(chan priority)
+	chanLrp := make(chan priority)
+	go func() {
+		lf, p, err := b.Left.RenderLatex()
+		chanLf <- lf
+		chanLfp <- p
+		if err != nil {
+			panic(err)
+		}
+	}()
+	go func() {
+		lr, p, err := b.Right.RenderLatex()
+		chanLr <- lr
+		chanLrp <- p
+		if err != nil {
+			panic(err)
+		}
+	}()
+	lf := <-chanLf
+	lr := <-chanLr
+	lfp := <-chanLfp
+	lrp := <-chanLrp
+	close(chanLf)
+	close(chanLr)
+	close(chanLfp)
+	close(chanLrp)
+	switch b.Operator {
+	case "+":
+		return fmt.Sprintf("%s + %s", lf, lr), termPriority, nil
+	case "-":
+		return fmt.Sprintf("%s - %s", lf, lr), termPriority, nil
+	case "*":
+		if strings.Contains(lf, " ") && lfp < factorPriority {
+			lf = `\left(` + lf + `\right)`
+		}
+		if strings.Contains(lr, " ") && lrp < factorPriority {
+			lr = `\left(` + lr + `\right)`
+		}
+		return fmt.Sprintf(`%s \times %s`, lf, lr), factorPriority, nil
+	case "/":
+		return fmt.Sprintf(`\frac{%s}{%s}`, lf, lr), factorPriority, nil
+	case "^":
+		var s string
+		if strings.Contains(lf, " ") && lfp < expPriority {
+			s += `\left(` + lf + `\right)`
+		} else {
+			s += lf
+		}
+		s += "^"
+		if len(lr) > 1 {
+			s += "{" + lr + "}"
+		} else {
+			s += lr
+		}
+		return s, expPriority, nil
+	default:
+		return "", 0, errors.Join(ErrUnknownOperation, errors.New("operation "+string(b.Operator)+" is not supported"))
+	}
+}
+
 func (b *unaryOperation) Eval() (*fraction, error) {
 	lb, err := b.Expression.Eval()
 	if err != nil {
@@ -102,28 +179,66 @@ func (b *unaryOperation) Eval() (*fraction, error) {
 	}
 }
 
+func (b *unaryOperation) RenderLatex() (string, priority, error) {
+	s, _, err := b.Expression.RenderLatex()
+	if err != nil {
+		return "", unaryPriority, err
+	}
+	if len(s) > 1 {
+		s = `\left(` + s + `\left)`
+	}
+	return fmt.Sprintf("%s%s", b.Operator, s), unaryPriority, nil
+}
+
 func (l *literalExp) Eval() (*fraction, error) {
 	return l.Value, nil
+}
+
+func (l *literalExp) RenderLatex() (string, priority, error) {
+	return l.Value.String(), literalPriority, nil
 }
 
 func (v *predefinedVariable) Eval() (*fraction, error) {
 	val, ok := predefinedVariables[v.ID]
 	if !ok {
-		return nil, errors.Join(ErrUnknownVariable(v.ID), fmt.Errorf("undefined variable \\%s", v.ID))
+		return nil, errors.Join(ErrUnknownVariable(v.ID), fmt.Errorf("undefined variable %s", v.ID))
 	}
-	return val, nil
+	return val.Val, nil
+}
+
+func (v *predefinedVariable) RenderLatex() (string, priority, error) {
+	_, ok := predefinedVariables[v.ID]
+	if !ok {
+		return "", literalPriority, errors.Join(ErrUnknownVariable(v.ID), fmt.Errorf("undefined variable %s", v.ID))
+	}
+	if v.OmitSlash {
+		return v.ID, literalPriority, nil
+	}
+	return `\` + v.ID, literalPriority, nil
 }
 
 func (f *predefinedFunction) Eval() (*fraction, error) {
 	fn, ok := predefinedFunctions[f.ID]
 	if !ok {
-		return nil, errors.Join(ErrUnknownVariable(f.ID), fmt.Errorf("undefined variable \\%s", f.ID))
+		return nil, errors.Join(ErrUnknownVariable(f.ID), fmt.Errorf("undefined variable %s", f.ID))
 	}
 	val, err := f.exp.Eval()
 	if err != nil {
 		return nil, err
 	}
 	return fn.Eval(val)
+}
+
+func (f *predefinedFunction) RenderLatex() (string, priority, error) {
+	_, ok := predefinedFunctions[f.ID]
+	if !ok {
+		return "", literalPriority, errors.Join(ErrUnknownVariable(f.ID), fmt.Errorf("undefined variable %s", f.ID))
+	}
+	val, _, err := f.exp.RenderLatex()
+	if err != nil {
+		return "", literalPriority, err
+	}
+	return fmt.Sprintf(`\%s\left(%s\right)`, f.ID, val), literalPriority, nil
 }
 
 func (r *relation) Eval(f *fraction) *fraction {

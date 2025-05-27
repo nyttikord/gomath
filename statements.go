@@ -10,11 +10,11 @@ type statement interface {
 	Eval(*Options) (string, error)
 }
 
-type returnStatement struct {
+type calculationStatement struct {
 	Expression expression
 }
 
-func (p *returnStatement) Eval(opt *Options) (string, error) {
+func (p *calculationStatement) Eval(opt *Options) (string, error) {
 	f, err := p.Expression.Eval()
 	if err != nil {
 		return "", err
@@ -23,4 +23,16 @@ func (p *returnStatement) Eval(opt *Options) (string, error) {
 		return f.Approx(opt.Precision), nil
 	}
 	return f.String(), nil
+}
+
+type latexStatement struct {
+	Expression expression
+}
+
+func (l *latexStatement) Eval(opt *Options) (string, error) {
+	s, _, err := l.Expression.RenderLatex()
+	if err != nil {
+		return "", err
+	}
+	return s, nil
 }

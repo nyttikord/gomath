@@ -17,9 +17,16 @@ var (
 	ErrUnknownExpression = errors.New("unknown expression")
 	// ErrInvalidExpression is thrown when the given expression's syntax is invalid
 	ErrInvalidExpression = errors.New("invalid expression")
+	// ErrUnknownAstType is thrown when GoMath does not know the given astType
+	ErrUnknownAstType = errors.New("unknown ast type")
 )
 
-type astType string
+type astType uint
+
+const (
+	astTypeCalculation astType = 0
+	astTypeLatex       astType = 1
+)
 
 type ast struct {
 	Type astType
@@ -42,7 +49,14 @@ func astParse(lexed []*lexer, tpe astType) (*ast, error) {
 	if err != nil {
 		return nil, err
 	}
-	tree.Body = &returnStatement{Expression: exp}
+	switch tpe {
+	case astTypeCalculation:
+		tree.Body = &calculationStatement{Expression: exp}
+	case astTypeLatex:
+		tree.Body = &latexStatement{Expression: exp}
+	default:
+		return nil, ErrUnknownAstType
+	}
 	return &tree, nil
 }
 
@@ -146,7 +160,8 @@ func literalExpression(l []*lexer, i *int) (expression, error) {
 
 func predefinedExpression(l []*lexer, i *int, id string) (expression, error) {
 	if isPredefinedVariable(id) {
-		return &predefinedVariable{id}, nil
+		v := predefinedVariables[id]
+		return &predefinedVariable{id, v.OmitSlash}, nil
 	}
 	if isPredefinedFunction(id) {
 		exp, err := operatorExpression(l, i)

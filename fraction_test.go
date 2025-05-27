@@ -7,145 +7,144 @@ import (
 
 func TestFraction_Simplify(t *testing.T) {
 	t.Log("testing positive denominator")
-	f := fraction{Numerator: 6, Denominator: 8}.Simplify()
-	expected := fraction{Numerator: 3, Denominator: 4}
-	if *f != expected {
+	f := newFraction(6, 8).Simplify()
+	expected := newFraction(3, 4)
+	if !f.Is(expected) {
 		t.Errorf("got %s; want %s", f.String(), expected.String())
 	}
 
 	t.Log("testing negative denominator")
-	f = fraction{Numerator: 6, Denominator: -5}.Simplify()
-	expected = fraction{Numerator: -6, Denominator: 5}
-	if *f != expected {
+	f = newFraction(6, -5).Simplify()
+	expected = newFraction(-6, 5)
+	if !f.Is(expected) {
 		t.Errorf("got %s; want %s", f.String(), expected.String())
 	}
 
 	t.Log("testing double negative fraction")
-	f = &fraction{Numerator: -6, Denominator: -5}
-	f = f.Simplify()
-	expected = fraction{Numerator: 6, Denominator: 5}
-	if *f != expected {
+	f = newFraction(-6, -5).Simplify()
+	expected = newFraction(6, 5)
+	if !f.Is(expected) {
 		t.Errorf("got %s; want %s", f.String(), expected.String())
 	}
 }
 
 func TestFractionComparison(t *testing.T) {
 	t.Log("testing equal fraction")
-	f := fraction{Numerator: 5, Denominator: 3}
+	f := newFraction(5, 3)
 	t.Log("smaller or equal")
-	if !f.SmallerOrEqualThan(&f) {
+	if !f.SmallerOrEqualThan(f) {
 		t.Errorf("fractions should be equal")
 	}
 	t.Log("smaller")
-	if f.SmallerThan(&f) {
+	if f.SmallerThan(f) {
 		t.Errorf("fractions should be equal")
 	}
 	t.Log("greater or equal")
-	if !f.GreaterOrEqualThan(&f) {
+	if !f.GreaterOrEqualThan(f) {
 		t.Errorf("fractions should be equal")
 	}
 	t.Log("greater")
-	if f.GreaterThan(&f) {
+	if f.GreaterThan(f) {
 		t.Errorf("fractions should be equal")
 	}
 
 	t.Log("testing unequal fractions")
 	// a < b
 	a := f
-	b := fraction{Numerator: 7, Denominator: 4}
+	b := newFraction(7, 4)
 	t.Log("smaller or equal")
-	if !a.SmallerOrEqualThan(&b) {
+	if !a.SmallerOrEqualThan(b) {
 		t.Errorf("a should be smaller than b")
 	}
 	t.Log("smaller")
-	if !a.SmallerThan(&b) {
+	if !a.SmallerThan(b) {
 		t.Errorf("a should be smaller than b")
 	}
 	t.Log("greater or equal")
-	if a.GreaterOrEqualThan(&b) {
+	if a.GreaterOrEqualThan(b) {
 		t.Errorf("a should be smaller than b")
 	}
 	t.Log("greater")
-	if b.GreaterThan(&b) {
+	if b.GreaterThan(b) {
 		t.Errorf("a should be smaller than b")
 	}
 }
 
 func TestFraction_Add(t *testing.T) {
-	a := fraction{Numerator: 5, Denominator: 6}
-	b := fraction{Numerator: 8, Denominator: 3}
-	expected := fraction{Numerator: 7, Denominator: 2}
-	res := *a.Add(&b)
-	if res != expected {
+	a := newFraction(5, 6)
+	b := newFraction(8, 3)
+	expected := newFraction(7, 2)
+	res := a.Add(b)
+	if res.Is(expected) {
 		t.Errorf("got %s; want %s", res.String(), expected.String())
 	}
 }
 
 func TestFraction_Sub(t *testing.T) {
-	a := fraction{Numerator: 5, Denominator: 6}
-	b := fraction{Numerator: 8, Denominator: 3}
-	expected := fraction{Numerator: -11, Denominator: 6}
-	res := *a.Sub(&b)
-	if res != expected {
+	a := newFraction(5, 6)
+	b := newFraction(8, 3)
+	expected := newFraction(-11, 6)
+	res := a.Sub(b)
+	if res.Is(expected) {
 		t.Errorf("got %s; want %s", res.String(), expected.String())
 	}
 }
 
 func TestFraction_Mul(t *testing.T) {
-	a := fraction{Numerator: 5, Denominator: 6}
-	b := fraction{Numerator: 8, Denominator: 3}
-	expected := fraction{Numerator: 20, Denominator: 9}
-	res := *a.Mul(&b)
-	if res != expected {
+	a := newFraction(5, 6)
+	b := newFraction(8, 3)
+	expected := newFraction(20, 9)
+	res := a.Mul(b)
+	if res.Is(expected) {
 		t.Errorf("got %s; want %s", res.String(), expected.String())
 	}
 }
 
 func TestFraction_Neg(t *testing.T) {
-	f := fraction{Numerator: 5, Denominator: 6}
-	expected := fraction{Numerator: -5, Denominator: 6}
-	res := *f.Neg()
-	if res != expected {
+	f := newFraction(5, 6)
+	expected := newFraction(-5, 6)
+	res := f.Neg()
+	if res.Is(expected) {
 		t.Errorf("got %s; want %s", res.String(), expected.String())
 	}
 }
 
 func TestFraction_Div(t *testing.T) {
 	t.Log("testing division")
-	a := fraction{Numerator: 5, Denominator: 6}
-	b := fraction{Numerator: 8, Denominator: 3}
-	expected := fraction{Numerator: 5, Denominator: 16}
-	res, err := a.Div(&b)
+	a := newFraction(5, 6)
+	b := newFraction(8, 3)
+	expected := newFraction(5, 16)
+	res, err := a.Div(b)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if *res != expected {
+	if res.Is(expected) {
 		t.Errorf("got %s; want %s", res.String(), expected.String())
 	}
 
 	t.Log("testing division by null fraction")
-	a = *OneFraction
-	b = *NullFraction
-	_, err = a.Div(&b)
+	a = oneFraction
+	b = nullFraction
+	_, err = a.Div(b)
 	if !errors.Is(err, ErrIllegalOperation) {
 		t.Errorf("expected illegal operation error, not %s", err)
 	}
 }
 
 func TestFraction_Inv(t *testing.T) {
-	t.Log("testing division")
-	a := fraction{Numerator: 5, Denominator: 6}
-	expected := fraction{Numerator: 6, Denominator: 5}
+	t.Log("testing invert")
+	a := newFraction(5, 6)
+	expected := newFraction(6, 5)
 	res, err := a.Inv()
 	if err != nil {
 		t.Fatal(err)
 	}
-	if *res != expected {
+	if res.Is(expected) {
 		t.Errorf("got %s; want %s", res.String(), expected.String())
 	}
 
-	t.Log("testing division by null fraction")
-	a = *NullFraction
+	t.Log("testing invert a null fraction")
+	a = nullFraction
 	_, err = a.Inv()
 	if !errors.Is(err, ErrIllegalOperation) {
 		t.Errorf("expected illegal operation error, not %s", err)
@@ -154,7 +153,7 @@ func TestFraction_Inv(t *testing.T) {
 
 func TestFraction_Approx(t *testing.T) {
 	expected := "3.1415"
-	f := fraction{Numerator: 6283, Denominator: 2000}
+	f := newFraction(6283, 2000)
 
 	t.Log("testing exact precision of value")
 	res := f.Approx(4)
@@ -176,7 +175,7 @@ func TestFraction_Approx(t *testing.T) {
 	}
 
 	t.Log("testing integer fraction")
-	f = *intToFraction(357)
+	f = intToFraction(357)
 	res = f.Approx(10)
 	expected = "357"
 	if res != expected {

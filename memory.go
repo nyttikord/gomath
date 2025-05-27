@@ -34,7 +34,7 @@ func init() {
 	createMathFunction := func(def space, mathFunc func(float64) float64) *mathFunction {
 		var rel relation
 		rel = func(f *fraction) *fraction {
-			x := f.Float()
+			x, _ := f.Float()
 			result, err := floatToFraction(mathFunc(x))
 			if err != nil {
 				panic(err)
@@ -81,7 +81,7 @@ func init() {
 	addFunc("tan", createMathFunction(tanDef, math.Tan))
 	addFunc("ln", createMathFunction(&realInterval{
 		LowerBound: &intervalBound{
-			Value:        NullFraction,
+			Value:        nullFraction,
 			IncludeValue: false,
 			Infinite:     false,
 		},
@@ -93,7 +93,7 @@ func init() {
 	}, math.Log))
 	addFunc("log2", createMathFunction(&realInterval{
 		LowerBound: &intervalBound{
-			Value:        NullFraction,
+			Value:        nullFraction,
 			IncludeValue: false,
 			Infinite:     false,
 		},
@@ -106,7 +106,7 @@ func init() {
 
 	log10 := createMathFunction(&realInterval{
 		LowerBound: &intervalBound{
-			Value:        NullFraction,
+			Value:        nullFraction,
 			IncludeValue: false,
 			Infinite:     false,
 		},

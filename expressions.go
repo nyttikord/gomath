@@ -81,7 +81,7 @@ func (b *binaryOperation) Eval() (*fraction, error) {
 	case "/":
 		return lf.Div(lr)
 	case "^":
-		return lf.Pow(lr)
+		return lf.Exp(lr)
 	default:
 		return nil, errors.Join(ErrUnknownOperation, errors.New("operation "+string(b.Operator)+" is not supported"))
 	}

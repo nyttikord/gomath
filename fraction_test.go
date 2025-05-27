@@ -6,6 +6,7 @@ import (
 )
 
 func TestFraction_Is(t *testing.T) {
+	t.Log("testing simple is")
 	f := newFraction(3, 4)
 	if !f.Is(f) {
 		t.Errorf("%s is not %s", f, f)
@@ -18,25 +19,16 @@ func TestFraction_Is(t *testing.T) {
 	if f.Is(b) {
 		t.Errorf("%s is %s", f, b)
 	}
-}
-
-func TestFraction_Simplify(t *testing.T) {
-	t.Log("testing positive denominator")
-	f := newFraction(6, 8).Simplify()
-	expected := newFraction(3, 4)
-	if !f.Is(expected) {
-		t.Errorf("got %s; want %s", f, expected)
-	}
 
 	t.Log("testing negative denominator")
-	f = newFraction(6, -5).Simplify()
-	expected = newFraction(-6, 5)
+	f = newFraction(6, -5)
+	expected := newFraction(-6, 5)
 	if !f.Is(expected) {
 		t.Errorf("got %s; want %s", f, expected)
 	}
 
 	t.Log("testing double negative fraction")
-	f = newFraction(-6, -5).Simplify()
+	f = newFraction(-6, -5)
 	expected = newFraction(6, 5)
 	if !f.Is(expected) {
 		t.Errorf("got %s; want %s", f, expected)
@@ -90,7 +82,7 @@ func TestFraction_Add(t *testing.T) {
 	b := newFraction(8, 3)
 	expected := newFraction(7, 2)
 	res := a.Add(b)
-	if res.Is(expected) {
+	if !res.Is(expected) {
 		t.Errorf("got %s; want %s", res.String(), expected.String())
 	}
 }
@@ -100,7 +92,7 @@ func TestFraction_Sub(t *testing.T) {
 	b := newFraction(8, 3)
 	expected := newFraction(-11, 6)
 	res := a.Sub(b)
-	if res.Is(expected) {
+	if !res.Is(expected) {
 		t.Errorf("got %s; want %s", res.String(), expected.String())
 	}
 }
@@ -119,7 +111,7 @@ func TestFraction_Neg(t *testing.T) {
 	f := newFraction(5, 6)
 	expected := newFraction(-5, 6)
 	res := f.Neg()
-	if res.Is(expected) {
+	if !res.Is(expected) {
 		t.Errorf("got %s; want %s", res.String(), expected.String())
 	}
 }
@@ -154,7 +146,7 @@ func TestFraction_Inv(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if res.Is(expected) {
+	if !res.Is(expected) {
 		t.Errorf("got %s; want %s", res.String(), expected.String())
 	}
 

@@ -66,27 +66,18 @@ func (f fraction) Approx(precision int) string {
 	return f.Rat.FloatString(precision)
 }
 
-// Simplify the fraction
-func (f fraction) Simplify() *fraction {
-	divisor := big.NewInt(0)
-	divisor.GCD(oneBigInt, oneBigInt, f.Num(), f.Denom())
-	if divisor.Cmp(nullBigInt) == 0 {
-		return &f
-	}
-	f.Num().Div(f.Num(), divisor)
-	f.Denom().Div(f.Denom(), divisor)
+func (f fraction) Copy() *fraction {
 	return &f
 }
 
 func (f fraction) SmallerOrEqualThan(b *fraction) bool {
-	a := f.Simplify()
-	b = b.Simplify()
+	b = b.Copy()
 
-	// With the Simplify call, both denominators are positive
-	a.Num().Mul(a.Num(), b.Denom())
-	b.Num().Mul(b.Num(), a.Denom())
+	// fractions are always simplified
+	f.Num().Mul(f.Num(), b.Denom())
+	b.Num().Mul(b.Num(), f.Denom())
 
-	return a.Num().Cmp(b.Num()) <= 0
+	return f.Num().Cmp(b.Num()) <= 0
 }
 
 func (f fraction) SmallerThan(b *fraction) bool {
@@ -104,12 +95,12 @@ func (f fraction) GreaterThan(b *fraction) bool {
 // Add a fraction
 func (f fraction) Add(a *fraction) *fraction {
 	f.Rat.Add(f.Rat, a.Rat)
-	return f.Simplify()
+	return &f
 }
 
 func (f fraction) Neg() *fraction {
 	f.Num().Mul(f.Num(), big.NewInt(-1))
-	return f.Simplify()
+	return &f
 }
 
 // Sub (subtract) a fraction
@@ -120,7 +111,7 @@ func (f fraction) Sub(a *fraction) *fraction {
 // Mul (multiply) by fraction
 func (f fraction) Mul(a *fraction) *fraction {
 	f.Rat.Mul(f.Rat, a.Rat)
-	return f.Simplify()
+	return &f
 }
 
 // Inv (invert) the fraction
@@ -129,7 +120,7 @@ func (f fraction) Inv() (*fraction, error) {
 		return &f, errors.Join(ErrIllegalOperation, errors.New("cannot invert a null fraction"))
 	}
 	f.Rat.Inv(f.Rat)
-	return f.Simplify(), nil
+	return &f, nil
 }
 
 // Div (divide) by a fraction
@@ -139,7 +130,7 @@ func (f fraction) Div(a *fraction) (*fraction, error) {
 		return &f, errors.Join(err, errors.New("cannot divide by a null fraction"))
 	}
 	mul := f.Mul(invA)
-	return mul.Simplify(), nil
+	return mul, nil
 }
 
 // IsInt returns true if the fraction is an int
@@ -175,7 +166,7 @@ func (f fraction) Exp(a *fraction) (*fraction, error) {
 		}
 		f.Num().Exp(f.Num(), n, nil)
 		f.Denom().Exp(f.Denom(), n, nil)
-		return f.Simplify(), nil
+		return &f, nil
 	}
 	//afl, _ := a.Float()
 	//nf, err := floatToFraction(math.Pow(float64(f.Num().P), afl))

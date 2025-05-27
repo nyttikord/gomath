@@ -135,11 +135,14 @@ func (f fraction) Add(a *fraction) *fraction {
 	return f.Simplify()
 }
 
+func (f fraction) Neg() *fraction {
+	f.Numerator *= -1
+	return f.Simplify()
+}
+
 // Sub (subtract) a fraction
 func (f fraction) Sub(a *fraction) *fraction {
-	f.Numerator = f.Numerator*a.Denominator - a.Numerator*f.Denominator
-	f.Denominator = f.Denominator * a.Denominator
-	return f.Simplify()
+	return f.Add(a.Neg())
 }
 
 // Mul (multiply) by fraction

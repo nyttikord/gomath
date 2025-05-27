@@ -128,7 +128,7 @@ func (set *periodicInterval) String() string {
 	return set.Interval.String() + " mod " + set.Period.String()
 }
 
-func (f fraction) smallerThanBound(b *intervalBound) bool {
+func (f *fraction) smallerThanBound(b *intervalBound) bool {
 	if b.Infinite {
 		return b.Positive
 	}
@@ -138,7 +138,7 @@ func (f fraction) smallerThanBound(b *intervalBound) bool {
 	return f.SmallerThan(b.Value)
 }
 
-func (f fraction) greaterThanBound(b *intervalBound) bool {
+func (f *fraction) greaterThanBound(b *intervalBound) bool {
 	if b.Infinite {
 		return !b.Positive
 	}
@@ -148,14 +148,14 @@ func (f fraction) greaterThanBound(b *intervalBound) bool {
 	return f.GreaterThan(b.Value)
 }
 
-func (f fraction) strictlySmallerThanBound(b *intervalBound) bool {
+func (f *fraction) strictlySmallerThanBound(b *intervalBound) bool {
 	if b.Infinite {
 		return b.Infinite
 	}
 	return f.SmallerThan(b.Value)
 }
 
-func (f fraction) strictlyGreaterThanBound(b *intervalBound) bool {
+func (f *fraction) strictlyGreaterThanBound(b *intervalBound) bool {
 	if b.Infinite {
 		return !b.Positive
 	}

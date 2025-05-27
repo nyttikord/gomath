@@ -3,6 +3,7 @@ package gomath
 import (
 	"errors"
 	"fmt"
+	"math/big"
 	"strings"
 )
 
@@ -174,18 +175,37 @@ func (b *unaryOperation) Eval() (*fraction, error) {
 		return lb, nil
 	case "-":
 		return lb.Mul(intToFraction(-1)), nil
+	case "!":
+		var i *big.Int
+		if i, err = lb.Int(); err != nil || i.Cmp(nullBigInt) < 0 {
+			return nil, errors.Join(ErrNumberNotInSpace, errors.New("operation "+string(b.Operator)+" is not supported for non positive integer"))
+		}
+		if !i.IsInt64() {
+			return nil, errors.Join(ErrInvalidExpression, fmt.Errorf("number %s is too big", i))
+		}
+		ii := i.Int64()
+		res := ii
+		ii--
+		for ii > 1 {
+			res *= ii
+			ii--
+		}
+		return intToFraction(res), nil
 	default:
 		return nil, errors.Join(ErrUnknownOperation, errors.New("operation "+string(b.Operator)+" is not supported"))
 	}
 }
 
 func (b *unaryOperation) RenderLatex() (string, priority, error) {
-	s, _, err := b.Expression.RenderLatex()
+	s, p, err := b.Expression.RenderLatex()
 	if err != nil {
 		return "", unaryPriority, err
 	}
-	if len(s) > 1 {
+	if strings.Contains(s, " ") && p < unaryPriority {
 		s = `\left(` + s + `\left)`
+	}
+	if b.Operator == "!" {
+		return fmt.Sprintf("%s!", s), unaryPriority, nil
 	}
 	return fmt.Sprintf("%s%s", b.Operator, s), unaryPriority, nil
 }

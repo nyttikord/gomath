@@ -90,7 +90,18 @@ func factorExpression(l []*lexer, i *int) (expression, error) {
 }
 
 func expExpression(l []*lexer, i *int) (expression, error) {
-	return binExpression(expOperators, literalExpression)(l, i)
+	res, err := binExpression(expOperators, literalExpression)(l, i)
+	if err != nil {
+		return nil, err
+	}
+	if *i == len(l) {
+		return res, nil
+	}
+	if l[*i].Type != Operator || l[*i].Value != "!" {
+		return res, nil
+	}
+	*i++
+	return &unaryOperation{"!", res}, nil
 }
 
 func binExpression(ops []operator, sub expressionFunc) expressionFunc {

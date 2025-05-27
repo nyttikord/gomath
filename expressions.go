@@ -146,8 +146,8 @@ func (b *binaryOperation) RenderLatex() (string, priority, error) {
 	case "/":
 		return fmt.Sprintf(`\frac{%s}{%s}`, lf, lr), factorPriority, nil
 	case "^":
-		s := ""
-		if strings.Contains(lf, " ") {
+		var s string
+		if strings.Contains(lf, " ") && lfp < expPriority {
 			s += `\left(` + lf + `\right)`
 		} else {
 			s += lf
@@ -185,7 +185,7 @@ func (b *unaryOperation) RenderLatex() (string, priority, error) {
 		return "", unaryPriority, err
 	}
 	if len(s) > 1 {
-		s = "(" + s + ")"
+		s = `\left(` + s + `\left)`
 	}
 	return fmt.Sprintf("%s%s", b.Operator, s), unaryPriority, nil
 }

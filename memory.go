@@ -32,7 +32,8 @@ func init() {
 		predefinedFunctions[n] = f
 	}
 	createMathFunction := func(def space, mathFunc func(float64) float64) *mathFunction {
-		rel := func(f *fraction) *fraction {
+		var rel relation
+		rel = func(f *fraction) *fraction {
 			x := f.Float()
 			result, err := floatToFraction(mathFunc(x))
 			if err != nil {
@@ -43,7 +44,7 @@ func init() {
 
 		return &mathFunction{
 			Definition: def,
-			Relation:   (*relation)(&rel),
+			Relation:   &rel,
 		}
 	}
 

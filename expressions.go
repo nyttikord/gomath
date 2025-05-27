@@ -118,6 +118,12 @@ func (b *binaryOperation) RenderLatex() (string, error) {
 	case "-":
 		return fmt.Sprintf("%s - %s", lf, lr), nil
 	case "*":
+		if strings.Contains(lf, " ") {
+			lf = `\left(` + lf + `\right)`
+		}
+		if strings.Contains(lr, " ") {
+			lr = `\left(` + lr + `\right)`
+		}
 		return fmt.Sprintf(`%s \times %s`, lf, lr), nil
 	case "/":
 		return fmt.Sprintf(`\frac{%s}{%s}`, lf, lr), nil

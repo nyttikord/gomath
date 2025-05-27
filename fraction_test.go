@@ -5,6 +5,21 @@ import (
 	"testing"
 )
 
+func TestFraction_Is(t *testing.T) {
+	f := newFraction(3, 4)
+	if !f.Is(f) {
+		t.Errorf("%s is not %s", f, f)
+	}
+	a := newFraction(6, 8)
+	if !f.Is(a) {
+		t.Errorf("%s is not %s", f, a)
+	}
+	b := newFraction(9, 8)
+	if f.Is(b) {
+		t.Errorf("%s is %s", f, b)
+	}
+}
+
 func TestFraction_Simplify(t *testing.T) {
 	t.Log("testing positive denominator")
 	f := newFraction(6, 8).Simplify()

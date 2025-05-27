@@ -10,12 +10,12 @@ $ go get -u github.com/nyttikord/gomath@latest
 ```
 You can replace `latest` with any valid tags.
 
-To parse an expression, use `gomath.Parse(string, *gomath.Options) (string, error)`.
+To parse an expression, use `gomath.ParseAndCalculate(string, *gomath.Options) (string, error)`.
 The string is a valid expression, like `1+2` or `2(1/3+4)^5`.
 It returns the result of the expression in a string according to the given options.
 
 ```go
-res, err := gomath.Parse("1+2", &gomath.Options{})
+res, err := gomath.ParseAndCalculate("1+2", &gomath.Options{})
 err == nil // true
 res == "3" // true
 ```

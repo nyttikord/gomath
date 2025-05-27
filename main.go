@@ -1,12 +1,16 @@
 package gomath
 
-// Parse an expression with given Options
-func Parse(expression string, opt *Options) (string, error) {
+// ParseAndCalculate an expression with given Options
+func ParseAndCalculate(expression string, opt *Options) (string, error) {
+	return parseAndEval(expression, opt, astTypeCalculation)
+}
+
+func parseAndEval(expression string, opt *Options, tpe astType) (string, error) {
 	lexed, err := lex(expression)
 	if err != nil {
 		return "", err
 	}
-	p, err := astParse(lexed, astTypeCalculation)
+	p, err := astParse(lexed, tpe)
 	if err != nil {
 		return "", err
 	}

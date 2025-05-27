@@ -30,7 +30,7 @@ type latexStatement struct {
 }
 
 func (l *latexStatement) Eval(opt *Options) (string, error) {
-	s, err := l.Expression.RenderLatex()
+	s, _, err := l.Expression.RenderLatex()
 	if err != nil {
 		return "", err
 	}

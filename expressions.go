@@ -19,11 +19,21 @@ type expression interface {
 	// Eval the expression
 	Eval() (*fraction, error)
 	// RenderLatex the expression
-	RenderLatex() (string, error)
+	RenderLatex() (string, priority, error)
 }
 
 type operator string
 type separator string
+
+type priority uint8
+
+const (
+	termPriority    priority = 0
+	factorPriority  priority = 1
+	expPriority     priority = 2
+	unaryPriority   priority = 3
+	literalPriority priority = 4
+)
 
 type binaryOperation struct {
 	Operator    operator
@@ -91,42 +101,50 @@ func (b *binaryOperation) Eval() (*fraction, error) {
 	}
 }
 
-func (b *binaryOperation) RenderLatex() (string, error) {
+func (b *binaryOperation) RenderLatex() (string, priority, error) {
 	chanLf := make(chan string)
 	chanLr := make(chan string)
+	chanLfp := make(chan priority)
+	chanLrp := make(chan priority)
 	go func() {
-		lf, err := b.Left.RenderLatex()
+		lf, p, err := b.Left.RenderLatex()
 		chanLf <- lf
+		chanLfp <- p
 		if err != nil {
 			panic(err)
 		}
 	}()
 	go func() {
-		lr, err := b.Right.RenderLatex()
+		lr, p, err := b.Right.RenderLatex()
 		chanLr <- lr
+		chanLrp <- p
 		if err != nil {
 			panic(err)
 		}
 	}()
 	lf := <-chanLf
 	lr := <-chanLr
+	lfp := <-chanLfp
+	lrp := <-chanLrp
 	close(chanLf)
 	close(chanLr)
+	close(chanLfp)
+	close(chanLrp)
 	switch b.Operator {
 	case "+":
-		return fmt.Sprintf("%s + %s", lf, lr), nil
+		return fmt.Sprintf("%s + %s", lf, lr), termPriority, nil
 	case "-":
-		return fmt.Sprintf("%s - %s", lf, lr), nil
+		return fmt.Sprintf("%s - %s", lf, lr), termPriority, nil
 	case "*":
-		if strings.Contains(lf, " ") {
+		if strings.Contains(lf, " ") && lfp < factorPriority {
 			lf = `\left(` + lf + `\right)`
 		}
-		if strings.Contains(lr, " ") {
+		if strings.Contains(lr, " ") && lrp < factorPriority {
 			lr = `\left(` + lr + `\right)`
 		}
-		return fmt.Sprintf(`%s \times %s`, lf, lr), nil
+		return fmt.Sprintf(`%s \times %s`, lf, lr), factorPriority, nil
 	case "/":
-		return fmt.Sprintf(`\frac{%s}{%s}`, lf, lr), nil
+		return fmt.Sprintf(`\frac{%s}{%s}`, lf, lr), factorPriority, nil
 	case "^":
 		s := ""
 		if strings.Contains(lf, " ") {
@@ -140,9 +158,9 @@ func (b *binaryOperation) RenderLatex() (string, error) {
 		} else {
 			s += lr
 		}
-		return s, nil
+		return s, expPriority, nil
 	default:
-		return "", errors.Join(ErrUnknownOperation, errors.New("operation "+string(b.Operator)+" is not supported"))
+		return "", 0, errors.Join(ErrUnknownOperation, errors.New("operation "+string(b.Operator)+" is not supported"))
 	}
 }
 
@@ -161,23 +179,23 @@ func (b *unaryOperation) Eval() (*fraction, error) {
 	}
 }
 
-func (b *unaryOperation) RenderLatex() (string, error) {
-	s, err := b.Expression.RenderLatex()
+func (b *unaryOperation) RenderLatex() (string, priority, error) {
+	s, _, err := b.Expression.RenderLatex()
 	if err != nil {
-		return "", err
+		return "", unaryPriority, err
 	}
 	if len(s) > 1 {
 		s = "(" + s + ")"
 	}
-	return fmt.Sprintf("%s%s", b.Operator, s), nil
+	return fmt.Sprintf("%s%s", b.Operator, s), unaryPriority, nil
 }
 
 func (l *literalExp) Eval() (*fraction, error) {
 	return l.Value, nil
 }
 
-func (l *literalExp) RenderLatex() (string, error) {
-	return l.Value.String(), nil
+func (l *literalExp) RenderLatex() (string, priority, error) {
+	return l.Value.String(), literalPriority, nil
 }
 
 func (v *predefinedVariable) Eval() (*fraction, error) {
@@ -188,15 +206,15 @@ func (v *predefinedVariable) Eval() (*fraction, error) {
 	return val.Val, nil
 }
 
-func (v *predefinedVariable) RenderLatex() (string, error) {
+func (v *predefinedVariable) RenderLatex() (string, priority, error) {
 	_, ok := predefinedVariables[v.ID]
 	if !ok {
-		return "", errors.Join(ErrUnknownVariable(v.ID), fmt.Errorf("undefined variable %s", v.ID))
+		return "", literalPriority, errors.Join(ErrUnknownVariable(v.ID), fmt.Errorf("undefined variable %s", v.ID))
 	}
 	if v.OmitSlash {
-		return v.ID, nil
+		return v.ID, literalPriority, nil
 	}
-	return `\` + v.ID, nil
+	return `\` + v.ID, literalPriority, nil
 }
 
 func (f *predefinedFunction) Eval() (*fraction, error) {
@@ -211,16 +229,16 @@ func (f *predefinedFunction) Eval() (*fraction, error) {
 	return fn.Eval(val)
 }
 
-func (f *predefinedFunction) RenderLatex() (string, error) {
+func (f *predefinedFunction) RenderLatex() (string, priority, error) {
 	_, ok := predefinedFunctions[f.ID]
 	if !ok {
-		return "", errors.Join(ErrUnknownVariable(f.ID), fmt.Errorf("undefined variable %s", f.ID))
+		return "", literalPriority, errors.Join(ErrUnknownVariable(f.ID), fmt.Errorf("undefined variable %s", f.ID))
 	}
-	val, err := f.exp.RenderLatex()
+	val, _, err := f.exp.RenderLatex()
 	if err != nil {
-		return "", err
+		return "", literalPriority, err
 	}
-	return fmt.Sprintf(`\%s\left(%s\right)`, f.ID, val), nil
+	return fmt.Sprintf(`\%s\left(%s\right)`, f.ID, val), literalPriority, nil
 }
 
 func (r *relation) Eval(f *fraction) *fraction {

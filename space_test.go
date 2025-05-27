@@ -19,10 +19,10 @@ func TestRealInterval_Contains(t *testing.T) {
 	}
 
 	if !set.Contains(nullFraction()) {
-		t.Fatalf("0 should be in [-1, 1]")
+		t.Errorf("0 should be in [-1, 1]")
 	}
 	if !set.Contains(oneFraction()) {
-		t.Fatalf("1 should be in [-1, 1]")
+		t.Errorf("1 should be in [-1, 1]")
 	}
 
 	t.Log("testing exclusive bounds")
@@ -40,10 +40,10 @@ func TestRealInterval_Contains(t *testing.T) {
 		CustomName: "",
 	}
 	if !set.Contains(nullFraction()) {
-		t.Fatalf("0 should be in ]-1, 1[")
+		t.Errorf("0 should be in ]-1, 1[")
 	}
 	if set.Contains(oneFraction()) {
-		t.Fatalf("1 should not be in ]-1, 1[")
+		t.Errorf("1 should not be in ]-1, 1[")
 	}
 
 	t.Log("testing infinite bounds")
@@ -60,12 +60,12 @@ func TestRealInterval_Contains(t *testing.T) {
 		CustomName: "",
 	}
 	if set.Contains(nullFraction()) {
-		t.Fatalf("0 should not be in [1, +inf[")
+		t.Errorf("0 should not be in [1, +inf[")
 	}
 	if !set.Contains(oneFraction()) {
-		t.Fatalf("1 should be in [1, +inf[")
+		t.Errorf("1 should be in [1, +inf[")
 	}
 	if !set.Contains(intToFraction(2)) {
-		t.Fatalf("2 should be in [1, +inf[")
+		t.Errorf("2 should be in [1, +inf[")
 	}
 }

@@ -14,7 +14,7 @@ func TestMathFunction_Exp(t *testing.T) {
 		t.Fatal(err)
 	}
 	if res != expected {
-		t.Fatalf("got %v; want %v", res, expected)
+		t.Errorf("got %v; want %v", res, expected)
 	}
 }
 
@@ -25,7 +25,7 @@ func TestMathFunction_Cos(t *testing.T) {
 		t.Fatal(err)
 	}
 	if res != expected {
-		t.Fatalf("got %v; want %v", res, expected)
+		t.Errorf("got %v; want %v", res, expected)
 	}
 }
 
@@ -36,7 +36,7 @@ func TestMathFunction_Sin(t *testing.T) {
 		t.Fatal(err)
 	}
 	if res != expected {
-		t.Fatalf("got %v; want %v", res, expected)
+		t.Errorf("got %v; want %v", res, expected)
 	}
 }
 
@@ -47,6 +47,6 @@ func TestMathFunction_Tan(t *testing.T) {
 		t.Fatal(err)
 	}
 	if res != expected {
-		t.Fatalf("got %v; want %v", res, expected)
+		t.Errorf("got %v; want %v", res, expected)
 	}
 }

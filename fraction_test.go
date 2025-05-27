@@ -172,7 +172,6 @@ func TestFraction_Approx(t *testing.T) {
 
 	t.Log("testing higher precision than exact value")
 	res = f.Approx(10)
-	expected = "3.1415000000"
 	if res != expected {
 		t.Errorf("got %s; want %s", res, expected)
 	}

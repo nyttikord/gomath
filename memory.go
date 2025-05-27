@@ -61,15 +61,10 @@ func init() {
 	if err != nil {
 		panic(err)
 	}
-	pi, _ = floatToFraction(math.Pi)
-	negPiOverTwo, err := pi.Div(intToFraction(-2))
-	if err != nil {
-		panic(err)
-	}
 	tanDef := &periodicInterval{
 		Interval: &realInterval{
 			LowerBound: &intervalBound{
-				Value:        negPiOverTwo,
+				Value:        piOverTwo.Neg(),
 				IncludeValue: false,
 				Infinite:     false,
 			},
@@ -86,7 +81,7 @@ func init() {
 	addFunc("tan", createMathFunction(tanDef, math.Tan))
 	addFunc("ln", createMathFunction(&realInterval{
 		LowerBound: &intervalBound{
-			Value:        nullFraction(),
+			Value:        nullFraction,
 			IncludeValue: false,
 			Infinite:     false,
 		},
@@ -98,7 +93,7 @@ func init() {
 	}, math.Log))
 	addFunc("log2", createMathFunction(&realInterval{
 		LowerBound: &intervalBound{
-			Value:        nullFraction(),
+			Value:        nullFraction,
 			IncludeValue: false,
 			Infinite:     false,
 		},
@@ -111,7 +106,7 @@ func init() {
 
 	log10 := createMathFunction(&realInterval{
 		LowerBound: &intervalBound{
-			Value:        nullFraction(),
+			Value:        nullFraction,
 			IncludeValue: false,
 			Infinite:     false,
 		},

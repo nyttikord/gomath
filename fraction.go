@@ -62,7 +62,11 @@ func (f *fraction) Approx(precision int) string {
 		n, _ := f.Int()
 		return fmt.Sprintf("%d", n)
 	}
-	return f.Rat.FloatString(precision)
+	s := strings.TrimSuffix(f.Rat.FloatString(precision), "0")
+	for strings.HasSuffix(s, "0") {
+		s = strings.TrimSuffix(s, "0")
+	}
+	return s
 }
 
 func (f *fraction) SmallerOrEqualThan(b *fraction) bool {

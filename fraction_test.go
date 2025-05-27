@@ -10,21 +10,21 @@ func TestFraction_Simplify(t *testing.T) {
 	f := newFraction(6, 8).Simplify()
 	expected := newFraction(3, 4)
 	if !f.Is(expected) {
-		t.Errorf("got %s; want %s", f.String(), expected.String())
+		t.Errorf("got %s; want %s", f, expected)
 	}
 
 	t.Log("testing negative denominator")
 	f = newFraction(6, -5).Simplify()
 	expected = newFraction(-6, 5)
 	if !f.Is(expected) {
-		t.Errorf("got %s; want %s", f.String(), expected.String())
+		t.Errorf("got %s; want %s", f, expected)
 	}
 
 	t.Log("testing double negative fraction")
 	f = newFraction(-6, -5).Simplify()
 	expected = newFraction(6, 5)
 	if !f.Is(expected) {
-		t.Errorf("got %s; want %s", f.String(), expected.String())
+		t.Errorf("got %s; want %s", f, expected)
 	}
 }
 
@@ -95,7 +95,7 @@ func TestFraction_Mul(t *testing.T) {
 	b := newFraction(8, 3)
 	expected := newFraction(20, 9)
 	res := a.Mul(b)
-	if res.Is(expected) {
+	if !res.Is(expected) {
 		t.Errorf("got %s; want %s", res.String(), expected.String())
 	}
 }
@@ -118,7 +118,7 @@ func TestFraction_Div(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if res.Is(expected) {
+	if !res.Is(expected) {
 		t.Errorf("got %s; want %s", res.String(), expected.String())
 	}
 
@@ -163,6 +163,7 @@ func TestFraction_Approx(t *testing.T) {
 
 	t.Log("testing higher precision than exact value")
 	res = f.Approx(10)
+	expected = "3.1415000000"
 	if res != expected {
 		t.Errorf("got %s; want %s", res, expected)
 	}

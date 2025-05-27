@@ -64,10 +64,16 @@ func (f fraction) String() string {
 }
 
 func (f fraction) Is(a *fraction) bool {
-	return f == *a
+	pf := f.Simplify()
+	a = a.Simplify()
+	return pf.Rat.Num().Cmp(a.Rat.Num()) == 0 && pf.Denom().Cmp(a.Denom()) == 0
 }
 
 func (f fraction) Approx(precision int) string {
+	if f.IsInt() {
+		n, _ := f.Int()
+		return fmt.Sprintf("%d", n)
+	}
 	return f.Rat.FloatString(precision)
 }
 
@@ -153,12 +159,12 @@ func (f fraction) IsInt() bool {
 
 // Int convers the fraction to an int.
 // Returns ErrFractionNotInt if the fraction isn't an int (check before with fraction.IsInt)
-func (f fraction) Int() (int64, error) {
+func (f fraction) Int() (*big.Int, error) {
 	if !f.IsInt() {
-		return 0, errors.Join(ErrFractionNotInt, errors.New(f.String()+" is not an int"))
+		return nullBigInt, errors.Join(ErrFractionNotInt, errors.New(f.String()+" is not an int"))
 	}
 	r := big.Int{}
-	return r.Div(f.Num(), f.Denom()).Int64(), nil
+	return r.Div(f.Num(), f.Denom()), nil
 }
 
 // Float converts the fraction to a float
@@ -172,13 +178,13 @@ func (f fraction) Exp(a *fraction) (*fraction, error) {
 		n, _ := a.Int()
 		fl, _ := f.Float()
 		if fl == 0 {
-			if n == 0 {
+			if n.Cmp(nullBigInt) == 0 {
 				return oneFraction, nil
 			}
 			return nullFraction, nil
 		}
-		f.Num().Exp(f.Num(), big.NewInt(n), nil)
-		f.Denom().Exp(f.Denom(), big.NewInt(n), nil)
+		f.Num().Exp(f.Num(), n, nil)
+		f.Denom().Exp(f.Denom(), n, nil)
 		return f.Simplify(), nil
 	}
 	//afl, _ := a.Float()

@@ -61,10 +61,15 @@ func init() {
 	if err != nil {
 		panic(err)
 	}
+	pi, _ = floatToFraction(math.Pi)
+	negPiOverTwo, err := pi.Div(intToFraction(-2))
+	if err != nil {
+		panic(err)
+	}
 	tanDef := &periodicInterval{
 		Interval: &realInterval{
 			LowerBound: &intervalBound{
-				Value:        piOverTwo.Neg(),
+				Value:        negPiOverTwo,
 				IncludeValue: false,
 				Infinite:     false,
 			},

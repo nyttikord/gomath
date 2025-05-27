@@ -115,9 +115,9 @@ func TestEvalLatex(t *testing.T) {
 	genericTestRenderLatex(t, "cos(2*pi)", `\cos\left(2 \times \pi\right)`)
 	genericTestRenderLatex(t, "e^(5+2)", `e^{5 + 2}`)
 	genericTestRenderLatex(t, "e^5", `e^5`)
-	genericTestRenderLatex(t, "(1+2)^5", `(1 + 2)^5`)
-	genericTestRenderLatex(t, "5*(1+2)^5", `5 \times (1 + 2)^5`)
-	genericTestRenderLatex(t, "5(1+2)^5", `5 \times (1 + 2)^5`)
+	genericTestRenderLatex(t, "(1+2)^5", `\left(1 + 2\right)^5`)
+	genericTestRenderLatex(t, "5*(1+2)^5", `5 \times \left(1 + 2\right)^5`)
+	genericTestRenderLatex(t, "5(1+2)^5", `5 \times \left(1 + 2\right)^5`)
 	genericTestRenderLatex(t, "(1+2/3)/2", `\frac{1 + \frac{2}{3}}{2}`)
 	genericTestRenderLatex(t, "2*(1+2)", `2 \times \left(1 + 2\right)`)
 }

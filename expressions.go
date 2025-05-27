@@ -148,7 +148,7 @@ func (b *binaryOperation) RenderLatex() (string, priority, error) {
 	case "^":
 		s := ""
 		if strings.Contains(lf, " ") {
-			s += "(" + lf + ")"
+			s += `\left(` + lf + `\right)`
 		} else {
 			s += lf
 		}

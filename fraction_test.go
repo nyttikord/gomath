@@ -132,8 +132,8 @@ func TestFraction_Div(t *testing.T) {
 	}
 
 	t.Log("testing division by null fraction")
-	a = oneFraction
-	b = nullFraction
+	a = oneFraction()
+	b = nullFraction()
 	_, err = a.Div(b)
 	if !errors.Is(err, ErrIllegalOperation) {
 		t.Errorf("expected illegal operation error, not %s", err)
@@ -153,7 +153,7 @@ func TestFraction_Inv(t *testing.T) {
 	}
 
 	t.Log("testing invert a null fraction")
-	a = nullFraction
+	a = nullFraction()
 	_, err = a.Inv()
 	if !errors.Is(err, ErrIllegalOperation) {
 		t.Errorf("expected illegal operation error, not %s", err)

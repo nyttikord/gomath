@@ -14,9 +14,8 @@ type fraction struct {
 }
 
 var (
-	nullFraction = newFraction(0, 1)
-	oneFraction  = newFraction(1, 1)
-	nullBigInt   = big.NewInt(0)
+	// nullFraction MUST NOT BE MODIFIED
+	nullBigInt = big.NewInt(0)
 
 	// ErrFractionNotInt is thrown when a non-integer fraction is converted into an int
 	ErrFractionNotInt = errors.New("fraction is not an int")
@@ -28,6 +27,14 @@ var (
 
 func newFraction(a, b int64) *fraction {
 	return &fraction{big.NewRat(a, b)}
+}
+
+func oneFraction() *fraction {
+	return intToFraction(1)
+}
+
+func nullFraction() *fraction {
+	return intToFraction(0)
 }
 
 // intToFraction converts an int64 into a fraction
@@ -159,9 +166,9 @@ func (f *fraction) Exp(a *fraction) (*fraction, error) {
 		fl, _ := f.Float()
 		if fl == 0 {
 			if n.Cmp(nullBigInt) == 0 {
-				return oneFraction, nil
+				return oneFraction(), nil
 			}
-			return nullFraction, nil
+			return nullFraction(), nil
 		}
 		f.Num().Exp(f.Num(), n, nil)
 		f.Denom().Exp(f.Denom(), n, nil)

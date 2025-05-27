@@ -17,6 +17,7 @@ var (
 	nullBigInt   = big.NewInt(0)
 	oneFraction  = intToFraction(1)
 	nullFraction = intToFraction(0)
+	pi           *fraction
 
 	// ErrFractionNotInt is thrown when a non-integer fraction is converted into an int
 	ErrFractionNotInt = errors.New("fraction is not an int")
@@ -25,6 +26,14 @@ var (
 	// ErrUnsupportedOperation is thrown when an unsupported operation is performed
 	ErrUnsupportedOperation = errors.New("unsupported operation")
 )
+
+func init() {
+	var err error
+	pi, err = floatToFraction(math.Pi)
+	if err != nil {
+		panic(err)
+	}
+}
 
 func newFraction(a, b int64) *fraction {
 	return &fraction{big.NewRat(a, b)}

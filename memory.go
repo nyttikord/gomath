@@ -24,7 +24,7 @@ func init() {
 		}
 		predefinedVariables[n] = f
 	}
-	addVar("pi", math.Pi)
+	predefinedVariables["pi"] = pi
 	addVar("e", math.E)
 	addVar("phi", math.Phi)
 
@@ -53,10 +53,6 @@ func init() {
 	addFunc("sin", createMathFunction(&realSet{}, math.Sin))
 	addFunc("cos", createMathFunction(&realSet{}, math.Cos))
 
-	pi, err := floatToFraction(math.Pi)
-	if err != nil {
-		panic(err)
-	}
 	piOverTwo, err := pi.Div(intToFraction(2))
 	if err != nil {
 		panic(err)

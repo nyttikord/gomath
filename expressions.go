@@ -37,7 +37,6 @@ type unaryOperation struct {
 
 type literalExp struct {
 	Value *fraction
-	Name  string
 }
 
 type variable struct {
@@ -170,7 +169,7 @@ func (l *literalExp) Eval() (*fraction, error) {
 }
 
 func (l *literalExp) RenderLatex() (string, error) {
-	return l.Name, nil
+	return l.Value.String(), nil
 }
 
 func (v *predefinedVariable) Eval() (*fraction, error) {

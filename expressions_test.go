@@ -108,3 +108,33 @@ func genericTest(t *testing.T, exp string, excepted string) {
 		t.Log(tree)
 	}
 }
+
+func TestEvalLatex(t *testing.T) {
+	genericTestRenderLatex(t, "(1+2)/3", `\frac{1 + 2}{3}`)
+	genericTestRenderLatex(t, "3/(1+2)", `\frac{3}{1 + 2}`)
+	genericTestRenderLatex(t, "cos(2*pi)", `\cos\left(2 \times \pi\right)`)
+}
+
+func genericTestRenderLatex(t *testing.T, exp string, excepted string) {
+	lexr, err := lex(exp)
+	if err != nil {
+		t.Fatal(err)
+	}
+	tree, err := astParse(lexr, astTypeLatex)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if tree.Type != astTypeLatex {
+		t.Errorf("got type %d; want %d", tree.Type, astTypeLatex)
+	}
+	val, err := tree.Body.Eval(&Options{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if val != excepted {
+		t.Errorf("got %s; want %s", val, excepted)
+	}
+	if t.Failed() {
+		t.Log(tree)
+	}
+}

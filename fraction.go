@@ -17,6 +17,7 @@ var (
 	nullFraction = newFraction(0, 1)
 	oneFraction  = newFraction(1, 1)
 	nullBigInt   = big.NewInt(0)
+	oneBigInt    = big.NewInt(1)
 
 	// ErrFractionNotInt is thrown when a non-integer fraction is converted into an int
 	ErrFractionNotInt = errors.New("fraction is not an int")
@@ -49,24 +50,12 @@ func floatToFraction(f float64) (*fraction, error) {
 	return newFraction(i, int64(math.Pow(10, float64(len(sp[1]))))), nil
 }
 
-func gcd(a, b *big.Int) *big.Int {
-	for b.Cmp(nullBigInt) != 0 {
-		a, b = b, a.Mod(a, b)
-	}
-	return a
-}
-
 func (f fraction) String() string {
-	if f.Denom().Cmp(big.NewInt(1)) != 0 {
-		return f.Rat.String()
-	}
-	return f.Num().String()
+	return f.Rat.RatString()
 }
 
 func (f fraction) Is(a *fraction) bool {
-	pf := f.Simplify()
-	a = a.Simplify()
-	return pf.Rat.Num().Cmp(a.Rat.Num()) == 0 && pf.Denom().Cmp(a.Denom()) == 0
+	return f.Rat.Num().Cmp(a.Rat.Num()) == 0 && f.Denom().Cmp(a.Denom()) == 0
 }
 
 func (f fraction) Approx(precision int) string {
@@ -79,7 +68,8 @@ func (f fraction) Approx(precision int) string {
 
 // Simplify the fraction
 func (f fraction) Simplify() *fraction {
-	divisor := gcd(f.Num(), f.Denom())
+	divisor := big.NewInt(0)
+	divisor.GCD(oneBigInt, oneBigInt, f.Num(), f.Denom())
 	if divisor.Cmp(nullBigInt) == 0 {
 		return &f
 	}

@@ -10,7 +10,9 @@ $ go get -u github.com/nyttikord/gomath@latest
 ```
 You can replace `latest` with any valid tags.
 
-To parse an expression, use `gomath.ParseAndCalculate(string, *gomath.Options) (string, error)`.
+### Calculate
+
+To parse an expression and calculate it, use `gomath.ParseAndCalculate(string, *gomath.Options) (string, error)`.
 The string is a valid expression, like `1+2` or `2(1/3+4)^5`.
 It returns the result of the expression in a string according to the given options.
 
@@ -23,6 +25,18 @@ res == "3" // true
 You can modify the result's type with `gomath.Options`.
 Set `Decimal` to `true` if you want to have a decimal approximation.
 You can specify the number of digits with `Precision`.
+
+### Convert to LaTeX
+
+To parse an expression and convert it into $\LaTeX$, use `gomath.ParseAndConvertToLatex(string, *gomath.Options) (string, error)`.
+The string is a valid expression like `1+2` or `2(1/3+4)^5`.
+It returns the result of the expression in a string according to the given options.
+
+```go
+res, err := gomath.ParseAndConvertToLatex("(1+2/3)/2", &gomath.Options{})
+err == nil // true
+res == `\frac{1 + \frac{2}{3}}{2}` // true
+```
 
 ### Special case
 

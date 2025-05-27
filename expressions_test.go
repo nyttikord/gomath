@@ -118,6 +118,8 @@ func TestEvalLatex(t *testing.T) {
 	genericTestRenderLatex(t, "(1+2)^5", `(1 + 2)^5`)
 	genericTestRenderLatex(t, "5*(1+2)^5", `5 \times (1 + 2)^5`)
 	genericTestRenderLatex(t, "5(1+2)^5", `5 \times (1 + 2)^5`)
+	genericTestRenderLatex(t, "(1+2/3)/2", `\frac{1 + \frac{2}{3}}{2}`)
+	genericTestRenderLatex(t, "2*(1+2)", `2 \times (1 + 2)`)
 }
 
 func genericTestRenderLatex(t *testing.T, exp string, excepted string) {

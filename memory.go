@@ -12,21 +12,26 @@ var (
 )
 
 var (
-	predefinedVariables = map[string]*fraction{}
+	predefinedVariables = map[string]*savedVariable{}
 	predefinedFunctions = map[string]*mathFunction{}
 )
 
+type savedVariable struct {
+	Val       *fraction
+	OmitSlash bool
+}
+
 func init() {
-	addVar := func(n string, v float64) {
+	addVar := func(n string, v float64, omitSlash bool) {
 		f, err := floatToFraction(v)
 		if err != nil {
 			panic(err)
 		}
-		predefinedVariables[n] = f
+		predefinedVariables[n] = &savedVariable{f, omitSlash}
 	}
-	predefinedVariables["pi"] = pi
-	addVar("e", math.E)
-	addVar("phi", math.Phi)
+	predefinedVariables["pi"] = &savedVariable{pi, false}
+	addVar("e", math.E, true)
+	addVar("phi", math.Phi, false)
 
 	addFunc := func(n string, f *mathFunction) {
 		predefinedFunctions[n] = f

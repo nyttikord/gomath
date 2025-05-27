@@ -40,7 +40,8 @@ type literalExp struct {
 }
 
 type variable struct {
-	ID string
+	ID        string
+	OmitSlash bool
 }
 
 type function struct {
@@ -127,6 +128,7 @@ func (b *binaryOperation) RenderLatex() (string, error) {
 		} else {
 			s += lf
 		}
+		s += "^"
 		if len(lr) > 1 {
 			s += "{" + lr + "}"
 		} else {
@@ -177,13 +179,16 @@ func (v *predefinedVariable) Eval() (*fraction, error) {
 	if !ok {
 		return nil, errors.Join(ErrUnknownVariable(v.ID), fmt.Errorf("undefined variable %s", v.ID))
 	}
-	return val, nil
+	return val.Val, nil
 }
 
 func (v *predefinedVariable) RenderLatex() (string, error) {
 	_, ok := predefinedVariables[v.ID]
 	if !ok {
 		return "", errors.Join(ErrUnknownVariable(v.ID), fmt.Errorf("undefined variable %s", v.ID))
+	}
+	if v.OmitSlash {
+		return v.ID, nil
 	}
 	return `\` + v.ID, nil
 }

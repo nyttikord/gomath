@@ -160,7 +160,8 @@ func literalExpression(l []*lexer, i *int) (expression, error) {
 
 func predefinedExpression(l []*lexer, i *int, id string) (expression, error) {
 	if isPredefinedVariable(id) {
-		return &predefinedVariable{id}, nil
+		v := predefinedVariables[id]
+		return &predefinedVariable{id, v.OmitSlash}, nil
 	}
 	if isPredefinedFunction(id) {
 		exp, err := operatorExpression(l, i)

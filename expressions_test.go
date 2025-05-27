@@ -87,6 +87,9 @@ func TestEvalPrioritySpecialCase(t *testing.T) {
 
 func TestEvalFactorial(t *testing.T) {
 	genericTest(t, "3!", "6")
+	genericTest(t, "3^2!", "362880")
+	genericTest(t, "3*2^2!", "72")
+	genericTest(t, "(2*2)!", "24")
 }
 
 func genericTest(t *testing.T, exp string, excepted string) {

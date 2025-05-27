@@ -38,19 +38,19 @@ func TestFraction_Is(t *testing.T) {
 func TestFractionComparison(t *testing.T) {
 	t.Log("testing equal fraction")
 	f := newFraction(5, 3)
-	t.Log("smaller or equal")
+	t.Log("testing smaller or equal")
 	if !f.SmallerOrEqualThan(f) {
 		t.Errorf("fractions should be equal")
 	}
-	t.Log("smaller")
+	t.Log("testing smaller")
 	if f.SmallerThan(f) {
 		t.Errorf("fractions should be equal")
 	}
-	t.Log("greater or equal")
+	t.Log("testing greater or equal")
 	if !f.GreaterOrEqualThan(f) {
 		t.Errorf("fractions should be equal")
 	}
-	t.Log("greater")
+	t.Log("testing greater")
 	if f.GreaterThan(f) {
 		t.Errorf("fractions should be equal")
 	}
@@ -59,19 +59,19 @@ func TestFractionComparison(t *testing.T) {
 	// a < b
 	a := f
 	b := newFraction(7, 4)
-	t.Log("smaller or equal")
+	t.Log("testing smaller or equal")
 	if !a.SmallerOrEqualThan(b) {
 		t.Errorf("%s should be smaller or equal than %s", b, a)
 	}
-	t.Log("smaller")
+	t.Log("testing smaller")
 	if !a.SmallerThan(b) {
 		t.Errorf("%s should be smaller than %s", b, a)
 	}
-	t.Log("greater or equal")
+	t.Log("testing greater or equal")
 	if a.GreaterOrEqualThan(b) {
 		t.Errorf("%s should be greater or equal than %s", a, b)
 	}
-	t.Log("greater")
+	t.Log("testing greater")
 	if b.GreaterThan(b) {
 		t.Errorf("%s should be greater than %s", a, b)
 	}

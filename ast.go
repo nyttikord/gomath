@@ -53,7 +53,7 @@ func astParse(lexed []*lexer, tpe astType) (*ast, error) {
 	case astTypeCalculation:
 		tree.Body = &calculationStatement{Expression: exp}
 	case astTypeLatex:
-		//
+		tree.Body = &latexStatement{Expression: exp}
 	default:
 		return nil, ErrUnknownAstType
 	}

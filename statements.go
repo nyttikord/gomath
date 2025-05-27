@@ -24,3 +24,15 @@ func (p *calculationStatement) Eval(opt *Options) (string, error) {
 	}
 	return f.String(), nil
 }
+
+type latexStatement struct {
+	Expression expression
+}
+
+func (l *latexStatement) Eval(opt *Options) (string, error) {
+	s, err := l.Expression.RenderLatex()
+	if err != nil {
+		return "", err
+	}
+	return s, nil
+}

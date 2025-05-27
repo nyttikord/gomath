@@ -2,13 +2,13 @@ package gomath
 
 import "testing"
 
-var opt = &Options{
+var testOpt = &Options{
 	Decimal:   true,
 	Precision: 6,
 }
 
 func TestMathFunction_Exp(t *testing.T) {
-	res, err := Parse("exp(0)", opt)
+	res, err := Parse("exp(0)", testOpt)
 	expected := "1"
 	if err != nil {
 		t.Fatal(err)
@@ -19,7 +19,7 @@ func TestMathFunction_Exp(t *testing.T) {
 }
 
 func TestMathFunction_Cos(t *testing.T) {
-	res, err := Parse("cos(0)", opt)
+	res, err := Parse("cos(0)", testOpt)
 	expected := "1"
 	if err != nil {
 		t.Fatal(err)
@@ -30,7 +30,7 @@ func TestMathFunction_Cos(t *testing.T) {
 }
 
 func TestMathFunction_Sin(t *testing.T) {
-	res, err := Parse("sin(0)", opt)
+	res, err := Parse("sin(0)", testOpt)
 	expected := "0"
 	if err != nil {
 		t.Fatal(err)
@@ -41,7 +41,7 @@ func TestMathFunction_Sin(t *testing.T) {
 }
 
 func TestMathFunction_Tan(t *testing.T) {
-	res, err := Parse("tan(0)", opt)
+	res, err := Parse("tan(0)", testOpt)
 	expected := "0"
 	if err != nil {
 		t.Fatal(err)

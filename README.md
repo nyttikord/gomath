@@ -26,11 +26,11 @@ You can specify the number of digits with `Precision`.
 
 ### Special case
 
-The written representation of calculus is definitely not compatible with computers.
+The written representation of calculation is definitely not compatible with computers.
 We use common signes and common conventions to prevent unwanted behaviors.
 For example, the multiplication is represented by `*` and not by `×`.
 
-The computer representation of calculus has some special cases.
+The computer representation of calculation has some special cases.
 How to interpret `5/2(1+2)`? And `-3^2`?
 All special cases and how they are interpreted are listed below.
 

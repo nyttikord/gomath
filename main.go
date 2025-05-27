@@ -6,7 +6,7 @@ func Parse(expression string, opt *Options) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	p, err := astParse(lexed, "return")
+	p, err := astParse(lexed, astTypeCalculation)
 	if err != nil {
 		return "", err
 	}

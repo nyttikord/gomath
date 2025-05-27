@@ -38,12 +38,12 @@ func TestEvalDivDecimal(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	tree, err := astParse(lexr, "return")
+	tree, err := astParse(lexr, astTypeCalculation)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if tree.Type != "return" {
-		t.Errorf("got type %s; want return", tree.Type)
+	if tree.Type != astTypeCalculation {
+		t.Errorf("got type %d; want %d", tree.Type, astTypeCalculation)
 	}
 	val, err := tree.Body.Eval(&Options{true, 3})
 	if err != nil {
@@ -90,12 +90,12 @@ func genericTest(t *testing.T, exp string, excepted string) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	tree, err := astParse(lexr, "return")
+	tree, err := astParse(lexr, astTypeCalculation)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if tree.Type != "return" {
-		t.Errorf("got type %s; want return", tree.Type)
+	if tree.Type != astTypeCalculation {
+		t.Errorf("got type %d; want %d", tree.Type, astTypeCalculation)
 	}
 	val, err := tree.Body.Eval(&Options{})
 	if err != nil {

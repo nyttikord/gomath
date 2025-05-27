@@ -10,11 +10,11 @@ type statement interface {
 	Eval(*Options) (string, error)
 }
 
-type returnStatement struct {
+type calculationStatement struct {
 	Expression expression
 }
 
-func (p *returnStatement) Eval(opt *Options) (string, error) {
+func (p *calculationStatement) Eval(opt *Options) (string, error) {
 	f, err := p.Expression.Eval()
 	if err != nil {
 		return "", err

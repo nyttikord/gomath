@@ -49,6 +49,9 @@ func astParse(lexed []*lexer, tpe astType) (*ast, error) {
 	if err != nil {
 		return nil, err
 	}
+	if i < len(lexed) {
+		return nil, errors.Join(ErrUnknownExpression, fmt.Errorf("cannot parse expression %s", lexed[i]))
+	}
 	switch tpe {
 	case astTypeCalculation:
 		tree.Body = &calculationStatement{Expression: exp}
@@ -105,14 +108,11 @@ func expExpression(l []*lexer, i *int) (expression, error) {
 }
 
 func binExpression(ops []operator, sub expressionFunc, l []*lexer, i *int) (expression, error) {
-	println(1, l[*i].String(), ops[0])
 	left, err := sub(l, i)
-	println(2, l[*i].String(), ops[0])
 	if err != nil {
 		return nil, err
 	}
 	for *i < len(l) && slices.Contains(ops, operator(l[*i].Value)) {
-		println(3, l[*i].String(), ops[0])
 		op := operator(l[*i].Value)
 		*i++
 		right, err := sub(l, i)
@@ -125,7 +125,6 @@ func binExpression(ops []operator, sub expressionFunc, l []*lexer, i *int) (expr
 			Right:    right,
 		}
 	}
-	println(4, l[*i].String(), ops[0])
 	return left, nil
 }
 

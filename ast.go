@@ -61,10 +61,10 @@ func astParse(lexed []*lexer, tpe astType) (*ast, error) {
 }
 
 func termExpression(l []*lexer, i *int) (expression, error) {
-	return binExpression(termOperators, omitExpression)(l, i)
+	return binExpression(termOperators, omitParenthesisExpression)(l, i)
 }
 
-func omitExpression(l []*lexer, i *int) (expression, error) {
+func omitParenthesisExpression(l []*lexer, i *int) (expression, error) {
 	sub := factorExpression
 	left, err := sub(l, i)
 	if err != nil {
@@ -82,11 +82,30 @@ func omitExpression(l []*lexer, i *int) (expression, error) {
 		}
 	}
 	return left, nil
-
 }
 
 func factorExpression(l []*lexer, i *int) (expression, error) {
-	return binExpression(factorOperators, expExpression)(l, i)
+	return binExpression(factorOperators, omitLiteralExpression)(l, i)
+}
+
+func omitLiteralExpression(l []*lexer, i *int) (expression, error) {
+	sub := expExpression
+	left, err := sub(l, i)
+	if err != nil {
+		return nil, err
+	}
+	for *i < len(l) && l[*i].Type == Literal {
+		right, err := sub(l, i)
+		if err != nil {
+			return nil, err
+		}
+		left = &binaryOperation{
+			Operator: "*",
+			Left:     left,
+			Right:    right,
+		}
+	}
+	return left, nil
 }
 
 func expExpression(l []*lexer, i *int) (expression, error) {

@@ -73,6 +73,10 @@ func TestEvalOmitMultSigne(t *testing.T) {
 	genericTest(t, "2^2(3+2)", "20")
 	t.Log("testing 2(3+2)^2")
 	genericTest(t, "2(3+2)^2", "50")
+	t.Log("testing 2cos(0)")
+	genericTest(t, "2cos(0)", "2")
+	t.Log("testing 2^2cos(0)")
+	genericTest(t, "2^2cos(0)", "4")
 }
 
 func TestEvalPrioritySpecialCase(t *testing.T) {

@@ -221,7 +221,7 @@ func (l *literalExp) RenderLatex() (string, priority, error) {
 func (v *predefinedVariable) Eval() (*fraction, error) {
 	val, ok := predefinedVariables[v.ID]
 	if !ok {
-		return nil, errors.Join(ErrUnknownVariable(v.ID), fmt.Errorf("undefined variable %s", v.ID))
+		return nil, errors.Join(genErrUnknownVariable(v.ID), fmt.Errorf("undefined variable %s", v.ID))
 	}
 	return val.Val, nil
 }
@@ -229,7 +229,7 @@ func (v *predefinedVariable) Eval() (*fraction, error) {
 func (v *predefinedVariable) RenderLatex() (string, priority, error) {
 	_, ok := predefinedVariables[v.ID]
 	if !ok {
-		return "", literalPriority, errors.Join(ErrUnknownVariable(v.ID), fmt.Errorf("undefined variable %s", v.ID))
+		return "", literalPriority, errors.Join(genErrUnknownVariable(v.ID), fmt.Errorf("undefined variable %s", v.ID))
 	}
 	if v.OmitSlash {
 		return v.ID, literalPriority, nil
@@ -240,7 +240,7 @@ func (v *predefinedVariable) RenderLatex() (string, priority, error) {
 func (f *predefinedFunction) Eval() (*fraction, error) {
 	fn, ok := predefinedFunctions[f.ID]
 	if !ok {
-		return nil, errors.Join(ErrUnknownVariable(f.ID), fmt.Errorf("undefined variable %s", f.ID))
+		return nil, errors.Join(genErrUnknownVariable(f.ID), fmt.Errorf("undefined variable %s", f.ID))
 	}
 	val, err := f.exp.Eval()
 	if err != nil {
@@ -252,7 +252,7 @@ func (f *predefinedFunction) Eval() (*fraction, error) {
 func (f *predefinedFunction) RenderLatex() (string, priority, error) {
 	_, ok := predefinedFunctions[f.ID]
 	if !ok {
-		return "", literalPriority, errors.Join(ErrUnknownVariable(f.ID), fmt.Errorf("undefined variable %s", f.ID))
+		return "", literalPriority, errors.Join(genErrUnknownVariable(f.ID), fmt.Errorf("undefined variable %s", f.ID))
 	}
 	val, _, err := f.exp.RenderLatex()
 	if err != nil {

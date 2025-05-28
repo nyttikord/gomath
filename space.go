@@ -30,6 +30,33 @@ type periodicInterval struct {
 	CustomName string
 }
 
+var (
+	spaceRStar = &realInterval{
+		LowerBound: &intervalBound{
+			Value:        nullFraction,
+			IncludeValue: false,
+			Infinite:     false,
+		},
+		UpperBound: &intervalBound{
+			Infinite: true,
+			Positive: true,
+		},
+		CustomName: `R \ { 0 }`,
+	}
+	spaceRStarPositive = &realInterval{
+		LowerBound: &intervalBound{
+			Value:        nullFraction,
+			IncludeValue: false,
+			Infinite:     false,
+		},
+		UpperBound: &intervalBound{
+			Infinite: true,
+			Positive: true,
+		},
+		CustomName: `] 0 ; +inf [`,
+	}
+)
+
 func (*realSet) Contains(*fraction) bool {
 	return true
 }

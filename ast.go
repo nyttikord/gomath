@@ -163,9 +163,7 @@ func literalExpression(l []*lexer, i *int) (expression, error) {
 		return &unaryOperation{operator(c.Value), exp}, nil
 	}
 	return nil, errors.Join(ErrUnknownExpression, fmt.Errorf(
-		"unknown type %s('%s'): excepting a valid literal expression",
-		c.Type,
-		c.Value,
+		"unknown type %s('%s'): excepting a valid literal expression", c.Type, c.Value,
 	))
 }
 

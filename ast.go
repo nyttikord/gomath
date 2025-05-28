@@ -61,32 +61,23 @@ func astParse(lexed []*lexer, tpe astType) (*ast, error) {
 }
 
 func termExpression(l []*lexer, i *int) (expression, error) {
-	return binExpression(termOperators, omitExpression)(l, i)
+	return binExpression(termOperators, omitParenthesisExpression)(l, i)
 }
 
-func omitExpression(l []*lexer, i *int) (expression, error) {
-	sub := factorExpression
-	left, err := sub(l, i)
-	if err != nil {
-		return nil, err
-	}
-	for *i < len(l) && l[*i].Value == "(" {
-		right, err := sub(l, i)
-		if err != nil {
-			return nil, err
-		}
-		left = &binaryOperation{
-			Operator: "*",
-			Left:     left,
-			Right:    right,
-		}
-	}
-	return left, nil
-
+func omitParenthesisExpression(l []*lexer, i *int) (expression, error) {
+	return omitExpression(factorExpression, func(l *lexer) bool {
+		return l.Type == Separator && l.Value == "("
+	}, l, i)
 }
 
 func factorExpression(l []*lexer, i *int) (expression, error) {
-	return binExpression(factorOperators, expExpression)(l, i)
+	return binExpression(factorOperators, omitLiteralExpression)(l, i)
+}
+
+func omitLiteralExpression(l []*lexer, i *int) (expression, error) {
+	return omitExpression(expExpression, func(l *lexer) bool {
+		return l.Type == Literal
+	}, l, i)
 }
 
 func expExpression(l []*lexer, i *int) (expression, error) {
@@ -125,6 +116,25 @@ func binExpression(ops []operator, sub expressionFunc) expressionFunc {
 		}
 		return left, nil
 	}
+}
+
+func omitExpression(sub expressionFunc, cond func(*lexer) bool, l []*lexer, i *int) (expression, error) {
+	left, err := sub(l, i)
+	if err != nil {
+		return nil, err
+	}
+	for *i < len(l) && cond(l[*i]) {
+		right, err := sub(l, i)
+		if err != nil {
+			return nil, err
+		}
+		left = &binaryOperation{
+			Operator: "*",
+			Left:     left,
+			Right:    right,
+		}
+	}
+	return left, nil
 }
 
 func literalExpression(l []*lexer, i *int) (expression, error) {

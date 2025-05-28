@@ -52,6 +52,8 @@ All special cases and how they are interpreted are listed below.
 |-------------------------|--------------------------|
 | `-a^b`                  | $-(a^b)$                 |
 | `a/b(c+d)`              | $\frac{a}{b}(c+d)$       |
+| `a/b*c`                 | $c\frac{a}{b}$           |
+| `a/bx`                  | $\frac{a}{bx}$           |
 | `a^b^c`                 | $(a^b)^c$                |
 
 These cases are listed on [Wikipedia](https://en.wikipedia.org/wiki/Order_of_operations#Special_cases).

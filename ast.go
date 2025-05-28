@@ -147,8 +147,10 @@ func literalExpression(l []*lexer, i *int) (expression, error) {
 			if err != nil {
 				return nil, err
 			}
-			if l[*i].Value != ")" {
-				return nil, errors.Join(ErrInvalidExpression, fmt.Errorf(") excepted, not %s", l[*i].Value))
+			if *i >= len(l) {
+				return nil, errors.Join(ErrInvalidExpression, fmt.Errorf("')' excepted"))
+			} else if l[*i].Value != ")" {
+				return nil, errors.Join(ErrInvalidExpression, fmt.Errorf("')' excepted, not '%s'", l[*i].Value))
 			}
 			*i++
 			return exp, nil

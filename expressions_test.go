@@ -87,6 +87,14 @@ func TestEvalPrioritySpecialCase(t *testing.T) {
 	genericTest(t, "6/2(1+2)", "9")
 	t.Log("testing 3^2^3") // must be interpreted as (3^2)^3
 	genericTest(t, "3^2^3", "729")
+	t.Log("testing 6/2*2") // must be interpreted as 2*(6/2)
+	genericTest(t, "6/2*2", "6")
+	t.Log("testing 6/2cos(1)") // must be interpreted as 6/(2cos(1))
+	res, err := ParseAndCalculate("6/(2cos(1))", &Options{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	genericTest(t, "6/2cos(1)", res)
 }
 
 func genericTest(t *testing.T, exp string, excepted string) {

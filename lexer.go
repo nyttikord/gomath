@@ -18,7 +18,7 @@ const (
 )
 
 var (
-	operators  = []operator{"+", "-", "*", "/", "^", "%", "="}
+	operators  = []operator{"+", "-", "*", "/", "^", "%", "=", "!"}
 	separators = []separator{",", "(", ")"}
 
 	// ErrSameTypeFollow is thrown when two numbers follow each others
@@ -132,5 +132,5 @@ func isSeparator(s rune) bool {
 }
 
 func (l *lexer) String() string {
-	return string(l.Type) + "(" + l.Value + ")"
+	return fmt.Sprintf("%s('%s')", l.Type, l.Value)
 }

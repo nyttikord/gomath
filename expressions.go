@@ -3,6 +3,7 @@ package gomath
 import (
 	"errors"
 	"fmt"
+	"math/big"
 	"strings"
 )
 
@@ -174,18 +175,37 @@ func (b *unaryOperation) Eval() (*fraction, error) {
 		return lb, nil
 	case "-":
 		return lb.Mul(intToFraction(-1)), nil
+	case "!":
+		var i *big.Int
+		if i, err = lb.Int(); err != nil || i.Cmp(nullBigInt) < 0 {
+			return nil, errors.Join(ErrNumberNotInSpace, errors.New("operation "+string(b.Operator)+" is not supported for non positive integer"))
+		}
+		if !i.IsInt64() {
+			return nil, errors.Join(ErrInvalidExpression, fmt.Errorf("number %s is too big", i))
+		}
+		ii := i.Int64()
+		res := ii
+		ii--
+		for ii > 1 {
+			res *= ii
+			ii--
+		}
+		return intToFraction(res), nil
 	default:
 		return nil, errors.Join(ErrUnknownOperation, errors.New("operation "+string(b.Operator)+" is not supported"))
 	}
 }
 
 func (b *unaryOperation) RenderLatex() (string, priority, error) {
-	s, _, err := b.Expression.RenderLatex()
+	s, p, err := b.Expression.RenderLatex()
 	if err != nil {
 		return "", unaryPriority, err
 	}
-	if len(s) > 1 {
+	if strings.Contains(s, " ") && p < unaryPriority {
 		s = `\left(` + s + `\left)`
+	}
+	if b.Operator == "!" {
+		return fmt.Sprintf("%s!", s), unaryPriority, nil
 	}
 	return fmt.Sprintf("%s%s", b.Operator, s), unaryPriority, nil
 }
@@ -201,7 +221,7 @@ func (l *literalExp) RenderLatex() (string, priority, error) {
 func (v *predefinedVariable) Eval() (*fraction, error) {
 	val, ok := predefinedVariables[v.ID]
 	if !ok {
-		return nil, errors.Join(ErrUnknownVariable(v.ID), fmt.Errorf("undefined variable %s", v.ID))
+		return nil, errors.Join(genErrUnknownVariable(v.ID), fmt.Errorf("undefined variable %s", v.ID))
 	}
 	return val.Val, nil
 }
@@ -209,7 +229,7 @@ func (v *predefinedVariable) Eval() (*fraction, error) {
 func (v *predefinedVariable) RenderLatex() (string, priority, error) {
 	_, ok := predefinedVariables[v.ID]
 	if !ok {
-		return "", literalPriority, errors.Join(ErrUnknownVariable(v.ID), fmt.Errorf("undefined variable %s", v.ID))
+		return "", literalPriority, errors.Join(genErrUnknownVariable(v.ID), fmt.Errorf("undefined variable %s", v.ID))
 	}
 	if v.OmitSlash {
 		return v.ID, literalPriority, nil
@@ -220,7 +240,7 @@ func (v *predefinedVariable) RenderLatex() (string, priority, error) {
 func (f *predefinedFunction) Eval() (*fraction, error) {
 	fn, ok := predefinedFunctions[f.ID]
 	if !ok {
-		return nil, errors.Join(ErrUnknownVariable(f.ID), fmt.Errorf("undefined variable %s", f.ID))
+		return nil, errors.Join(genErrUnknownVariable(f.ID), fmt.Errorf("undefined variable %s", f.ID))
 	}
 	val, err := f.exp.Eval()
 	if err != nil {
@@ -232,7 +252,7 @@ func (f *predefinedFunction) Eval() (*fraction, error) {
 func (f *predefinedFunction) RenderLatex() (string, priority, error) {
 	_, ok := predefinedFunctions[f.ID]
 	if !ok {
-		return "", literalPriority, errors.Join(ErrUnknownVariable(f.ID), fmt.Errorf("undefined variable %s", f.ID))
+		return "", literalPriority, errors.Join(genErrUnknownVariable(f.ID), fmt.Errorf("undefined variable %s", f.ID))
 	}
 	val, _, err := f.exp.RenderLatex()
 	if err != nil {

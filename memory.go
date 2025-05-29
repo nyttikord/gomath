@@ -8,7 +8,7 @@ import (
 
 var (
 	// ErrUnknownVariable is thrown when GoMath doesn't know the variable used
-	ErrUnknownVariable = func(name string) error { return errors.New("unknown variable: " + name) }
+	ErrUnknownVariable = errors.New("unknown variable")
 )
 
 var (
@@ -80,43 +80,10 @@ func init() {
 		CustomName: "] -pi/2 ; pi/2 [ mod pi",
 	}
 	addFunc("tan", createMathFunction(tanDef, math.Tan))
-	addFunc("ln", createMathFunction(&realInterval{
-		LowerBound: &intervalBound{
-			Value:        nullFraction,
-			IncludeValue: false,
-			Infinite:     false,
-		},
-		UpperBound: &intervalBound{
-			Infinite: true,
-			Positive: true,
-		},
-		CustomName: `R \ { 0 }`,
-	}, math.Log))
-	addFunc("log2", createMathFunction(&realInterval{
-		LowerBound: &intervalBound{
-			Value:        nullFraction,
-			IncludeValue: false,
-			Infinite:     false,
-		},
-		UpperBound: &intervalBound{
-			Infinite: true,
-			Positive: true,
-		},
-		CustomName: `R \ { 0 }`,
-	}, math.Log2))
+	addFunc("ln", createMathFunction(spaceRStar, math.Log))
+	addFunc("log2", createMathFunction(spaceRStarPositive, math.Log2))
 
-	log10 := createMathFunction(&realInterval{
-		LowerBound: &intervalBound{
-			Value:        nullFraction,
-			IncludeValue: false,
-			Infinite:     false,
-		},
-		UpperBound: &intervalBound{
-			Infinite: true,
-			Positive: true,
-		},
-		CustomName: `R \ { 0 }`,
-	}, math.Log10)
+	log10 := createMathFunction(spaceRStarPositive, math.Log10)
 	addFunc("log", log10)
 	addFunc("log10", log10)
 }
@@ -141,4 +108,8 @@ func isPredefinedVariable(id string) bool {
 func isPredefinedFunction(id string) bool {
 	_, ok := predefinedFunctions[id]
 	return ok
+}
+
+func genErrUnknownVariable(name string) error {
+	return errors.Join(ErrUnknownVariable, fmt.Errorf("unknown %s", name))
 }

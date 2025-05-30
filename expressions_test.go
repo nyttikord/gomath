@@ -97,6 +97,13 @@ func TestEvalPrioritySpecialCase(t *testing.T) {
 	genericTest(t, "6/2cos(1)", res)
 }
 
+func TestEvalFactorial(t *testing.T) {
+	genericTest(t, "3!", "6")
+	genericTest(t, "3^2!", "362880")
+	genericTest(t, "3*2^2!", "72")
+	genericTest(t, "(2*2)!", "24")
+}
+
 func genericTest(t *testing.T, exp string, excepted string) {
 	lexr, err := lex(exp)
 	if err != nil {
@@ -132,6 +139,11 @@ func TestEvalLatex(t *testing.T) {
 	genericTestRenderLatex(t, "5(1+2)^5", `5 \times \left(1 + 2\right)^5`)
 	genericTestRenderLatex(t, "(1+2/3)/2", `\frac{1 + \frac{2}{3}}{2}`)
 	genericTestRenderLatex(t, "2*(1+2)", `2 \times \left(1 + 2\right)`)
+	genericTestRenderLatex(t, "2!", `2!`)
+	genericTestRenderLatex(t, "2*2!", `2 \times 2!`)
+	genericTestRenderLatex(t, "2!*2!", `2! \times 2!`)
+	genericTestRenderLatex(t, "3^2!", `3^2!`)
+	genericTestRenderLatex(t, "(3+2)!", `\left(3 + 2\right)!`)
 }
 
 func genericTestRenderLatex(t *testing.T, exp string, excepted string) {

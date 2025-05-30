@@ -60,16 +60,16 @@ These cases are listed on [Wikipedia](https://en.wikipedia.org/wiki/Order_of_ope
 
 ### Supported operation
 
-All common operators (`+`, `-`, `*`, `/`, `^`) are supported.
+All common operators (`+`, `-`, `*`, `/`, `^`, `!`) are supported.
 Parenthesis (`(`, `)`) are also supported.
 
-We plan to add the support for the factorial (`!`) and the modulo (`%`).
+We plan to add the support for the modulo (`%`).
 
 ### Supported variables
 
-$\pi$ is represented by `\pi`.
-$e$ is represented by `\e`.
-$\phi$ is represented by `\phi`.
+$\pi$ is represented by `pi`.
+$e$ is represented by `e`.
+$\phi$ is represented by `phi`.
 
 ### Supported functions
 

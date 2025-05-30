@@ -3,6 +3,7 @@ package gomath
 import (
 	"errors"
 	"fmt"
+	"math/big"
 	"strings"
 )
 
@@ -131,37 +132,26 @@ func (b *binaryOperation) RenderLatex() (string, priority, error) {
 	close(chanLfp)
 	close(chanLrp)
 	switch b.Operator {
-	case "+":
-		return fmt.Sprintf("%s + %s", lf, lr), termPriority, nil
-	case "-":
-		return fmt.Sprintf("%s - %s", lf, lr), termPriority, nil
+	case "+", "-":
+		lf = handleLatexParenthesis(lf, lfp, termPriority)
+		lr = handleLatexParenthesis(lr, lrp, termPriority)
+		return fmt.Sprintf("%s %s %s", lf, b.Operator, lr), termPriority, nil
 	case "*":
-		if strings.Contains(lf, " ") && lfp < factorPriority {
-			lf = `\left(` + lf + `\right)`
-		}
-		if strings.Contains(lr, " ") && lrp < factorPriority {
-			lr = `\left(` + lr + `\right)`
-		}
+		lf = handleLatexParenthesis(lf, lfp, factorPriority)
+		lr = handleLatexParenthesis(lr, lrp, factorPriority)
 		return fmt.Sprintf(`%s \times %s`, lf, lr), factorPriority, nil
 	case "/":
 		return fmt.Sprintf(`\frac{%s}{%s}`, lf, lr), factorPriority, nil
 	case "^":
-		var s string
-		if strings.Contains(lf, " ") && lfp < expPriority {
-			s += `\left(` + lf + `\right)`
-		} else {
-			s += lf
-		}
-		s += "^"
+		s := handleLatexParenthesis(lf, lfp, expPriority) + "^"
 		if len(lr) > 1 {
 			s += "{" + lr + "}"
 		} else {
 			s += lr
 		}
 		return s, expPriority, nil
-	default:
-		return "", 0, errors.Join(ErrUnknownOperation, errors.New("operation "+string(b.Operator)+" is not supported"))
 	}
+	return "", 0, errors.Join(ErrUnknownOperation, errors.New("operation "+string(b.Operator)+" is not supported"))
 }
 
 func (b *unaryOperation) Eval() (*fraction, error) {
@@ -174,18 +164,35 @@ func (b *unaryOperation) Eval() (*fraction, error) {
 		return lb, nil
 	case "-":
 		return lb.Mul(intToFraction(-1)), nil
+	case "!":
+		var i *big.Int
+		if i, err = lb.Int(); err != nil || i.Cmp(nullBigInt) < 0 {
+			return nil, errors.Join(ErrNumberNotInSpace, errors.New("operation "+string(b.Operator)+" is not supported for non positive integer"))
+		}
+		if !i.IsInt64() {
+			return nil, errors.Join(ErrInvalidExpression, fmt.Errorf("number %s is too big", i))
+		}
+		ii := i.Int64()
+		res := ii
+		ii--
+		for ii > 1 {
+			res *= ii
+			ii--
+		}
+		return intToFraction(res), nil
 	default:
 		return nil, errors.Join(ErrUnknownOperation, errors.New("operation "+string(b.Operator)+" is not supported"))
 	}
 }
 
 func (b *unaryOperation) RenderLatex() (string, priority, error) {
-	s, _, err := b.Expression.RenderLatex()
+	s, p, err := b.Expression.RenderLatex()
 	if err != nil {
 		return "", unaryPriority, err
 	}
-	if len(s) > 1 {
-		s = `\left(` + s + `\left)`
+	s = handleLatexParenthesis(s, p, unaryPriority)
+	if b.Operator == "!" {
+		return fmt.Sprintf("%s!", s), unaryPriority, nil
 	}
 	return fmt.Sprintf("%s%s", b.Operator, s), unaryPriority, nil
 }
@@ -243,4 +250,11 @@ func (f *predefinedFunction) RenderLatex() (string, priority, error) {
 
 func (r *relation) Eval(f *fraction) *fraction {
 	return (*r)(f)
+}
+
+func handleLatexParenthesis(s string, stringPriority, currentPriority priority) string {
+	if strings.Contains(s, " ") && stringPriority < currentPriority {
+		s = `\left(` + s + `\right)`
+	}
+	return s
 }

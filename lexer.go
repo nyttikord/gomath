@@ -18,7 +18,7 @@ const (
 )
 
 var (
-	operators  = []operator{"+", "-", "*", "/", "^", "%", "="}
+	operators  = []operator{"+", "-", "*", "/", "^", "%", "=", "!"}
 	separators = []separator{",", "(", ")"}
 
 	// ErrSameTypeFollow is thrown when two numbers follow each others

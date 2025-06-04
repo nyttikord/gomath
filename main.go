@@ -24,7 +24,7 @@ type Result interface {
 }
 
 type res struct {
-	*ast
+	ast    *ast
 	result *statementResult
 }
 
@@ -50,11 +50,11 @@ func (r *res) IsExact() bool {
 }
 
 func (r *res) LaTeX() (string, error) {
-	err := r.ChangeType(astTypeLatex)
+	err := r.ast.ChangeType(astTypeLatex)
 	if err != nil {
 		return "", err
 	}
-	result, err := r.Body.Eval(&Options{})
+	result, err := r.ast.Body.Eval(&Options{})
 	if err != nil {
 		return "", err
 	}

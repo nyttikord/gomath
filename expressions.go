@@ -132,37 +132,26 @@ func (b *binaryOperation) RenderLatex() (string, priority, error) {
 	close(chanLfp)
 	close(chanLrp)
 	switch b.Operator {
-	case "+":
-		return fmt.Sprintf("%s + %s", lf, lr), termPriority, nil
-	case "-":
-		return fmt.Sprintf("%s - %s", lf, lr), termPriority, nil
+	case "+", "-":
+		lf = handleLatexParenthesis(lf, lfp, termPriority)
+		lr = handleLatexParenthesis(lr, lrp, termPriority)
+		return fmt.Sprintf("%s %s %s", lf, b.Operator, lr), termPriority, nil
 	case "*":
-		if strings.Contains(lf, " ") && lfp < factorPriority {
-			lf = `\left(` + lf + `\right)`
-		}
-		if strings.Contains(lr, " ") && lrp < factorPriority {
-			lr = `\left(` + lr + `\right)`
-		}
+		lf = handleLatexParenthesis(lf, lfp, factorPriority)
+		lr = handleLatexParenthesis(lr, lrp, factorPriority)
 		return fmt.Sprintf(`%s \times %s`, lf, lr), factorPriority, nil
 	case "/":
 		return fmt.Sprintf(`\frac{%s}{%s}`, lf, lr), factorPriority, nil
 	case "^":
-		var s string
-		if strings.Contains(lf, " ") && lfp < expPriority {
-			s += `\left(` + lf + `\right)`
-		} else {
-			s += lf
-		}
-		s += "^"
+		s := handleLatexParenthesis(lf, lfp, expPriority) + "^"
 		if len(lr) > 1 {
 			s += "{" + lr + "}"
 		} else {
 			s += lr
 		}
 		return s, expPriority, nil
-	default:
-		return "", 0, errors.Join(ErrUnknownOperation, errors.New("operation "+string(b.Operator)+" is not supported"))
 	}
+	return "", 0, errors.Join(ErrUnknownOperation, errors.New("operation "+string(b.Operator)+" is not supported"))
 }
 
 func (b *unaryOperation) Eval() (*fraction, error) {
@@ -201,9 +190,7 @@ func (b *unaryOperation) RenderLatex() (string, priority, error) {
 	if err != nil {
 		return "", unaryPriority, err
 	}
-	if strings.Contains(s, " ") && p < unaryPriority {
-		s = `\left(` + s + `\left)`
-	}
+	s = handleLatexParenthesis(s, p, unaryPriority)
 	if b.Operator == "!" {
 		return fmt.Sprintf("%s!", s), unaryPriority, nil
 	}
@@ -263,4 +250,11 @@ func (f *predefinedFunction) RenderLatex() (string, priority, error) {
 
 func (r *relation) Eval(f *fraction) *fraction {
 	return (*r)(f)
+}
+
+func handleLatexParenthesis(s string, stringPriority, currentPriority priority) string {
+	if strings.Contains(s, " ") && stringPriority < currentPriority {
+		s = `\left(` + s + `\right)`
+	}
+	return s
 }

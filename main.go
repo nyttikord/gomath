@@ -1,5 +1,11 @@
 package gomath
 
+type Result interface {
+	String() string
+	Approx(uint) string
+	LaTeX() string
+}
+
 // ParseAndCalculate an expression with given Options
 func ParseAndCalculate(expression string, opt *Options) (string, error) {
 	return parseAndEval(expression, opt, astTypeCalculation)

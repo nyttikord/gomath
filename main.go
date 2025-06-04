@@ -52,24 +52,40 @@ func (r *res) LaTeX() (string, error) {
 	return r.Body.Eval(&Options{})
 }
 
+func Parse(expression string) (Result, error) {
+	tree, err := parseAst(expression, astTypeCalculation)
+	if err != nil {
+		return nil, err
+	}
+	r, err := tree.Body.Eval(&Options{Decimal: false})
+	if err != nil {
+		return nil, err
+	}
+	return &res{ast: tree, result: r}, nil
+}
+
 // ParseAndCalculate an expression with given Options
 func ParseAndCalculate(expression string, opt *Options) (string, error) {
-	return parseAndEval(expression, opt, astTypeCalculation)
+	tree, err := parseAst(expression, astTypeCalculation)
+	if err != nil {
+		return "", err
+	}
+	return tree.Body.Eval(opt)
 }
 
-// ParseAndConvertToLatex an expression with given Options
-func ParseAndConvertToLatex(expression string, opt *Options) (string, error) {
-	return parseAndEval(expression, opt, astTypeLatex)
+// ParseAndConvertToLaTeX an expression with given Options
+func ParseAndConvertToLaTeX(expression string, opt *Options) (string, error) {
+	tree, err := parseAst(expression, astTypeLatex)
+	if err != nil {
+		return "", err
+	}
+	return tree.Body.Eval(opt)
 }
 
-func parseAndEval(expression string, opt *Options, tpe astType) (string, error) {
+func parseAst(expression string, tpe astType) (*ast, error) {
 	lexed, err := lex(expression)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
-	p, err := astParse(lexed, tpe)
-	if err != nil {
-		return "", err
-	}
-	return p.Body.Eval(opt)
+	return astParse(lexed, tpe)
 }

@@ -11,9 +11,15 @@ var (
 	ErrInvalidResult = errors.New("invalid result")
 )
 
+// Result represents the result got after the Parse function.
+// You can directly get the exact result with String or with fmt.Sprintf("%s", result)
 type Result interface {
+	// String returns the string representation of the Result.
+	// It is the exact result (fraction form)
 	String() string
+	// Approx returns an approximation of the Result given by String()
 	Approx(int) (string, error)
+	// LaTeX returns the LaTeX representation of the expression leading to the Result
 	LaTeX() (string, error)
 }
 

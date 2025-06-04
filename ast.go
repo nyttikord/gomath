@@ -49,6 +49,9 @@ func astParse(lexed []*lexer, tpe astType) (*ast, error) {
 	if err != nil {
 		return nil, err
 	}
+	if i < len(lexed) {
+		return nil, errors.Join(ErrUnknownExpression, fmt.Errorf("cannot parse expression %s", lexed[i]))
+	}
 	switch tpe {
 	case astTypeCalculation:
 		tree.Body = &calculationStatement{Expression: exp}
@@ -61,7 +64,7 @@ func astParse(lexed []*lexer, tpe astType) (*ast, error) {
 }
 
 func termExpression(l []*lexer, i *int) (expression, error) {
-	return binExpression(termOperators, omitParenthesisExpression)(l, i)
+	return binExpression(termOperators, omitParenthesisExpression, l, i)
 }
 
 func omitParenthesisExpression(l []*lexer, i *int) (expression, error) {
@@ -71,7 +74,7 @@ func omitParenthesisExpression(l []*lexer, i *int) (expression, error) {
 }
 
 func factorExpression(l []*lexer, i *int) (expression, error) {
-	return binExpression(factorOperators, omitLiteralExpression)(l, i)
+	return binExpression(factorOperators, omitLiteralExpression, l, i)
 }
 
 func omitLiteralExpression(l []*lexer, i *int) (expression, error) {
@@ -81,7 +84,7 @@ func omitLiteralExpression(l []*lexer, i *int) (expression, error) {
 }
 
 func expExpression(l []*lexer, i *int) (expression, error) {
-	res, err := binExpression(expOperators, literalExpression)(l, i)
+	res, err := binExpression(expOperators, literalExpression, l, i)
 	if err != nil {
 		return nil, err
 	}
@@ -95,27 +98,28 @@ func expExpression(l []*lexer, i *int) (expression, error) {
 	return &unaryOperation{"!", res}, nil
 }
 
-func binExpression(ops []operator, sub expressionFunc) expressionFunc {
-	return func(l []*lexer, i *int) (expression, error) {
-		left, err := sub(l, i)
+func binExpression(ops []operator, sub expressionFunc, l []*lexer, i *int) (expression, error) {
+	left, err := sub(l, i)
+	if err != nil {
+		return nil, err
+	}
+	for *i < len(l) && slices.Contains(ops, operator(l[*i].Value)) {
+		op := operator(l[*i].Value)
+		*i++
+		if *i >= len(l) {
+			return nil, ErrInvalidExpression
+		}
+		right, err := sub(l, i)
 		if err != nil {
 			return nil, err
 		}
-		for *i < len(l) && slices.Contains(ops, operator(l[*i].Value)) {
-			op := operator(l[*i].Value)
-			*i++
-			right, err := sub(l, i)
-			if err != nil {
-				return nil, err
-			}
-			left = &binaryOperation{
-				Operator: op,
-				Left:     left,
-				Right:    right,
-			}
+		left = &binaryOperation{
+			Operator: op,
+			Left:     left,
+			Right:    right,
 		}
-		return left, nil
 	}
+	return left, nil
 }
 
 func omitExpression(sub expressionFunc, cond func(*lexer) bool, l []*lexer, i *int) (expression, error) {
@@ -159,8 +163,10 @@ func literalExpression(l []*lexer, i *int) (expression, error) {
 			if err != nil {
 				return nil, err
 			}
-			if l[*i].Value != ")" {
-				return nil, errors.Join(ErrInvalidExpression, fmt.Errorf(") excepted, not %s", l[*i].Value))
+			if *i >= len(l) {
+				return nil, errors.Join(ErrInvalidExpression, fmt.Errorf("')' excepted"))
+			} else if l[*i].Value != ")" {
+				return nil, errors.Join(ErrInvalidExpression, fmt.Errorf("')' excepted, not '%s'", l[*i].Value))
 			}
 			*i++
 			return exp, nil
@@ -172,11 +178,7 @@ func literalExpression(l []*lexer, i *int) (expression, error) {
 		}
 		return &unaryOperation{operator(c.Value), exp}, nil
 	}
-	return nil, errors.Join(ErrUnknownExpression, fmt.Errorf(
-		"unknown type %s('%s'): excepting a valid literal expression",
-		c.Type,
-		c.Value,
-	))
+	return nil, errors.Join(ErrUnknownExpression, fmt.Errorf("unknown type %s: excepting a valid literal expression", c))
 }
 
 func predefinedExpression(l []*lexer, i *int, id string) (expression, error) {
@@ -191,7 +193,7 @@ func predefinedExpression(l []*lexer, i *int, id string) (expression, error) {
 		}
 		return &predefinedFunction{id, exp}, nil
 	}
-	return nil, ErrUnknownVariable(id)
+	return nil, genErrUnknownVariable(id)
 }
 
 func operatorExpression(l []*lexer, i *int) (expression, error) {

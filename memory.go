@@ -8,7 +8,7 @@ import (
 
 var (
 	// ErrUnknownVariable is thrown when GoMath doesn't know the variable used
-	ErrUnknownVariable = func(name string) error { return errors.New("unknown variable: " + name) }
+	ErrUnknownVariable = errors.New("unknown variable")
 )
 
 var (
@@ -108,4 +108,8 @@ func isPredefinedVariable(id string) bool {
 func isPredefinedFunction(id string) bool {
 	_, ok := predefinedFunctions[id]
 	return ok
+}
+
+func genErrUnknownVariable(name string) error {
+	return errors.Join(ErrUnknownVariable, fmt.Errorf("unknown %s", name))
 }

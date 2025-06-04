@@ -49,7 +49,7 @@ func TestEvalDivDecimal(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if val != "0.1" {
+	if val.String() != "0.1" {
 		t.Errorf("got %s; want %s", val, "0.1")
 	}
 	if t.Failed() {
@@ -120,7 +120,7 @@ func genericTest(t *testing.T, exp string, excepted string) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if val != excepted {
+	if val.String() != excepted {
 		t.Errorf("got %s; want %s", val, excepted)
 	}
 	if t.Failed() {
@@ -162,7 +162,7 @@ func genericTestRenderLatex(t *testing.T, exp string, excepted string) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if val != excepted {
+	if val.String() != excepted {
 		t.Errorf("got %s; want %s", val, excepted)
 	}
 	if t.Failed() {

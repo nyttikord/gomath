@@ -42,6 +42,7 @@ func (p *calculationStatement) Eval(opt *Options) (*statementResult, error) {
 		r.result = f.Approx(opt.Precision)
 		return r, nil
 	}
+	r.result = f.String()
 	return r, nil
 }
 

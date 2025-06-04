@@ -24,5 +24,6 @@ func TestAstErrors(t *testing.T) {
 	}
 	genericTestAstError("1+1)", ErrUnknownExpression)
 	genericTestAstError("(1+1", ErrInvalidExpression)
+	genericTestAstError("1+1+", ErrInvalidExpression)
 	//genericTestAstError("1×1+1", ErrUnknownVariable) // will be valid when omission between number and literal is added
 }

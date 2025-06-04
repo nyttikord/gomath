@@ -106,6 +106,9 @@ func binExpression(ops []operator, sub expressionFunc, l []*lexer, i *int) (expr
 	for *i < len(l) && slices.Contains(ops, operator(l[*i].Value)) {
 		op := operator(l[*i].Value)
 		*i++
+		if *i >= len(l) {
+			return nil, ErrInvalidExpression
+		}
 		right, err := sub(l, i)
 		if err != nil {
 			return nil, err

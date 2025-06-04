@@ -4,10 +4,25 @@ type Options struct {
 	Decimal   bool
 	Precision int
 }
+type statementResult struct {
+	fraction *fraction
+	result   string
+}
+
+// String gives the natural result of the statement.
+func (c *statementResult) String() string {
+	return c.result
+}
+
+// Fraction gives the computed fraction during the evaluation.
+// Is nil if no fraction was computed
+func (c *statementResult) Fraction() *fraction {
+	return c.fraction
+}
 
 type statement interface {
 	// Eval the statement
-	Eval(*Options) (string, error)
+	Eval(*Options) (*statementResult, error)
 	// getExpr returns the expression of the statement
 	getExpr() expression
 }
@@ -16,15 +31,18 @@ type calculationStatement struct {
 	Expression expression
 }
 
-func (p *calculationStatement) Eval(opt *Options) (string, error) {
+func (p *calculationStatement) Eval(opt *Options) (*statementResult, error) {
 	f, err := p.Expression.Eval()
 	if err != nil {
-		return "", err
+		return nil, err
 	}
+	r := &statementResult{}
+	r.fraction = f
 	if opt.Decimal {
-		return f.Approx(opt.Precision), nil
+		r.result = f.Approx(opt.Precision)
+		return r, nil
 	}
-	return f.String(), nil
+	return r, nil
 }
 
 func (p *calculationStatement) getExpr() expression {
@@ -35,12 +53,15 @@ type latexStatement struct {
 	Expression expression
 }
 
-func (l *latexStatement) Eval(opt *Options) (string, error) {
+func (l *latexStatement) Eval(opt *Options) (*statementResult, error) {
 	s, _, err := l.Expression.RenderLatex()
 	if err != nil {
-		return "", err
+		return nil, err
 	}
-	return s, nil
+	r := &statementResult{}
+	r.result = s
+	r.fraction = nil
+	return r, nil
 }
 
 func (l *latexStatement) getExpr() expression {

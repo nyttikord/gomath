@@ -2,9 +2,6 @@ package gomath
 
 import (
 	"errors"
-	"math/big"
-	"strconv"
-	"strings"
 )
 
 var (
@@ -25,29 +22,19 @@ type Result interface {
 
 type res struct {
 	*ast
-	result string
+	result *statementResult
 }
 
 func (r *res) String() string {
-	return r.result
+	return r.result.String()
 }
 
 func (r *res) Approx(precision int) (string, error) {
-	splits := strings.Split(r.result, "/")
-	if len(splits) == 1 {
-		return r.result, nil
-	} else if len(splits) != 2 {
+	f := r.result.Fraction()
+	if f == nil {
 		return "", ErrInvalidResult
 	}
-	num, err := strconv.Atoi(splits[0])
-	if err != nil {
-		return "", err
-	}
-	den, err := strconv.Atoi(splits[1])
-	if err != nil {
-		return "", err
-	}
-	return big.NewRat(int64(num), int64(den)).FloatString(precision), nil
+	return f.Approx(precision), nil
 }
 
 func (r *res) LaTeX() (string, error) {
@@ -55,7 +42,11 @@ func (r *res) LaTeX() (string, error) {
 	if err != nil {
 		return "", err
 	}
-	return r.Body.Eval(&Options{})
+	result, err := r.Body.Eval(&Options{})
+	if err != nil {
+		return "", err
+	}
+	return result.String(), nil
 }
 
 // Parse the given expression and return the Result obtained
@@ -77,7 +68,11 @@ func ParseAndCalculate(expression string, opt *Options) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	return tree.Body.Eval(opt)
+	result, err := tree.Body.Eval(opt)
+	if err != nil {
+		return "", err
+	}
+	return result.String(), nil
 }
 
 // ParseAndConvertToLaTeX an expression with given Options
@@ -86,7 +81,11 @@ func ParseAndConvertToLaTeX(expression string, opt *Options) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	return tree.Body.Eval(opt)
+	result, err := tree.Body.Eval(opt)
+	if err != nil {
+		return "", err
+	}
+	return result.String(), nil
 }
 
 func parseAst(expression string, tpe astType) (*ast, error) {

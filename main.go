@@ -58,6 +58,7 @@ func (r *res) LaTeX() (string, error) {
 	return r.Body.Eval(&Options{})
 }
 
+// Parse the given expression and return the Result obtained
 func Parse(expression string) (Result, error) {
 	tree, err := parseAst(expression, astTypeCalculation)
 	if err != nil {

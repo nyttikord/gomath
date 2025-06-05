@@ -17,7 +17,6 @@ func TestEvalAddUnary(t *testing.T) {
 }
 
 func TestEvalMult(t *testing.T) {
-	t.Log("Testing 1+2")
 	genericTest(t, "2*3", "6")
 }
 
@@ -49,7 +48,7 @@ func TestEvalDivDecimal(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if val != "0.1" {
+	if val.String() != "0.1" {
 		t.Errorf("got %s; want %s", val, "0.1")
 	}
 	if t.Failed() {
@@ -104,7 +103,7 @@ func TestEvalFactorial(t *testing.T) {
 	genericTest(t, "(2*2)!", "24")
 }
 
-func genericTest(t *testing.T, exp string, excepted string) {
+func genericTest(t *testing.T, exp string, expected string) {
 	lexr, err := lex(exp)
 	if err != nil {
 		t.Fatal(err)
@@ -120,8 +119,8 @@ func genericTest(t *testing.T, exp string, excepted string) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if val != excepted {
-		t.Errorf("got %s; want %s", val, excepted)
+	if val.String() != expected {
+		t.Errorf("got %s; want %s", val, expected)
 	}
 	if t.Failed() {
 		t.Log(tree)
@@ -162,7 +161,7 @@ func genericTestRenderLatex(t *testing.T, exp string, excepted string) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if val != excepted {
+	if val.String() != excepted {
 		t.Errorf("got %s; want %s", val, excepted)
 	}
 	if t.Failed() {

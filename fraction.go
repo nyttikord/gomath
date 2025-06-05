@@ -78,6 +78,26 @@ func (f fraction) Approx(precision int) string {
 	return s
 }
 
+func (f fraction) CanBeRepresentedExactly(precision int) bool {
+	if f.IsInt() {
+		return true
+	}
+
+	// Fraction is not an int, and the precision is negative or null, the representation
+	if precision <= 0 {
+		return false
+	}
+
+	rest := big.NewInt(0).Mod(f.Num(), f.Denom())
+
+	for n := 1; n <= precision && rest.Cmp(big.NewInt(0)) == 1; n++ {
+		rest.Mod(rest.Mul(rest, big.NewInt(10)), f.Denom())
+	}
+
+	// Is exact only if rest is null
+	return rest.Cmp(big.NewInt(0)) == 0
+}
+
 func (f fraction) Copy() *fraction {
 	b := intToFraction(1)
 	b.Set(f.Rat)

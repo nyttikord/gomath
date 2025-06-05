@@ -33,6 +33,11 @@ type ast struct {
 	Body statement
 }
 
+func (a *ast) ChangeType(tpe astType) error {
+	a.Type = tpe
+	return a.setStatement(a.Body.getExpr())
+}
+
 func (a *ast) String() string {
 	m, err := json.MarshalIndent(a, "", "  ")
 	if err != nil {
@@ -41,9 +46,21 @@ func (a *ast) String() string {
 	return string(m)
 }
 
+func (a *ast) setStatement(expr expression) error {
+	switch a.Type {
+	case astTypeCalculation:
+		a.Body = &calculationStatement{Expression: expr}
+	case astTypeLatex:
+		a.Body = &latexStatement{Expression: expr}
+	default:
+		return ErrUnknownAstType
+	}
+	return nil
+}
+
 // astParse the given lexer and returns an ast
 func astParse(lexed []*lexer, tpe astType) (*ast, error) {
-	tree := ast{Type: tpe}
+	tree := &ast{Type: tpe}
 	i := 0
 	exp, err := termExpression(lexed, &i)
 	if err != nil {
@@ -52,15 +69,7 @@ func astParse(lexed []*lexer, tpe astType) (*ast, error) {
 	if i < len(lexed) {
 		return nil, errors.Join(ErrUnknownExpression, fmt.Errorf("cannot parse expression %s", lexed[i]))
 	}
-	switch tpe {
-	case astTypeCalculation:
-		tree.Body = &calculationStatement{Expression: exp}
-	case astTypeLatex:
-		tree.Body = &latexStatement{Expression: exp}
-	default:
-		return nil, ErrUnknownAstType
-	}
-	return &tree, nil
+	return tree, tree.setStatement(exp) // works because tree is a pointer
 }
 
 func termExpression(l []*lexer, i *int) (expression, error) {

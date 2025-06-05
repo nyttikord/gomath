@@ -2,7 +2,6 @@ package gomath
 
 import (
 	"errors"
-	"math/big"
 )
 
 var (
@@ -20,7 +19,7 @@ type Result interface {
 	// LaTeX returns the LaTeX representation of the expression leading to the Result
 	LaTeX() (string, error)
 	// IsExact returns true if the fraction can be exactly represented by a string
-	IsExact() bool
+	IsExact(int) bool
 }
 
 type res struct {
@@ -40,13 +39,13 @@ func (r *res) Approx(precision int) string {
 	return f.Approx(precision)
 }
 
-func (r *res) IsExact() bool {
+func (r *res) IsExact(precision int) bool {
 	f := r.result.Fraction()
 	if f == nil {
 		panic(ErrInvalidResult)
 	}
-	d := f.Denom()
-	return big.NewInt(0).Mod(d, big.NewInt(2)).Cmp(nullBigInt) == 0
+
+	return f.CanBeRepresentedExactly(precision)
 }
 
 func (r *res) LaTeX() (string, error) {

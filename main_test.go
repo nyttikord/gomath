@@ -29,15 +29,15 @@ func TestRes_IsExact(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !r.IsExact() {
-		t.Errorf("excepted: %t, got: %t", true, r.IsExact())
+	if !r.IsExact(2) {
+		t.Errorf("excepted: %t, got: %t", true, false)
 	}
 	r, err = Parse("2/3")
 	if err != nil {
 		t.Fatal(err)
 	}
-	if r.IsExact() {
-		t.Errorf("excepted: %t, got: %t", false, r.IsExact())
+	if r.IsExact(20) {
+		t.Errorf("excepted: %t, got: %t", false, true)
 	}
 }
 

@@ -197,3 +197,28 @@ func TestFraction_Approx(t *testing.T) {
 		t.Errorf("got %s; want %s", res, expected)
 	}
 }
+
+func TestFraction_CanBeRepresentedExactly(t *testing.T) {
+	f := newFraction(1, 16) // Equal exactly to 0.0625
+
+	if !f.CanBeRepresentedExactly(5) {
+		t.Errorf("1/16 with precision of 5 digits should be exact")
+	}
+	if !f.CanBeRepresentedExactly(4) {
+		t.Errorf("1/16 with precision of 4 digits should be exact")
+	}
+	if f.CanBeRepresentedExactly(3) {
+		t.Errorf("1/16 with precision of 3 digits should not be exact")
+	}
+	if f.CanBeRepresentedExactly(0) {
+		t.Errorf("1/16 with precision of 0 digits should not be exact")
+	}
+
+	f = newFraction(5, 1) // Integer fraction
+	if !f.CanBeRepresentedExactly(0) {
+		t.Errorf("5/1 should be exact no matter the precision")
+	}
+	if !f.CanBeRepresentedExactly(10) {
+		t.Errorf("5/1 should be exact no matter the precision")
+	}
+}

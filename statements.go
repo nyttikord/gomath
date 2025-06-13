@@ -32,7 +32,7 @@ type calculationStatement struct {
 }
 
 func (p *calculationStatement) Eval(opt *Options) (*statementResult, error) {
-	f, err := p.Expression.Eval()
+	f, err := p.Expression.Eval(opt)
 	if err != nil {
 		return nil, err
 	}
@@ -55,7 +55,7 @@ type latexStatement struct {
 }
 
 func (l *latexStatement) Eval(opt *Options) (*statementResult, error) {
-	s, _, err := l.Expression.RenderLatex()
+	s, _, err := l.Expression.RenderLatex(opt)
 	if err != nil {
 		return nil, err
 	}

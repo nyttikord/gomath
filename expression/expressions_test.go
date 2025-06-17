@@ -1,7 +1,6 @@
 package expression
 
 import (
-	"github.com/nyttikord/gomath"
 	"github.com/nyttikord/gomath/ast"
 	"github.com/nyttikord/gomath/lexer"
 	"testing"
@@ -92,11 +91,22 @@ func TestEvalPrioritySpecialCase(t *testing.T) {
 	t.Log("testing 6/2*2") // must be interpreted as 2*(6/2)
 	genericTest(t, "6/2*2", "6")
 	t.Log("testing 6/2cos(1)") // must be interpreted as 6/(2cos(1))
-	res, err := gomath.ParseAndCalculate("6/(2cos(1))", &ast.Options{})
+	lexr, err := lexer.Lex("6/(2cos(1))")
 	if err != nil {
 		t.Fatal(err)
 	}
-	genericTest(t, "6/2cos(1)", res)
+	tree, err := ast.Parse(lexr, ast.TypeCalculation)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if tree.Type != ast.TypeCalculation {
+		t.Errorf("got type %d; want %d", tree.Type, ast.TypeCalculation)
+	}
+	res, err := tree.Body.Eval(&ast.Options{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	genericTest(t, "6/2cos(1)", res.String())
 }
 
 func TestEvalFactorial(t *testing.T) {

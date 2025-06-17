@@ -1,8 +1,11 @@
 package gomath
 
-import "testing"
+import (
+	"github.com/nyttikord/gomath/ast"
+	"testing"
+)
 
-var testOpt = &Options{
+var testOpt = &ast.Options{
 	Decimal:   true,
 	Precision: 6,
 }

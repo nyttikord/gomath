@@ -1,55 +1,55 @@
-package gomath
+package math
 
-type space interface {
-	Contains(f *fraction) bool
+type Space interface {
+	Contains(f *Fraction) bool
 	String() string
 }
 
-type realSet struct{}
+type RealSet struct{}
 
-type intervalBound struct {
-	Value        *fraction
+type IntervalBound struct {
+	Value        *Fraction
 	IncludeValue bool
 	Infinite     bool
 	Positive     bool
 }
 
-type realInterval struct {
-	LowerBound *intervalBound
-	UpperBound *intervalBound
+type RealInterval struct {
+	LowerBound *IntervalBound
+	UpperBound *IntervalBound
 	CustomName string
 }
 
-type unionSet struct {
-	Sets       []space
+type UnionSet struct {
+	Sets       []Space
 	CustomName string
 }
-type periodicInterval struct {
-	Interval   *realInterval
-	Period     *fraction
+type PeriodicInterval struct {
+	Interval   *RealInterval
+	Period     *Fraction
 	CustomName string
 }
 
 var (
-	spaceRStar = &realInterval{
-		LowerBound: &intervalBound{
-			Value:        nullFraction,
+	SpaceRStar = &RealInterval{
+		LowerBound: &IntervalBound{
+			Value:        NullFraction,
 			IncludeValue: false,
 			Infinite:     false,
 		},
-		UpperBound: &intervalBound{
+		UpperBound: &IntervalBound{
 			Infinite: true,
 			Positive: true,
 		},
 		CustomName: `R \ { 0 }`,
 	}
-	spaceRStarPositive = &realInterval{
-		LowerBound: &intervalBound{
-			Value:        nullFraction,
+	SpaceRStarPositive = &RealInterval{
+		LowerBound: &IntervalBound{
+			Value:        NullFraction,
 			IncludeValue: false,
 			Infinite:     false,
 		},
-		UpperBound: &intervalBound{
+		UpperBound: &IntervalBound{
 			Infinite: true,
 			Positive: true,
 		},
@@ -57,17 +57,17 @@ var (
 	}
 )
 
-func (*realSet) Contains(*fraction) bool {
+func (*RealSet) Contains(*Fraction) bool {
 	return true
 }
-func (*realSet) String() string {
+func (*RealSet) String() string {
 	return "R"
 }
 
-func (i *realInterval) Contains(f *fraction) bool {
+func (i *RealInterval) Contains(f *Fraction) bool {
 	return f.smallerThanBound(i.UpperBound) && f.greaterThanBound(i.LowerBound)
 }
-func (i *realInterval) String() string {
+func (i *RealInterval) String() string {
 	if i.CustomName != "" {
 		return i.CustomName
 	}
@@ -108,7 +108,7 @@ func (i *realInterval) String() string {
 	return s
 }
 
-func (s *unionSet) Contains(f *fraction) bool {
+func (s *UnionSet) Contains(f *Fraction) bool {
 	for _, space := range s.Sets {
 		if !space.Contains(f) {
 			return false
@@ -116,7 +116,7 @@ func (s *unionSet) Contains(f *fraction) bool {
 	}
 	return true
 }
-func (s *unionSet) String() string {
+func (s *UnionSet) String() string {
 	if s.CustomName != "" {
 		return s.CustomName
 	}
@@ -131,7 +131,7 @@ func (s *unionSet) String() string {
 	return st
 }
 
-func (set *periodicInterval) Contains(f *fraction) bool {
+func (set *PeriodicInterval) Contains(f *Fraction) bool {
 	if set.Interval.Contains(f) {
 		return true
 	}
@@ -148,14 +148,14 @@ func (set *periodicInterval) Contains(f *fraction) bool {
 	}
 	return set.Interval.Contains(f)
 }
-func (set *periodicInterval) String() string {
+func (set *PeriodicInterval) String() string {
 	if set.CustomName != "" {
 		return set.CustomName
 	}
 	return set.Interval.String() + " mod " + set.Period.String()
 }
 
-func (f fraction) smallerThanBound(b *intervalBound) bool {
+func (f Fraction) smallerThanBound(b *IntervalBound) bool {
 	if b.Infinite {
 		return b.Positive
 	}
@@ -165,7 +165,7 @@ func (f fraction) smallerThanBound(b *intervalBound) bool {
 	return f.SmallerThan(b.Value)
 }
 
-func (f fraction) greaterThanBound(b *intervalBound) bool {
+func (f Fraction) greaterThanBound(b *IntervalBound) bool {
 	if b.Infinite {
 		return !b.Positive
 	}
@@ -175,14 +175,14 @@ func (f fraction) greaterThanBound(b *intervalBound) bool {
 	return f.GreaterThan(b.Value)
 }
 
-func (f fraction) strictlySmallerThanBound(b *intervalBound) bool {
+func (f Fraction) strictlySmallerThanBound(b *IntervalBound) bool {
 	if b.Infinite {
 		return b.Infinite
 	}
 	return f.SmallerThan(b.Value)
 }
 
-func (f fraction) strictlyGreaterThanBound(b *intervalBound) bool {
+func (f Fraction) strictlyGreaterThanBound(b *IntervalBound) bool {
 	if b.Infinite {
 		return !b.Positive
 	}

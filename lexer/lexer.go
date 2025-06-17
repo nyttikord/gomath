@@ -1,4 +1,4 @@
-package gomath
+package lexer
 
 import (
 	"errors"
@@ -18,21 +18,21 @@ const (
 )
 
 var (
-	operators  = []operator{"+", "-", "*", "/", "^", "%", "=", "!"}
-	separators = []separator{",", "(", ")"}
+	operators  = []string{"+", "-", "*", "/", "^", "%", "=", "!"}
+	separators = []string{",", "(", ")"}
 
 	// ErrSameTypeFollow is thrown when two numbers follow each others
 	ErrSameTypeFollow = errors.New("sequence of two with exclusively numbers")
 )
 
-type lexer struct {
+type Lexer struct {
 	Type  lexType
 	Value string
 }
 
-// lex returns the lexer of the content
-func lex(content string) ([]*lexer, error) {
-	var lexr []*lexer
+// Lex returns the Lexer of the content
+func Lex(content string) ([]*Lexer, error) {
+	var lexr []*Lexer
 	for _, w := range strings.Split(content, " ") {
 		word, err := lexWord(w)
 		if err != nil {
@@ -55,25 +55,25 @@ func lex(content string) ([]*lexer, error) {
 	return lexr, nil
 }
 
-// lexWord returns the lexer of the word
-func lexWord(w string) ([]*lexer, error) {
+// lexWord returns the Lexer of the word
+func lexWord(w string) ([]*Lexer, error) {
 	if isDigit(w) {
 		if []rune(w)[0] == '-' {
-			return []*lexer{
+			return []*Lexer{
 				{Operator, "-"},
 				{Number, w[1:]},
 			}, nil
 		} else if []rune(w)[0] == '+' {
-			return []*lexer{
+			return []*Lexer{
 				{Operator, "+"},
 				{Number, w[1:]},
 			}, nil
 		}
-		return []*lexer{
+		return []*Lexer{
 			{Number, w},
 		}, nil
 	}
-	var lexers []*lexer
+	var lexers []*Lexer
 	sel := ""
 	var tpe lexType
 
@@ -82,7 +82,7 @@ func lexWord(w string) ([]*lexer, error) {
 			return
 		}
 		if tpe != "" {
-			lexers = append(lexers, &lexer{tpe, sel})
+			lexers = append(lexers, &Lexer{tpe, sel})
 		}
 		sel = ""
 		tpe = typ
@@ -93,7 +93,7 @@ func lexWord(w string) ([]*lexer, error) {
 			return
 		}
 		if tpe != "" {
-			lexers = append(lexers, &lexer{tpe, sel})
+			lexers = append(lexers, &Lexer{tpe, sel})
 		}
 		sel = ""
 		tpe = typ
@@ -111,7 +111,7 @@ func lexWord(w string) ([]*lexer, error) {
 		}
 		sel += string(c)
 	}
-	lexers = append(lexers, &lexer{tpe, sel})
+	lexers = append(lexers, &Lexer{tpe, sel})
 	return lexers, nil
 }
 
@@ -123,14 +123,14 @@ func isDigit(s string) bool {
 
 // isOperator checks if the rune is an operator
 func isOperator(s rune) bool {
-	return slices.Contains(operators, operator(s))
+	return slices.Contains(operators, string(s))
 }
 
 // isSeparator checks if the rune is a separator
 func isSeparator(s rune) bool {
-	return slices.Contains(separators, separator(s))
+	return slices.Contains(separators, string(s))
 }
 
-func (l *lexer) String() string {
+func (l *Lexer) String() string {
 	return fmt.Sprintf("%s('%s')", l.Type, l.Value)
 }

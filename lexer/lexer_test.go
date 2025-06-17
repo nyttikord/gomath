@@ -1,17 +1,17 @@
-package gomath
+package lexer
 
 import (
 	"testing"
 )
 
 func TestLexerSum(t *testing.T) {
-	lexr, err := lex("1+2")
+	lexr, err := Lex("1+2")
 	if err != nil {
 		t.Fatal(err)
 	}
-	fn := func(l []*lexer) {
+	fn := func(l []*Lexer) {
 		if len(l) != 3 {
-			t.Errorf("lexer has wrong length, got %d, excepted %d", len(lexr), 3)
+			t.Errorf("Lexer has wrong length, got %d, excepted %d", len(lexr), 3)
 			printLex(t, lexr)
 			return
 		}
@@ -43,32 +43,32 @@ func TestLexerSum(t *testing.T) {
 	t.Log("Testing 1+2")
 	fn(lexr)
 	t.Log("Testing 1 + 2")
-	lexr, err = lex("1 + 2")
+	lexr, err = Lex("1 + 2")
 	if err != nil {
 		t.Fatal(err)
 	}
 	fn(lexr)
 	t.Log("Testing 1+ 2")
-	lexr, err = lex("1+ 2")
+	lexr, err = Lex("1+ 2")
 	if err != nil {
 		t.Fatal(err)
 	}
 	fn(lexr)
 	t.Log("Testing 1 +2")
-	lexr, err = lex("1 +2")
+	lexr, err = Lex("1 +2")
 	if err != nil {
 		t.Fatal(err)
 	}
 }
 
 func TestLexerSub(t *testing.T) {
-	lexr, err := lex("1-2")
+	lexr, err := Lex("1-2")
 	if err != nil {
 		t.Fatal(err)
 	}
-	fn := func(l []*lexer) {
+	fn := func(l []*Lexer) {
 		if len(l) != 3 {
-			t.Errorf("lexer has wrong length, got %d, excepted %d", len(lexr), 3)
+			t.Errorf("Lexer has wrong length, got %d, excepted %d", len(lexr), 3)
 			printLex(t, lexr)
 			return
 		}
@@ -100,32 +100,32 @@ func TestLexerSub(t *testing.T) {
 	t.Log("Testing 1-2")
 	fn(lexr)
 	t.Log("Testing 1 - 2")
-	lexr, err = lex("1 - 2")
+	lexr, err = Lex("1 - 2")
 	if err != nil {
 		t.Fatal(err)
 	}
 	fn(lexr)
 	t.Log("Testing 1- 2")
-	lexr, err = lex("1- 2")
+	lexr, err = Lex("1- 2")
 	if err != nil {
 		t.Fatal(err)
 	}
 	fn(lexr)
 	t.Log("Testing 1 -2")
-	lexr, err = lex("1 -2")
+	lexr, err = Lex("1 -2")
 	if err != nil {
 		t.Fatal(err)
 	}
 }
 
 func TestLexerUnary(t *testing.T) {
-	lexr, err := lex("+1")
+	lexr, err := Lex("+1")
 	if err != nil {
 		t.Fatal(err)
 	}
-	fn := func(l []*lexer, op string) {
+	fn := func(l []*Lexer, op string) {
 		if len(l) != 2 {
-			t.Errorf("lexer has wrong length, got %d, excepted %d", len(lexr), 2)
+			t.Errorf("Lexer has wrong length, got %d, excepted %d", len(lexr), 2)
 			printLex(t, lexr)
 			return
 		}
@@ -150,7 +150,7 @@ func TestLexerUnary(t *testing.T) {
 	t.Log("Testing +1")
 	fn(lexr, "+")
 	t.Log("Testing -1")
-	lexr, err = lex("-1")
+	lexr, err = Lex("-1")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -158,12 +158,12 @@ func TestLexerUnary(t *testing.T) {
 }
 
 func TestLexerComplex(t *testing.T) {
-	lexr, err := lex("2(2+3)^2")
+	lexr, err := Lex("2(2+3)^2")
 	if err != nil {
 		t.Fatal(err)
 	}
 	if len(lexr) != 8 {
-		t.Errorf("lexer has wrong length, got %d, excepted %d", len(lexr), 8)
+		t.Errorf("Lexer has wrong length, got %d, excepted %d", len(lexr), 8)
 	}
 	if lexr[0].Type != Number {
 		t.Errorf("got type %s; want Number", lexr[0].Type)
@@ -216,12 +216,12 @@ func TestLexerComplex(t *testing.T) {
 }
 
 func TestLexer_Word(t *testing.T) {
-	lexr, err := lex("cos sin exp")
+	lexr, err := Lex("cos sin exp")
 	if err != nil {
 		t.Fatal(err)
 	}
 	if len(lexr) != 3 {
-		t.Errorf("lexer has wrong length, got %d, excepted %d", len(lexr), 3)
+		t.Errorf("Lexer has wrong length, got %d, excepted %d", len(lexr), 3)
 	}
 	if lexr[0].Type != Literal {
 		t.Errorf("got type %s; want Literal", lexr[0].Type)
@@ -243,7 +243,7 @@ func TestLexer_Word(t *testing.T) {
 	}
 }
 
-func printLex(t *testing.T, lexr []*lexer) {
+func printLex(t *testing.T, lexr []*Lexer) {
 	s := ""
 	for _, l := range lexr {
 		s += l.String() + " "

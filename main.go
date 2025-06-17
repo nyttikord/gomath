@@ -2,6 +2,8 @@ package gomath
 
 import (
 	"errors"
+	"github.com/nyttikord/gomath/ast"
+	"github.com/nyttikord/gomath/lexer"
 )
 
 var (
@@ -23,8 +25,8 @@ type Result interface {
 }
 
 type res struct {
-	ast    *ast
-	result *statementResult
+	ast    *ast.Ast
+	result *ast.StatementResult
 }
 
 func (r *res) String() string {
@@ -49,11 +51,11 @@ func (r *res) IsExact(precision int) bool {
 }
 
 func (r *res) LaTeX() (string, error) {
-	err := r.ast.ChangeType(astTypeLatex)
+	err := r.ast.ChangeType(ast.TypeLatex)
 	if err != nil {
 		return "", err
 	}
-	result, err := r.ast.Body.Eval(&Options{})
+	result, err := r.ast.Body.Eval(&ast.Options{})
 	if err != nil {
 		return "", err
 	}
@@ -62,11 +64,11 @@ func (r *res) LaTeX() (string, error) {
 
 // Parse the given expression and return the Result obtained
 func Parse(expression string) (Result, error) {
-	tree, err := parseAst(expression, astTypeCalculation)
+	tree, err := parseAst(expression, ast.TypeCalculation)
 	if err != nil {
 		return nil, err
 	}
-	r, err := tree.Body.Eval(&Options{Decimal: false})
+	r, err := tree.Body.Eval(&ast.Options{Decimal: false})
 	if err != nil {
 		return nil, err
 	}
@@ -74,8 +76,8 @@ func Parse(expression string) (Result, error) {
 }
 
 // ParseAndCalculate an expression with given Options
-func ParseAndCalculate(expression string, opt *Options) (string, error) {
-	tree, err := parseAst(expression, astTypeCalculation)
+func ParseAndCalculate(expression string, opt *ast.Options) (string, error) {
+	tree, err := parseAst(expression, ast.TypeCalculation)
 	if err != nil {
 		return "", err
 	}
@@ -87,8 +89,8 @@ func ParseAndCalculate(expression string, opt *Options) (string, error) {
 }
 
 // ParseAndConvertToLaTeX an expression with given Options
-func ParseAndConvertToLaTeX(expression string, opt *Options) (string, error) {
-	tree, err := parseAst(expression, astTypeLatex)
+func ParseAndConvertToLaTeX(expression string, opt *ast.Options) (string, error) {
+	tree, err := parseAst(expression, ast.TypeLatex)
 	if err != nil {
 		return "", err
 	}
@@ -99,10 +101,10 @@ func ParseAndConvertToLaTeX(expression string, opt *Options) (string, error) {
 	return result.String(), nil
 }
 
-func parseAst(expression string, tpe astType) (*ast, error) {
-	lexed, err := lex(expression)
+func parseAst(expression string, tpe ast.Type) (*ast.Ast, error) {
+	lexed, err := lexer.Lex(expression)
 	if err != nil {
 		return nil, err
 	}
-	return astParse(lexed, tpe)
+	return ast.Parse(lexed, tpe)
 }

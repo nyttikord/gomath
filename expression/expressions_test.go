@@ -2,6 +2,8 @@ package expression
 
 import (
 	"github.com/nyttikord/gomath"
+	"github.com/nyttikord/gomath/ast"
+	"github.com/nyttikord/gomath/lexer"
 	"testing"
 )
 
@@ -34,18 +36,18 @@ func TestEvalDivUnary(t *testing.T) {
 }
 
 func TestEvalDivDecimal(t *testing.T) {
-	lexr, err := gomath.lex("1/10")
+	lexr, err := lexer.Lex("1/10")
 	if err != nil {
 		t.Fatal(err)
 	}
-	tree, err := gomath.astParse(lexr, gomath.astTypeCalculation)
+	tree, err := ast.Parse(lexr, ast.TypeCalculation)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if tree.Type != gomath.astTypeCalculation {
-		t.Errorf("got type %d; want %d", tree.Type, gomath.astTypeCalculation)
+	if tree.Type != ast.TypeCalculation {
+		t.Errorf("got type %d; want %d", tree.Type, ast.TypeCalculation)
 	}
-	val, err := tree.Body.Eval(&gomath.Options{true, 3})
+	val, err := tree.Body.Eval(&ast.Options{Decimal: true, Precision: 3})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -90,7 +92,7 @@ func TestEvalPrioritySpecialCase(t *testing.T) {
 	t.Log("testing 6/2*2") // must be interpreted as 2*(6/2)
 	genericTest(t, "6/2*2", "6")
 	t.Log("testing 6/2cos(1)") // must be interpreted as 6/(2cos(1))
-	res, err := gomath.ParseAndCalculate("6/(2cos(1))", &gomath.Options{})
+	res, err := gomath.ParseAndCalculate("6/(2cos(1))", &ast.Options{})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -105,18 +107,18 @@ func TestEvalFactorial(t *testing.T) {
 }
 
 func genericTest(t *testing.T, exp string, expected string) {
-	lexr, err := gomath.lex(exp)
+	lexr, err := lexer.Lex(exp)
 	if err != nil {
 		t.Fatal(err)
 	}
-	tree, err := gomath.astParse(lexr, gomath.astTypeCalculation)
+	tree, err := ast.Parse(lexr, ast.TypeCalculation)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if tree.Type != gomath.astTypeCalculation {
-		t.Errorf("got type %d; want %d", tree.Type, gomath.astTypeCalculation)
+	if tree.Type != ast.TypeCalculation {
+		t.Errorf("got type %d; want %d", tree.Type, ast.TypeCalculation)
 	}
-	val, err := tree.Body.Eval(&gomath.Options{})
+	val, err := tree.Body.Eval(&ast.Options{})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -147,18 +149,18 @@ func TestEvalLatex(t *testing.T) {
 }
 
 func genericTestRenderLatex(t *testing.T, exp string, excepted string) {
-	lexr, err := gomath.lex(exp)
+	lexr, err := lexer.Lex(exp)
 	if err != nil {
 		t.Fatal(err)
 	}
-	tree, err := gomath.astParse(lexr, gomath.astTypeLatex)
+	tree, err := ast.Parse(lexr, ast.TypeLatex)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if tree.Type != gomath.astTypeLatex {
-		t.Errorf("got type %d; want %d", tree.Type, gomath.astTypeLatex)
+	if tree.Type != ast.TypeLatex {
+		t.Errorf("got type %d; want %d", tree.Type, ast.TypeLatex)
 	}
-	val, err := tree.Body.Eval(&gomath.Options{})
+	val, err := tree.Body.Eval(&ast.Options{})
 	if err != nil {
 		t.Fatal(err)
 	}

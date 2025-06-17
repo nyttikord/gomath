@@ -20,8 +20,6 @@ type Expression interface {
 	RenderLatex() (string, priority, error)
 }
 
-type separator string
-
 type priority uint8
 
 const (

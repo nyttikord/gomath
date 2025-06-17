@@ -1,4 +1,4 @@
-package gomath
+package ast
 
 import (
 	"errors"
@@ -12,7 +12,7 @@ func TestAstErrors(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		tree, err := astParse(lexr, astTypeCalculation)
+		tree, err := Parse(lexr, TypeCalculation)
 		if err == nil {
 			t.Errorf("expected error %s", exceptedErr)
 		} else if !errors.Is(err, exceptedErr) {

@@ -2,10 +2,11 @@ package expression
 
 import (
 	"github.com/nyttikord/gomath"
+	"github.com/nyttikord/gomath/ast"
 	"testing"
 )
 
-var testOpt = &gomath.Options{
+var testOpt = &ast.Options{
 	Decimal:   true,
 	Precision: 6,
 }

@@ -1,4 +1,4 @@
-package gomath
+package ast
 
 import (
 	"encoding/json"
@@ -21,29 +21,29 @@ var (
 	// ErrInvalidExpression is thrown when the given expression's syntax is invalid
 	ErrInvalidExpression = errors.New("invalid expression")
 	// ErrUnknownAstType is thrown when GoMath does not know the given astType
-	ErrUnknownAstType = errors.New("unknown ast type")
+	ErrUnknownAstType = errors.New("unknown Ast type")
 )
 
 type astType uint
 
 const (
-	astTypeCalculation astType = 0
-	astTypeLatex       astType = 1
+	TypeCalculation astType = 0
+	TypeLatex       astType = 1
 )
 
-type ast struct {
+type Ast struct {
 	Type astType
 	Body statement
 }
 
 type expressionFunc func(l []*lexer.Lexer, i *int) (expression.Expression, error)
 
-func (a *ast) ChangeType(tpe astType) error {
+func (a *Ast) ChangeType(tpe astType) error {
 	a.Type = tpe
 	return a.setStatement(a.Body.getExpr())
 }
 
-func (a *ast) String() string {
+func (a *Ast) String() string {
 	m, err := json.MarshalIndent(a, "", "  ")
 	if err != nil {
 		return ""
@@ -51,11 +51,11 @@ func (a *ast) String() string {
 	return string(m)
 }
 
-func (a *ast) setStatement(expr expression.Expression) error {
+func (a *Ast) setStatement(expr expression.Expression) error {
 	switch a.Type {
-	case astTypeCalculation:
+	case TypeCalculation:
 		a.Body = &calculationStatement{Expression: expr}
-	case astTypeLatex:
+	case TypeLatex:
 		a.Body = &latexStatement{Expression: expr}
 	default:
 		return ErrUnknownAstType
@@ -63,9 +63,9 @@ func (a *ast) setStatement(expr expression.Expression) error {
 	return nil
 }
 
-// astParse the given lexer and returns an ast
-func astParse(lexed []*lexer.Lexer, tpe astType) (*ast, error) {
-	tree := &ast{Type: tpe}
+// Parse the given lexer and returns an Ast
+func Parse(lexed []*lexer.Lexer, tpe astType) (*Ast, error) {
+	tree := &Ast{Type: tpe}
 	i := 0
 	exp, err := termExpression(lexed, &i)
 	if err != nil {

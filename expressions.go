@@ -3,7 +3,6 @@ package gomath
 import (
 	"errors"
 	"fmt"
-	"math/big"
 	"strings"
 )
 
@@ -23,7 +22,6 @@ type expression interface {
 	RenderLatex() (string, priority, error)
 }
 
-type operator string
 type separator string
 
 type priority uint8
@@ -36,31 +34,16 @@ const (
 	literalPriority priority = 4
 )
 
-type binaryOperation struct {
-	expression
-	Operator    operator
-	Left, Right expression
-}
-
-type unaryOperation struct {
-	expression
-	Operator   operator
-	Expression expression
-}
-
 type literalExp struct {
-	expression
 	Value *fraction
 }
 
 type variable struct {
-	expression
 	ID        string
 	OmitSlash bool
 }
 
 type function struct {
-	expression
 	ID  string
 	exp expression
 }
@@ -69,138 +52,6 @@ type predefinedVariable variable
 type predefinedFunction function
 
 type relation func(*fraction) *fraction
-
-func (b *binaryOperation) Eval() (*fraction, error) {
-	chanLf := make(chan *fraction)
-	chanLr := make(chan *fraction)
-	go func() {
-		lf, err := b.Left.Eval()
-		chanLf <- lf
-		if err != nil {
-			panic(err)
-		}
-	}()
-	go func() {
-		lr, err := b.Right.Eval()
-		chanLr <- lr
-		if err != nil {
-			panic(err)
-		}
-	}()
-	lf := <-chanLf
-	lr := <-chanLr
-	close(chanLf)
-	close(chanLr)
-	switch b.Operator {
-	case "+":
-		return lf.Add(lr), nil
-	case "-":
-		return lf.Sub(lr), nil
-	case "*":
-		return lf.Mul(lr), nil
-	case "/":
-		return lf.Div(lr)
-	case "^":
-		return lf.Exp(lr)
-	default:
-		return nil, errors.Join(ErrUnknownOperation, errors.New("operation "+string(b.Operator)+" is not supported"))
-	}
-}
-
-func (b *binaryOperation) RenderLatex() (string, priority, error) {
-	chanLf := make(chan string)
-	chanLr := make(chan string)
-	chanLfp := make(chan priority)
-	chanLrp := make(chan priority)
-	go func() {
-		lf, p, err := b.Left.RenderLatex()
-		chanLf <- lf
-		chanLfp <- p
-		if err != nil {
-			panic(err)
-		}
-	}()
-	go func() {
-		lr, p, err := b.Right.RenderLatex()
-		chanLr <- lr
-		chanLrp <- p
-		if err != nil {
-			panic(err)
-		}
-	}()
-	lf := <-chanLf
-	lr := <-chanLr
-	lfp := <-chanLfp
-	lrp := <-chanLrp
-	close(chanLf)
-	close(chanLr)
-	close(chanLfp)
-	close(chanLrp)
-	switch b.Operator {
-	case "+", "-":
-		lf = handleLatexParenthesis(lf, lfp, termPriority)
-		lr = handleLatexParenthesis(lr, lrp, termPriority)
-		return fmt.Sprintf("%s %s %s", lf, b.Operator, lr), termPriority, nil
-	case "*":
-		lf = handleLatexParenthesis(lf, lfp, factorPriority)
-		lr = handleLatexParenthesis(lr, lrp, factorPriority)
-		return fmt.Sprintf(`%s \times %s`, lf, lr), factorPriority, nil
-	case "/":
-		return fmt.Sprintf(`\frac{%s}{%s}`, lf, lr), factorPriority, nil
-	case "^":
-		s := handleLatexParenthesis(lf, lfp, expPriority) + "^"
-		if len(lr) > 1 {
-			s += "{" + lr + "}"
-		} else {
-			s += lr
-		}
-		return s, expPriority, nil
-	}
-	return "", 0, errors.Join(ErrUnknownOperation, errors.New("operation "+string(b.Operator)+" is not supported"))
-}
-
-func (b *unaryOperation) Eval() (*fraction, error) {
-	lb, err := b.Expression.Eval()
-	if err != nil {
-		return nil, err
-	}
-	switch b.Operator {
-	case "+":
-		return lb, nil
-	case "-":
-		return lb.Mul(intToFraction(-1)), nil
-	case "!":
-		var i *big.Int
-		if i, err = lb.Int(); err != nil || i.Cmp(nullBigInt) < 0 {
-			return nil, errors.Join(ErrNumberNotInSpace, errors.New("operation "+string(b.Operator)+" is not supported for non positive integer"))
-		}
-		if !i.IsInt64() {
-			return nil, errors.Join(ErrInvalidExpression, fmt.Errorf("number %s is too big", i))
-		}
-		ii := i.Int64()
-		res := ii
-		ii--
-		for ii > 1 {
-			res *= ii
-			ii--
-		}
-		return intToFraction(res), nil
-	default:
-		return nil, errors.Join(ErrUnknownOperation, errors.New("operation "+string(b.Operator)+" is not supported"))
-	}
-}
-
-func (b *unaryOperation) RenderLatex() (string, priority, error) {
-	s, p, err := b.Expression.RenderLatex()
-	if err != nil {
-		return "", unaryPriority, err
-	}
-	s = handleLatexParenthesis(s, p, unaryPriority)
-	if b.Operator == "!" {
-		return fmt.Sprintf("%s!", s), unaryPriority, nil
-	}
-	return fmt.Sprintf("%s%s", b.Operator, s), unaryPriority, nil
-}
 
 func (l *literalExp) Eval() (*fraction, error) {
 	return l.Value, nil

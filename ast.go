@@ -9,9 +9,9 @@ import (
 )
 
 var (
-	termOperators   = []operator{"+", "-"}
-	factorOperators = []operator{"*", "/"}
-	expOperators    = []operator{"^"}
+	termOperators   = []string{"+", "-"}
+	factorOperators = []string{"*", "/"}
+	expOperators    = []string{"^"}
 
 	// ErrUnknownExpression is thrown when GoMath does not know the expression
 	ErrUnknownExpression = errors.New("unknown expression")
@@ -104,16 +104,16 @@ func expExpression(l []*lexer, i *int) (expression, error) {
 		return res, nil
 	}
 	*i++
-	return &unaryOperation{"!", res}, nil
+	return &factorial{res, true}, nil
 }
 
-func binExpression(ops []operator, sub expressionFunc, l []*lexer, i *int) (expression, error) {
+func binExpression(ops []string, sub expressionFunc, l []*lexer, i *int) (expression, error) {
 	left, err := sub(l, i)
 	if err != nil {
 		return nil, err
 	}
-	for *i < len(l) && slices.Contains(ops, operator(l[*i].Value)) {
-		op := operator(l[*i].Value)
+	for *i < len(l) && slices.Contains(ops, l[*i].Value) {
+		op := l[*i].Value
 		*i++
 		if *i >= len(l) {
 			return nil, ErrInvalidExpression
@@ -122,10 +122,19 @@ func binExpression(ops []operator, sub expressionFunc, l []*lexer, i *int) (expr
 		if err != nil {
 			return nil, err
 		}
-		left = &binaryOperation{
-			Operator: op,
-			Left:     left,
-			Right:    right,
+		switch op {
+		case "+":
+			left = &addition{left, right, false}
+		case "-":
+			left = &addition{left, &negation{right, false}, true}
+		case "*":
+			left = &multiplication{left, right, false}
+		case "/":
+			left = &multiplication{left, &inversion{right, false}, true}
+		case "^":
+			left = &exponential{left, right}
+		default:
+			return nil, ErrUnknownOperation
 		}
 	}
 	return left, nil
@@ -141,11 +150,7 @@ func omitExpression(sub expressionFunc, cond func(*lexer) bool, l []*lexer, i *i
 		if err != nil {
 			return nil, err
 		}
-		left = &binaryOperation{
-			Operator: "*",
-			Left:     left,
-			Right:    right,
-		}
+		left = &multiplication{left, right, false}
 	}
 	return left, nil
 }
@@ -185,7 +190,15 @@ func literalExpression(l []*lexer, i *int) (expression, error) {
 		if err != nil {
 			return nil, err
 		}
-		return &unaryOperation{operator(c.Value), exp}, nil
+		switch c.Value {
+		case "-":
+			exp = &negation{exp, true}
+		case "+":
+			exp = &negation{exp, false}
+		default:
+			return nil, ErrUnknownOperation
+		}
+		return exp, nil
 	}
 	return nil, errors.Join(ErrUnknownExpression, fmt.Errorf("unknown type %s: excepting a valid literal expression", c))
 }

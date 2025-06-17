@@ -1,4 +1,4 @@
-package expression
+package gomath
 
 import (
 	"github.com/nyttikord/gomath/ast"

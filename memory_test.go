@@ -1,7 +1,6 @@
-package expression
+package gomath
 
 import (
-	"github.com/nyttikord/gomath"
 	"github.com/nyttikord/gomath/ast"
 	"testing"
 )
@@ -12,7 +11,7 @@ var testOpt = &ast.Options{
 }
 
 func TestMathFunction_Exp(t *testing.T) {
-	res, err := gomath.ParseAndCalculate("exp(0)", testOpt)
+	res, err := ParseAndCalculate("exp(0)", testOpt)
 	expected := "1"
 	if err != nil {
 		t.Fatal(err)
@@ -23,7 +22,7 @@ func TestMathFunction_Exp(t *testing.T) {
 }
 
 func TestMathFunction_Cos(t *testing.T) {
-	res, err := gomath.ParseAndCalculate("cos(0)", testOpt)
+	res, err := ParseAndCalculate("cos(0)", testOpt)
 	expected := "1"
 	if err != nil {
 		t.Fatal(err)
@@ -34,7 +33,7 @@ func TestMathFunction_Cos(t *testing.T) {
 }
 
 func TestMathFunction_Sin(t *testing.T) {
-	res, err := gomath.ParseAndCalculate("sin(0)", testOpt)
+	res, err := ParseAndCalculate("sin(0)", testOpt)
 	expected := "0"
 	if err != nil {
 		t.Fatal(err)
@@ -45,7 +44,7 @@ func TestMathFunction_Sin(t *testing.T) {
 }
 
 func TestMathFunction_Tan(t *testing.T) {
-	res, err := gomath.ParseAndCalculate("tan(0)", testOpt)
+	res, err := ParseAndCalculate("tan(0)", testOpt)
 	expected := "0"
 	if err != nil {
 		t.Fatal(err)

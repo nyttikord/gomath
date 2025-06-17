@@ -30,12 +30,10 @@ type negation struct {
 
 type multiplication struct {
 	Left, Right Expression
-	isDiv       bool
 }
 
-type inversion struct {
-	Left     Expression
-	isSingle bool
+type division struct {
+	Left, Right Expression
 }
 
 type pow struct {
@@ -90,7 +88,7 @@ func (n *negation) RenderLatex() (string, priority, error) {
 	}
 	s = handleLatexParenthesis(s, p, unaryPriority)
 	if !n.IsSingle() {
-		return s, unaryPriority, nil
+		return s, literalPriority, nil
 	}
 	return fmt.Sprintf("%s%s", "-", s), unaryPriority, nil
 }
@@ -118,36 +116,29 @@ func (m *multiplication) RenderLatex() (string, priority, error) {
 	lr := <-cr
 	pf := <-cpl
 	pr := <-cpr
-	if m.isDiv {
-		return fmt.Sprintf(`\frac{%s}{%s}`, lf, lr), factorPriority, nil
-	}
 	lf = handleLatexParenthesis(lf, pf, factorPriority)
 	lr = handleLatexParenthesis(lr, pr, factorPriority)
 	return fmt.Sprintf(`%s \times %s`, lf, lr), factorPriority, nil
 }
 
-func (i *inversion) Eval() (*math.Fraction, error) {
-	lf, err := i.Left.Eval()
-	if err != nil {
-		return nil, err
-	}
-	return lf.Inv()
+func (m *division) Eval() (*math.Fraction, error) {
+	cf := make(chan *math.Fraction)
+	cr := make(chan *math.Fraction)
+	getLeftRight(cf, cr, m.Left, m.Right)
+	lf := <-cf
+	lr := <-cr
+	return lf.Div(lr)
 }
 
-func (i *inversion) RenderLatex() (string, priority, error) {
-	s, p, err := i.Left.RenderLatex()
-	if err != nil {
-		return "", 0, err
-	}
-	s = handleLatexParenthesis(s, p, unaryPriority)
-	if !i.IsSingle() {
-		return s, unaryPriority, nil
-	}
-	return fmt.Sprintf(`\frac{1}{%s}`, s), factorPriority, nil
-}
-
-func (i *inversion) IsSingle() bool {
-	return i.isSingle
+func (m *division) RenderLatex() (string, priority, error) {
+	cf := make(chan string)
+	cr := make(chan string)
+	cpl := make(chan priority)
+	cpr := make(chan priority)
+	getLatexLeftRight(cf, cr, cpl, cpr, m.Left, m.Right)
+	lf := <-cf
+	lr := <-cr
+	return fmt.Sprintf(`\frac{%s}{%s}`, lf, lr), factorPriority, nil
 }
 
 func (e *pow) Eval() (*math.Fraction, error) {
@@ -226,15 +217,11 @@ func Sub(l Expression, r Expression) Operator {
 }
 
 func Mul(l Expression, r Expression) Operator {
-	return &multiplication{l, r, false}
+	return &multiplication{l, r}
 }
 
 func Div(l Expression, r Expression) Operator {
-	return &multiplication{l, &inversion{r, false}, true}
-}
-
-func Inv(l Expression) UnaryOperator {
-	return &inversion{l, true}
+	return &division{l, r}
 }
 
 func Factorial(l Expression) UnaryOperator {

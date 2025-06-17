@@ -1,52 +1,55 @@
-package gomath
+package expression
 
 import (
 	"errors"
 	"fmt"
+	"github.com/nyttikord/gomath/math"
 	"math/big"
 )
 
-type operator interface {
-	Eval() (*fraction, error)
+type Operator interface {
+	Eval() (*math.Fraction, error)
 	RenderLatex() (string, priority, error)
 }
 
-type unaryOperator interface {
+type UnaryOperator interface {
+	Eval() (*math.Fraction, error)
+	RenderLatex() (string, priority, error)
 	IsSingle() bool
 }
 
 type addition struct {
-	Left, Right expression
+	Left, Right Expression
 	isSub       bool
 }
 
 type negation struct {
-	Left     expression
+	Left     Expression
 	isSingle bool
 }
 
 type multiplication struct {
-	Left, Right expression
+	Left, Right Expression
 	isDiv       bool
 }
 
 type inversion struct {
-	Left     expression
+	Left     Expression
 	isSingle bool
 }
 
-type exponential struct {
-	Left, Right expression
+type pow struct {
+	Left, Right Expression
 }
 
 type factorial struct {
-	Left     expression
+	Left     Expression
 	isSingle bool
 }
 
-func (a *addition) Eval() (*fraction, error) {
-	cf := make(chan *fraction)
-	cr := make(chan *fraction)
+func (a *addition) Eval() (*math.Fraction, error) {
+	cf := make(chan *math.Fraction)
+	cr := make(chan *math.Fraction)
 	getLeftRight(cf, cr, a.Left, a.Right)
 	lf := <-cf
 	lr := <-cr
@@ -72,7 +75,7 @@ func (a *addition) RenderLatex() (string, priority, error) {
 	return fmt.Sprintf("%s%s%s", lf, op, lr), termPriority, nil
 }
 
-func (n *negation) Eval() (*fraction, error) {
+func (n *negation) Eval() (*math.Fraction, error) {
 	lf, err := n.Left.Eval()
 	if err != nil {
 		return nil, err
@@ -96,9 +99,9 @@ func (n *negation) IsSingle() bool {
 	return n.isSingle
 }
 
-func (m *multiplication) Eval() (*fraction, error) {
-	cf := make(chan *fraction)
-	cr := make(chan *fraction)
+func (m *multiplication) Eval() (*math.Fraction, error) {
+	cf := make(chan *math.Fraction)
+	cr := make(chan *math.Fraction)
 	getLeftRight(cf, cr, m.Left, m.Right)
 	lf := <-cf
 	lr := <-cr
@@ -123,7 +126,7 @@ func (m *multiplication) RenderLatex() (string, priority, error) {
 	return fmt.Sprintf(`%s \times %s`, lf, lr), factorPriority, nil
 }
 
-func (i *inversion) Eval() (*fraction, error) {
+func (i *inversion) Eval() (*math.Fraction, error) {
 	lf, err := i.Left.Eval()
 	if err != nil {
 		return nil, err
@@ -147,16 +150,16 @@ func (i *inversion) IsSingle() bool {
 	return i.isSingle
 }
 
-func (e *exponential) Eval() (*fraction, error) {
-	cf := make(chan *fraction)
-	cr := make(chan *fraction)
+func (e *pow) Eval() (*math.Fraction, error) {
+	cf := make(chan *math.Fraction)
+	cr := make(chan *math.Fraction)
 	getLeftRight(cf, cr, e.Left, e.Right)
 	lf := <-cf
 	lr := <-cr
 	return lf.Exp(lr)
 }
 
-func (e *exponential) RenderLatex() (string, priority, error) {
+func (e *pow) RenderLatex() (string, priority, error) {
 	cf := make(chan string)
 	cr := make(chan string)
 	cpl := make(chan priority)
@@ -175,17 +178,17 @@ func (e *exponential) RenderLatex() (string, priority, error) {
 	return s, expPriority, nil
 }
 
-func (f *factorial) Eval() (*fraction, error) {
+func (f *factorial) Eval() (*math.Fraction, error) {
 	lf, err := f.Left.Eval()
 	if err != nil {
 		return nil, err
 	}
 	var i *big.Int
-	if i, err = lf.Int(); err != nil || i.Cmp(nullBigInt) < 0 {
+	if i, err = lf.Int(); err != nil || i.Cmp(math.NullBigInt) < 0 {
 		return nil, errors.Join(ErrNumberNotInSpace, errors.New("factorial is not supported for non positive integer"))
 	}
 	if !i.IsInt64() {
-		return nil, errors.Join(ErrInvalidExpression, fmt.Errorf("number %s is too big", i))
+		return nil, errors.Join(ErrNumberNotInSpace, fmt.Errorf("number %s is too big", i))
 	}
 	ii := i.Int64()
 	res := ii
@@ -194,7 +197,7 @@ func (f *factorial) Eval() (*fraction, error) {
 		res *= ii
 		ii--
 	}
-	return intToFraction(res), nil
+	return math.IntToFraction(res), nil
 }
 
 func (f *factorial) RenderLatex() (string, priority, error) {
@@ -210,7 +213,39 @@ func (f *factorial) IsSingle() bool {
 	return f.isSingle
 }
 
-func getLeftRight(cl, cr chan<- *fraction, left, right expression) {
+func Neg(l Expression) UnaryOperator {
+	return &negation{l, true}
+}
+
+func Add(l Expression, r Expression) Operator {
+	return &addition{l, r, false}
+}
+
+func Sub(l Expression, r Expression) Operator {
+	return &addition{l, &negation{r, false}, true}
+}
+
+func Mul(l Expression, r Expression) Operator {
+	return &multiplication{l, r, false}
+}
+
+func Div(l Expression, r Expression) Operator {
+	return &multiplication{l, &inversion{r, false}, true}
+}
+
+func Inv(l Expression) UnaryOperator {
+	return &inversion{l, true}
+}
+
+func Factorial(l Expression) UnaryOperator {
+	return &factorial{l, true}
+}
+
+func Pow(l Expression, r Expression) Operator {
+	return &pow{l, r}
+}
+
+func getLeftRight(cl, cr chan<- *math.Fraction, left, right Expression) {
 	go func() {
 		lf, err := left.Eval()
 		cl <- lf
@@ -227,7 +262,7 @@ func getLeftRight(cl, cr chan<- *fraction, left, right expression) {
 	}()
 }
 
-func getLatexLeftRight(cl, cr chan<- string, cpl, cpr chan<- priority, left, right expression) {
+func getLatexLeftRight(cl, cr chan<- string, cpl, cpr chan<- priority, left, right Expression) {
 	go func() {
 		lf, p, err := left.RenderLatex()
 		cl <- lf

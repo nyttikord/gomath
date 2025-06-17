@@ -2,12 +2,13 @@ package gomath
 
 import (
 	"errors"
+	"github.com/nyttikord/gomath/lexer"
 	"testing"
 )
 
 func TestAstErrors(t *testing.T) {
 	genericTestAstError := func(exp string, exceptedErr error) {
-		lexr, err := lex(exp)
+		lexr, err := lexer.Lex(exp)
 		if err != nil {
 			t.Fatal(err)
 		}

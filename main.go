@@ -2,6 +2,7 @@ package gomath
 
 import (
 	"errors"
+	"github.com/nyttikord/gomath/lexer"
 )
 
 var (
@@ -100,7 +101,7 @@ func ParseAndConvertToLaTeX(expression string, opt *Options) (string, error) {
 }
 
 func parseAst(expression string, tpe astType) (*ast, error) {
-	lexed, err := lex(expression)
+	lexed, err := lexer.Lex(expression)
 	if err != nil {
 		return nil, err
 	}

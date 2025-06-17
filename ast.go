@@ -4,6 +4,9 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/nyttikord/gomath/expression"
+	"github.com/nyttikord/gomath/lexer"
+	"github.com/nyttikord/gomath/math"
 	"slices"
 	"strconv"
 )
@@ -33,6 +36,8 @@ type ast struct {
 	Body statement
 }
 
+type expressionFunc func(l []*lexer.Lexer, i *int) (expression.Expression, error)
+
 func (a *ast) ChangeType(tpe astType) error {
 	a.Type = tpe
 	return a.setStatement(a.Body.getExpr())
@@ -46,7 +51,7 @@ func (a *ast) String() string {
 	return string(m)
 }
 
-func (a *ast) setStatement(expr expression) error {
+func (a *ast) setStatement(expr expression.Expression) error {
 	switch a.Type {
 	case astTypeCalculation:
 		a.Body = &calculationStatement{Expression: expr}
@@ -59,7 +64,7 @@ func (a *ast) setStatement(expr expression) error {
 }
 
 // astParse the given lexer and returns an ast
-func astParse(lexed []*lexer, tpe astType) (*ast, error) {
+func astParse(lexed []*lexer.Lexer, tpe astType) (*ast, error) {
 	tree := &ast{Type: tpe}
 	i := 0
 	exp, err := termExpression(lexed, &i)
@@ -72,27 +77,27 @@ func astParse(lexed []*lexer, tpe astType) (*ast, error) {
 	return tree, tree.setStatement(exp) // works because tree is a pointer
 }
 
-func termExpression(l []*lexer, i *int) (expression, error) {
+func termExpression(l []*lexer.Lexer, i *int) (expression.Expression, error) {
 	return binExpression(termOperators, omitParenthesisExpression, l, i)
 }
 
-func omitParenthesisExpression(l []*lexer, i *int) (expression, error) {
-	return omitExpression(factorExpression, func(l *lexer) bool {
-		return l.Type == Separator && l.Value == "("
+func omitParenthesisExpression(l []*lexer.Lexer, i *int) (expression.Expression, error) {
+	return omitExpression(factorExpression, func(l *lexer.Lexer) bool {
+		return l.Type == lexer.Separator && l.Value == "("
 	}, l, i)
 }
 
-func factorExpression(l []*lexer, i *int) (expression, error) {
+func factorExpression(l []*lexer.Lexer, i *int) (expression.Expression, error) {
 	return binExpression(factorOperators, omitLiteralExpression, l, i)
 }
 
-func omitLiteralExpression(l []*lexer, i *int) (expression, error) {
-	return omitExpression(expExpression, func(l *lexer) bool {
-		return l.Type == Literal
+func omitLiteralExpression(l []*lexer.Lexer, i *int) (expression.Expression, error) {
+	return omitExpression(expExpression, func(l *lexer.Lexer) bool {
+		return l.Type == lexer.Literal
 	}, l, i)
 }
 
-func expExpression(l []*lexer, i *int) (expression, error) {
+func expExpression(l []*lexer.Lexer, i *int) (expression.Expression, error) {
 	res, err := binExpression(expOperators, literalExpression, l, i)
 	if err != nil {
 		return nil, err
@@ -100,14 +105,14 @@ func expExpression(l []*lexer, i *int) (expression, error) {
 	if *i == len(l) {
 		return res, nil
 	}
-	if l[*i].Type != Operator || l[*i].Value != "!" {
+	if l[*i].Type != lexer.Operator || l[*i].Value != "!" {
 		return res, nil
 	}
 	*i++
-	return &factorial{res, true}, nil
+	return expression.Factorial(res), nil
 }
 
-func binExpression(ops []string, sub expressionFunc, l []*lexer, i *int) (expression, error) {
+func binExpression(ops []string, sub expressionFunc, l []*lexer.Lexer, i *int) (expression.Expression, error) {
 	left, err := sub(l, i)
 	if err != nil {
 		return nil, err
@@ -124,23 +129,23 @@ func binExpression(ops []string, sub expressionFunc, l []*lexer, i *int) (expres
 		}
 		switch op {
 		case "+":
-			left = &addition{left, right, false}
+			left = expression.Add(left, right)
 		case "-":
-			left = &addition{left, &negation{right, false}, true}
+			left = expression.Sub(left, right)
 		case "*":
-			left = &multiplication{left, right, false}
+			left = expression.Mul(left, right)
 		case "/":
-			left = &multiplication{left, &inversion{right, false}, true}
+			left = expression.Div(left, right)
 		case "^":
-			left = &exponential{left, right}
+			left = expression.Pow(left, right)
 		default:
-			return nil, ErrUnknownOperation
+			return nil, expression.ErrUnknownOperation
 		}
 	}
 	return left, nil
 }
 
-func omitExpression(sub expressionFunc, cond func(*lexer) bool, l []*lexer, i *int) (expression, error) {
+func omitExpression(sub expressionFunc, cond func(*lexer.Lexer) bool, l []*lexer.Lexer, i *int) (expression.Expression, error) {
 	left, err := sub(l, i)
 	if err != nil {
 		return nil, err
@@ -150,28 +155,28 @@ func omitExpression(sub expressionFunc, cond func(*lexer) bool, l []*lexer, i *i
 		if err != nil {
 			return nil, err
 		}
-		left = &multiplication{left, right, false}
+		left = expression.Mul(left, right)
 	}
 	return left, nil
 }
 
-func literalExpression(l []*lexer, i *int) (expression, error) {
+func literalExpression(l []*lexer.Lexer, i *int) (expression.Expression, error) {
 	c := l[*i]
 	*i++
 	switch c.Type {
-	case Number:
+	case lexer.Number:
 		v, err := strconv.ParseFloat(c.Value, 64)
 		if err != nil {
 			return nil, err
 		}
-		f, err := floatToFraction(v)
+		f, err := math.FloatToFraction(v)
 		if err != nil {
 			return nil, err
 		}
-		return &literalExp{Value: f}, nil
-	case Literal:
+		return expression.Const(f), nil
+	case lexer.Literal:
 		return predefinedExpression(l, i, c.Value)
-	case Separator:
+	case lexer.Separator:
 		if c.Value == "(" {
 			exp, err := termExpression(l, i)
 			if err != nil {
@@ -185,42 +190,41 @@ func literalExpression(l []*lexer, i *int) (expression, error) {
 			*i++
 			return exp, nil
 		}
-	case Operator:
+	case lexer.Operator:
 		exp, err := expExpression(l, i)
 		if err != nil {
 			return nil, err
 		}
 		switch c.Value {
 		case "-":
-			exp = &negation{exp, true}
+			exp = expression.Neg(exp)
 		case "+":
-			exp = &negation{exp, false}
+			exp = expression.Neg(expression.Neg(exp))
 		default:
-			return nil, ErrUnknownOperation
+			return nil, expression.ErrUnknownOperation
 		}
 		return exp, nil
 	}
 	return nil, errors.Join(ErrUnknownExpression, fmt.Errorf("unknown type %s: excepting a valid literal expression", c))
 }
 
-func predefinedExpression(l []*lexer, i *int, id string) (expression, error) {
-	if isPredefinedVariable(id) {
-		v := predefinedVariables[id]
-		return &predefinedVariable{id, v.OmitSlash}, nil
+func predefinedExpression(l []*lexer.Lexer, i *int, id string) (expression.Expression, error) {
+	if expression.IsPredefinedVariable(id) {
+		return expression.LiteralVariable(id), nil
 	}
-	if isPredefinedFunction(id) {
+	if expression.IsPredefinedFunction(id) {
 		exp, err := operatorExpression(l, i)
 		if err != nil {
 			return nil, err
 		}
-		return &predefinedFunction{id, exp}, nil
+		return expression.LiteralFunction(id, exp), nil
 	}
-	return nil, genErrUnknownVariable(id)
+	return nil, expression.GenErrUnknownVariable(id)
 }
 
-func operatorExpression(l []*lexer, i *int) (expression, error) {
+func operatorExpression(l []*lexer.Lexer, i *int) (expression.Expression, error) {
 	c := l[*i]
-	if c.Type == Separator && c.Value == "(" {
+	if c.Type == lexer.Separator && c.Value == "(" {
 		*i++
 		exp, err := termExpression(l, i)
 		if err != nil {

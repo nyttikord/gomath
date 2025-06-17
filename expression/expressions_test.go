@@ -1,6 +1,7 @@
-package gomath
+package expression
 
 import (
+	"github.com/nyttikord/gomath"
 	"testing"
 )
 
@@ -33,18 +34,18 @@ func TestEvalDivUnary(t *testing.T) {
 }
 
 func TestEvalDivDecimal(t *testing.T) {
-	lexr, err := lex("1/10")
+	lexr, err := gomath.lex("1/10")
 	if err != nil {
 		t.Fatal(err)
 	}
-	tree, err := astParse(lexr, astTypeCalculation)
+	tree, err := gomath.astParse(lexr, gomath.astTypeCalculation)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if tree.Type != astTypeCalculation {
-		t.Errorf("got type %d; want %d", tree.Type, astTypeCalculation)
+	if tree.Type != gomath.astTypeCalculation {
+		t.Errorf("got type %d; want %d", tree.Type, gomath.astTypeCalculation)
 	}
-	val, err := tree.Body.Eval(&Options{true, 3})
+	val, err := tree.Body.Eval(&gomath.Options{true, 3})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -89,7 +90,7 @@ func TestEvalPrioritySpecialCase(t *testing.T) {
 	t.Log("testing 6/2*2") // must be interpreted as 2*(6/2)
 	genericTest(t, "6/2*2", "6")
 	t.Log("testing 6/2cos(1)") // must be interpreted as 6/(2cos(1))
-	res, err := ParseAndCalculate("6/(2cos(1))", &Options{})
+	res, err := gomath.ParseAndCalculate("6/(2cos(1))", &gomath.Options{})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -104,18 +105,18 @@ func TestEvalFactorial(t *testing.T) {
 }
 
 func genericTest(t *testing.T, exp string, expected string) {
-	lexr, err := lex(exp)
+	lexr, err := gomath.lex(exp)
 	if err != nil {
 		t.Fatal(err)
 	}
-	tree, err := astParse(lexr, astTypeCalculation)
+	tree, err := gomath.astParse(lexr, gomath.astTypeCalculation)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if tree.Type != astTypeCalculation {
-		t.Errorf("got type %d; want %d", tree.Type, astTypeCalculation)
+	if tree.Type != gomath.astTypeCalculation {
+		t.Errorf("got type %d; want %d", tree.Type, gomath.astTypeCalculation)
 	}
-	val, err := tree.Body.Eval(&Options{})
+	val, err := tree.Body.Eval(&gomath.Options{})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -146,18 +147,18 @@ func TestEvalLatex(t *testing.T) {
 }
 
 func genericTestRenderLatex(t *testing.T, exp string, excepted string) {
-	lexr, err := lex(exp)
+	lexr, err := gomath.lex(exp)
 	if err != nil {
 		t.Fatal(err)
 	}
-	tree, err := astParse(lexr, astTypeLatex)
+	tree, err := gomath.astParse(lexr, gomath.astTypeLatex)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if tree.Type != astTypeLatex {
-		t.Errorf("got type %d; want %d", tree.Type, astTypeLatex)
+	if tree.Type != gomath.astTypeLatex {
+		t.Errorf("got type %d; want %d", tree.Type, gomath.astTypeLatex)
 	}
-	val, err := tree.Body.Eval(&Options{})
+	val, err := tree.Body.Eval(&gomath.Options{})
 	if err != nil {
 		t.Fatal(err)
 	}

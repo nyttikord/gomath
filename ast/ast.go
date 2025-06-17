@@ -20,25 +20,25 @@ var (
 	ErrUnknownExpression = errors.New("unknown expression")
 	// ErrInvalidExpression is thrown when the given expression's syntax is invalid
 	ErrInvalidExpression = errors.New("invalid expression")
-	// ErrUnknownAstType is thrown when GoMath does not know the given astType
+	// ErrUnknownAstType is thrown when GoMath does not know the given Type
 	ErrUnknownAstType = errors.New("unknown Ast type")
 )
 
-type astType uint
+type Type uint
 
 const (
-	TypeCalculation astType = 0
-	TypeLatex       astType = 1
+	TypeCalculation Type = 0
+	TypeLatex       Type = 1
 )
 
 type Ast struct {
-	Type astType
+	Type Type
 	Body statement
 }
 
 type expressionFunc func(l []*lexer.Lexer, i *int) (expression.Expression, error)
 
-func (a *Ast) ChangeType(tpe astType) error {
+func (a *Ast) ChangeType(tpe Type) error {
 	a.Type = tpe
 	return a.setStatement(a.Body.getExpr())
 }
@@ -64,7 +64,7 @@ func (a *Ast) setStatement(expr expression.Expression) error {
 }
 
 // Parse the given lexer and returns an Ast
-func Parse(lexed []*lexer.Lexer, tpe astType) (*Ast, error) {
+func Parse(lexed []*lexer.Lexer, tpe Type) (*Ast, error) {
 	tree := &Ast{Type: tpe}
 	i := 0
 	exp, err := termExpression(lexed, &i)

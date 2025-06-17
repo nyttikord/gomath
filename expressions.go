@@ -37,25 +37,30 @@ const (
 )
 
 type binaryOperation struct {
+	expression
 	Operator    operator
 	Left, Right expression
 }
 
 type unaryOperation struct {
+	expression
 	Operator   operator
 	Expression expression
 }
 
 type literalExp struct {
+	expression
 	Value *fraction
 }
 
 type variable struct {
+	expression
 	ID        string
 	OmitSlash bool
 }
 
 type function struct {
+	expression
 	ID  string
 	exp expression
 }

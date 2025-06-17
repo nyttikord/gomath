@@ -142,6 +142,7 @@ func genericTest(t *testing.T, exp string, expected string) {
 
 func TestEvalLatex(t *testing.T) {
 	genericTestRenderLatex(t, "(1+2)/3", `\frac{1 + 2}{3}`)
+	genericTestRenderLatex(t, "1+-2", `1 + -2`)
 	genericTestRenderLatex(t, "3/(1+2)", `\frac{3}{1 + 2}`)
 	genericTestRenderLatex(t, "cos(2*pi)", `\cos\left(2 \times \pi\right)`)
 	genericTestRenderLatex(t, "e^(5+2)", `e^{5 + 2}`)

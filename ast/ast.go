@@ -178,7 +178,6 @@ func literalExpression(l []*lexer.Lexer, i *int) (expression.Expression, error) 
 		return predefinedExpression(l, i, c.Value)
 	case lexer.Separator:
 		if c.Value == "(" {
-			println("here")
 			exp, err := termExpression(l, i)
 			if err != nil {
 				return nil, err

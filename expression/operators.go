@@ -72,7 +72,7 @@ func (a *addition) RenderLatex() (string, priority, error) {
 	if a.isSub {
 		op = "-"
 	}
-	return fmt.Sprintf("%s%s%s", lf, op, lr), termPriority, nil
+	return fmt.Sprintf("%s %s %s", lf, op, lr), termPriority, nil
 }
 
 func (n *negation) Eval() (*math.Fraction, error) {

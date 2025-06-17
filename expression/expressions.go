@@ -58,7 +58,7 @@ func (l *constExp) RenderLatex() (string, priority, error) {
 
 func handleLatexParenthesis(s string, stringPriority, currentPriority priority) string {
 	if strings.Contains(s, " ") && stringPriority < currentPriority {
-		s = `\left(` + s + `\right)`
+		return `\left(` + s + `\right)`
 	}
 	return s
 }

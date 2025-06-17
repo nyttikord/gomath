@@ -141,21 +141,21 @@ func genericTest(t *testing.T, exp string, expected string) {
 }
 
 func TestEvalLatex(t *testing.T) {
-	genericTestRenderLatex(t, "(1+2)/3", `\frac{1+2}{3}`)
-	genericTestRenderLatex(t, "3/(1+2)", `\frac{3}{1+2}`)
+	genericTestRenderLatex(t, "(1+2)/3", `\frac{1 + 2}{3}`)
+	genericTestRenderLatex(t, "3/(1+2)", `\frac{3}{1 + 2}`)
 	genericTestRenderLatex(t, "cos(2*pi)", `\cos\left(2 \times \pi\right)`)
-	genericTestRenderLatex(t, "e^(5+2)", `e^{5+2}`)
+	genericTestRenderLatex(t, "e^(5+2)", `e^{5 + 2}`)
 	genericTestRenderLatex(t, "e^5", `e^5`)
-	genericTestRenderLatex(t, "(1+2)^5", `\left(1+2\right)^5`)
-	genericTestRenderLatex(t, "5*(1+2)^5", `5 \times \left(1+2\right)^5`)
-	genericTestRenderLatex(t, "5(1+2)^5", `5 \times \left(1+2\right)^5`)
-	genericTestRenderLatex(t, "(1+2/3)/2", `\frac{1+\frac{2}{3}}{2}`)
-	genericTestRenderLatex(t, "2*(1+2)", `2 \times \left(1+2\right)`)
+	genericTestRenderLatex(t, "(1+2)^5", `\left(1 + 2\right)^5`)
+	genericTestRenderLatex(t, "5*(1+2)^5", `5 \times \left(1 + 2\right)^5`)
+	genericTestRenderLatex(t, "5(1+2)^5", `5 \times \left(1 + 2\right)^5`)
+	genericTestRenderLatex(t, "(1+2/3)/2", `\frac{1 + \frac{2}{3}}{2}`)
+	genericTestRenderLatex(t, "2*(1+2)", `2 \times \left(1 + 2\right)`)
 	genericTestRenderLatex(t, "2!", `2!`)
 	genericTestRenderLatex(t, "2*2!", `2 \times 2!`)
 	genericTestRenderLatex(t, "2!*2!", `2! \times 2!`)
 	genericTestRenderLatex(t, "3^2!", `3^2!`)
-	genericTestRenderLatex(t, "(3+2)!", `\left(3+2\right)!`)
+	genericTestRenderLatex(t, "(3+2)!", `\left(3 + 2\right)!`)
 }
 
 func genericTestRenderLatex(t *testing.T, exp string, excepted string) {
@@ -177,7 +177,7 @@ func genericTestRenderLatex(t *testing.T, exp string, excepted string) {
 	if val.String() != excepted {
 		t.Errorf("got %s; want %s", val, excepted)
 	}
-	if t.Failed() {
-		t.Log(tree)
-	}
+	//if t.Failed() {
+	//	t.Log(tree)
+	//}
 }

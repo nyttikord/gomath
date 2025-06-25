@@ -199,7 +199,6 @@ func literalExpression(l []*lexer.Lexer, i *int) (expression.Expression, error) 
 		case "-":
 			exp = expression.Neg(exp)
 		case "+":
-			exp = expression.Neg(expression.Neg(exp))
 		default:
 			return nil, expression.ErrUnknownOperation
 		}

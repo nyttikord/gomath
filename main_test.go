@@ -1,6 +1,9 @@
 package gomath
 
-import "testing"
+import (
+	"github.com/nyttikord/gomath/ast"
+	"testing"
+)
 
 func TestRes_Approx(t *testing.T) {
 	r, err := Parse("3/4")
@@ -50,7 +53,7 @@ func TestRes_LaTeX(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	excepted, err := ParseAndConvertToLaTeX("3/4", &Options{})
+	excepted, err := ParseAndConvertToLaTeX("3/4", &ast.Options{})
 	if err != nil {
 		t.Fatal(err)
 	}

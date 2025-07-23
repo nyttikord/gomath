@@ -77,29 +77,29 @@ func lexWord(w string) ([]*Lexer, error) {
 	}
 	var lexers []*Lexer
 	isDecimal := false
-	sel := ""
-	var tpe lexType
+	content := ""
+	var precType lexType
 
-	fnUpdate := func(typ lexType) {
-		if tpe == typ {
+	fnUpdate := func(newType lexType) {
+		if precType == newType {
 			return
 		}
-		if tpe != "" {
-			lexers = append(lexers, &Lexer{tpe, sel})
+		if precType != "" {
+			lexers = append(lexers, &Lexer{precType, content})
 		}
-		sel = ""
-		tpe = typ
+		content = ""
+		precType = newType
 	}
 
 	fnUpdateUnique := func(typ lexType) {
-		if tpe == typ && sel == "" {
+		if precType == typ && content == "" {
 			return
 		}
-		if tpe != "" {
-			lexers = append(lexers, &Lexer{tpe, sel})
+		if precType != "" {
+			lexers = append(lexers, &Lexer{precType, content})
 		}
-		sel = ""
-		tpe = typ
+		content = ""
+		precType = typ
 	}
 
 	for _, c := range []rune(w) {
@@ -107,8 +107,8 @@ func lexWord(w string) ([]*Lexer, error) {
 			if !isDecimal {
 				isDecimal = c == '.'
 			}
-			if sel == "" {
-				sel += "0" // turns .5 into 0.5
+			if content == "" {
+				content += "0" // turns .5 into 0.5
 			}
 			fnUpdate(Number)
 		} else if isOperator(c) {
@@ -118,10 +118,9 @@ func lexWord(w string) ([]*Lexer, error) {
 		} else {
 			fnUpdate(Literal)
 		}
-		sel += string(c)
+		content += string(c)
 	}
-	lexers = append(lexers, &Lexer{tpe, sel})
-	return lexers, nil
+	return append(lexers, &Lexer{precType, content}), nil
 }
 
 // isDigit checks if the string contains a digit

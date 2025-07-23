@@ -10,6 +10,12 @@ $ go get -u github.com/nyttikord/gomath@latest
 ```
 You can replace `latest` with any valid tags.
 
+You can install a CLI with
+```bash
+$ go install github.com/nyttikord/gomath/cmd@latest
+```
+You can replace `latest` with any valid tags.
+
 ### Calculate
 
 To parse an expression and calculate it, use `gomath.ParseAndCalculate(string, *gomath.Options) (string, error)`.
@@ -37,6 +43,14 @@ res, err := gomath.ParseAndConvertToLatex("(1+2/3)/2", &gomath.Options{})
 err == nil // true
 res == `\frac{1 + \frac{2}{3}}{2}` // true
 ```
+
+### CLI
+
+You can get the help with `gomath help`.
+
+To evaluate an expression, use `gomath eval <expression>`.
+
+To convert to $\LaTeX$ an expression, use `gomath latex <expression>`. 
 
 ### Special case
 

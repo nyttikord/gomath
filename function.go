@@ -13,13 +13,13 @@ var (
 
 type Function func(map[string]string) (Result, error)
 
-func NewFunction(s string) (Function, error) {
+func NewFunction(s string) (Function, int, error) {
 	splits := strings.Split(s, "->")
 	if len(splits) != 2 {
-		return nil, errors.Join(ErrInvalidFunction, errors.New("a function is defined by 'args -> expression'"))
+		return nil, 0, errors.Join(ErrInvalidFunction, errors.New("a function is defined by 'args -> expression'"))
 	}
 	before := splits[0]
-	expression := splits[1]
+	expression := strings.TrimSpace(splits[1])
 	var params []string
 	for _, p := range strings.Split(before, ",") {
 		params = append(params, strings.TrimSpace(p))
@@ -37,5 +37,5 @@ func NewFunction(s string) (Function, error) {
 			cp = strings.ReplaceAll(cp, p, v)
 		}
 		return Parse(cp)
-	}, nil
+	}, len(params), nil
 }

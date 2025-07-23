@@ -13,6 +13,15 @@ var (
 
 type Function func(map[string]string) (Result, error)
 
+// NewFunction creates a new Function by parsing the given string. It must follow this scheme:
+//
+//	arg1, arg2, arg3... -> expr
+//
+// Example:
+//
+//	gomath.NewFunction("x, y -> x^y")
+//
+// It returns the Function and the number of arguments.
 func NewFunction(s string) (Function, int, error) {
 	splits := strings.Split(s, "->")
 	if len(splits) != 2 {

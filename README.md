@@ -10,32 +10,55 @@ $ go get -u github.com/nyttikord/gomath@latest
 ```
 You can replace `latest` with any valid tags.
 
-### Calculate
+### General parsing
 
-To parse an expression and calculate it, use `gomath.ParseAndCalculate(string, *gomath.Options) (string, error)`.
+To parse an expression, use `gomath.Parse(string) (gomath.Result, error)`.
 The string is a valid expression, like `1+2` or `2(1/3+4)^5`.
-It returns the result of the expression in a string according to the given options.
+
+The result will give you everything needed to perform operations like the exact representation or the ability to convert
+it to $\LaTeX$ code.
 
 ```go
-res, err := gomath.ParseAndCalculate("1+2", &gomath.Options{})
-err == nil // true
-res == "3" // true
+res, err := gomath.Parse("1/2+1")
+// check the error
+res.String == "3/2" // true
+res.IsExact // true because 1.5 is the exact representation of 3/2
+res.LaTeX == `\frac{1}{2} + 1` // true
+res.Approx(5) == "1.50000" // true
 ```
 
-You can modify the result's type with `gomath.Options`.
-Set `Decimal` to `true` if you want to have a decimal approximation.
-You can specify the number of digits with `Precision`.
+You can also call `gomath.ParseAndCalculate(string, *gomath.Options) (string, error)` to directly get the string 
+representation with the given options or `gomath.ParseAndConvertToLatex(string, *gomath.Options) (string, error)` to get
+the $\LaTeX$ code.
 
-### Convert to LaTeX
+### Creating a function
 
-To parse an expression and convert it into $\LaTeX$, use `gomath.ParseAndConvertToLatex(string, *gomath.Options) (string, error)`.
-The string is a valid expression like `1+2` or `2(1/3+4)^5`.
-It returns the result of the expression in a string according to the given options.
+You can create a function with `gomath.NewFunction(string) (gomath.Function, int, error)`.
+The string is a valid expression representing a function.
+It is composed by the arguments and the expression of the function.
+You must separate each argument with a coma (`,`) and separate the arguments and the expression with `->`.
+```
+x, y -> x^y
+```
+is a valid expression representing a function.
+The returned int is the number of arguments.
+
+Then, you can evaluate the function by passing a map containing every argument.
+gomath will send you the result (an instance of `gomath.Result`) of the evaluation.
 
 ```go
-res, err := gomath.ParseAndConvertToLatex("(1+2/3)/2", &gomath.Options{})
-err == nil // true
-res == `\frac{1 + \frac{2}{3}}{2}` // true
+f, _, err := gomath.NewFunction("x, y -> x^y")
+if err != nil {
+	panic(err) // will not panic because the expression is valid
+}
+res, err := f(map[string]string{
+	"x": "5",
+	"y": "2"
+})
+if err != nil {
+	panic(err) // will not panic because the expression is valid and every argument is set
+}
+res.String == "25" // true
 ```
 
 ### Special case

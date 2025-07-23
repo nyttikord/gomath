@@ -68,12 +68,15 @@ func lexWord(w string) ([]*Lexer, error) {
 				{Operator, "+"},
 				{Number, w[1:]},
 			}, nil
+		} else if []rune(w)[0] == '.' {
+			w = "0" + w
 		}
 		return []*Lexer{
 			{Number, w},
 		}, nil
 	}
 	var lexers []*Lexer
+	isDecimal := false
 	sel := ""
 	var tpe lexType
 
@@ -100,7 +103,13 @@ func lexWord(w string) ([]*Lexer, error) {
 	}
 
 	for _, c := range []rune(w) {
-		if isDigit(string(c)) || (c == '.' && sel != "") {
+		if isDigit(string(c)) || (c == '.' && !isDecimal) {
+			if !isDecimal {
+				isDecimal = c == '.'
+			}
+			if sel == "" {
+				sel += "0" // turns .5 into 0.5
+			}
 			fnUpdate(Number)
 		} else if isOperator(c) {
 			fnUpdateUnique(Operator)

@@ -4,6 +4,32 @@ import (
 	"testing"
 )
 
+func TestLexerLiteral(t *testing.T) {
+	lexr, err := Lex("1")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if lexr[0].Type != Number || lexr[0].Value != "1" {
+		t.Error("expecting number(1), got", lexr[0])
+	}
+
+	lexr, err = Lex("1.2")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if lexr[0].Type != Number || lexr[0].Value != "1.2" {
+		t.Error("expecting number(1.2), got", lexr[0])
+	}
+
+	lexr, err = Lex(".5")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if lexr[0].Type != Number || lexr[0].Value != "0.5" {
+		t.Error("expecting number(0.5), got", lexr[0])
+	}
+}
+
 func TestLexerSum(t *testing.T) {
 	lexr, err := Lex("1+2")
 	if err != nil {

@@ -15,8 +15,8 @@ You can replace `latest` with any valid tags.
 To parse an expression, use `gomath.Parse(string) (gomath.Result, error)`.
 The string is a valid expression, like `1+2` or `2(1/3+4)^5`.
 
-The result will give you everything needed to perform operations like the exact representation or the ability to convert
-it to $\LaTeX$ code.
+The result will give you everything needed to perform operations, like getting the exact representation of the result, 
+or the ability to convert
 
 ```go
 res, err := gomath.Parse("1/2+1")

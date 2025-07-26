@@ -10,11 +10,13 @@ $ go get -u github.com/nyttikord/gomath@latest
 ```
 You can replace `latest` with any valid tags.
 
-You can install a CLI with
+You can install the CLI by cloning the repo and building it.
 ```bash
-$ go install github.com/nyttikord/gomath/cmd@latest
+$ git clone https://github.com/nyttikord/gomath.git
+$ cd gomath/cmd 
+$ go build -o gomath . 
 ```
-You can replace `latest` with any valid tags.
+Then, you can put the file gomath where do you want (it could be in `/usr/local/bin` for example).
 
 ### Calculate
 

@@ -9,7 +9,7 @@ import (
 
 func main() {
 	if len(os.Args) < 2 {
-		fmt.Printf("Usage: %s <subcommand>\nUse %s help to get the help.\n", os.Args[0], os.Args[0])
+		fmt.Printf("Usage: %s <subcommand>\nUse %s help for more information.\n", os.Args[0], os.Args[0])
 		os.Exit(1)
 	}
 	subcommand := os.Args[1]
@@ -19,7 +19,13 @@ func main() {
 			fmt.Printf("Help does not take any arguments.\n")
 			os.Exit(1)
 		}
-		fmt.Printf("Subcommands:\n- eval <expression> -> evaluate an expression.\n- latex <expression> -> latexify an expression.\n")
+		fmt.Printf(
+			"Usage: %s <subcommand>\nSubcommands\n"+
+				"- help -> print this help text\n"+
+				"- eval <expression> -> evaluate an expression.\n"+
+				"- latex <expression> -> convert an expression to LaTeX code.\n",
+			os.Args[0],
+		)
 	case "eval":
 		if len(os.Args) < 3 {
 			fmt.Printf("Usage: %s eval <expression>.\n", os.Args[0])
@@ -45,6 +51,6 @@ func main() {
 		}
 		fmt.Println(res)
 	default:
-		fmt.Printf("Unknown subcommand: %s\nUse %s help to get the help.\n", subcommand, os.Args[0])
+		fmt.Printf("Unknown subcommand: %s\nUse %s help to more information.\n", subcommand, os.Args[0])
 	}
 }

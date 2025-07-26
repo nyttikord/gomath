@@ -50,7 +50,7 @@ You can get the help with `gomath help`.
 
 To evaluate an expression, use `gomath eval <expression>`.
 
-To convert to $\LaTeX$ an expression, use `gomath latex <expression>`. 
+To convert an expression to $\LaTeX$, use `gomath latex <expression>`. 
 
 ### Special case
 

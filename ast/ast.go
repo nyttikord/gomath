@@ -36,7 +36,7 @@ type Ast struct {
 	Body statement
 }
 
-type expressionFunc func(l []*lexer.Lexer, i *int) (expression.Expression, error)
+type expressionFunc func(*lexer.TokenList) (expression.Expression, error)
 
 func (a *Ast) ChangeType(tpe Type) error {
 	a.Type = tpe
@@ -64,66 +64,67 @@ func (a *Ast) setStatement(expr expression.Expression) error {
 }
 
 // Parse the given lexer and returns an Ast
-func Parse(lexed []*lexer.Lexer, tpe Type) (*Ast, error) {
+func Parse(tkl *lexer.TokenList, tpe Type) (*Ast, error) {
 	tree := &Ast{Type: tpe}
-	i := 0
-	exp, err := termExpression(lexed, &i)
+	if !tkl.Next() {
+		return nil, ErrInvalidExpression
+	}
+	exp, err := termExpression(tkl)
 	if err != nil {
 		return nil, err
 	}
-	if i < len(lexed) {
-		return nil, errors.Join(ErrUnknownExpression, fmt.Errorf("cannot parse expression %s", lexed[i]))
+	if !tkl.Empty() {
+		return nil, errors.Join(ErrUnknownExpression, fmt.Errorf("cannot parse expression %s", tkl.Current()))
 	}
 	return tree, tree.setStatement(exp) // works because tree is a pointer
 }
 
-func termExpression(l []*lexer.Lexer, i *int) (expression.Expression, error) {
-	return binExpression(termOperators, omitParenthesisExpression, l, i)
+func termExpression(tkl *lexer.TokenList) (expression.Expression, error) {
+	return binExpression(termOperators, omitParenthesisExpression, tkl)
 }
 
-func omitParenthesisExpression(l []*lexer.Lexer, i *int) (expression.Expression, error) {
+func omitParenthesisExpression(tkl *lexer.TokenList) (expression.Expression, error) {
 	return omitExpression(factorExpression, func(l *lexer.Lexer) bool {
 		return l.Type == lexer.Separator && l.Value == "("
-	}, l, i)
+	}, tkl)
 }
 
-func factorExpression(l []*lexer.Lexer, i *int) (expression.Expression, error) {
-	return binExpression(factorOperators, omitLiteralExpression, l, i)
+func factorExpression(tkl *lexer.TokenList) (expression.Expression, error) {
+	return binExpression(factorOperators, omitLiteralExpression, tkl)
 }
 
-func omitLiteralExpression(l []*lexer.Lexer, i *int) (expression.Expression, error) {
+func omitLiteralExpression(tkl *lexer.TokenList) (expression.Expression, error) {
 	return omitExpression(expExpression, func(l *lexer.Lexer) bool {
 		return l.Type == lexer.Literal
-	}, l, i)
+	}, tkl)
 }
 
-func expExpression(l []*lexer.Lexer, i *int) (expression.Expression, error) {
-	res, err := binExpression(expOperators, literalExpression, l, i)
+func expExpression(tkl *lexer.TokenList) (expression.Expression, error) {
+	res, err := binExpression(expOperators, literalExpression, tkl)
 	if err != nil {
 		return nil, err
 	}
-	if *i == len(l) {
+	if tkl.Empty() {
 		return res, nil
 	}
-	if l[*i].Type != lexer.Operator || l[*i].Value != "!" {
+	if tkl.Current().Type != lexer.Operator || tkl.Current().Value != "!" {
 		return res, nil
 	}
-	*i++
+	tkl.Next()
 	return expression.Factorial(res), nil
 }
 
-func binExpression(ops []string, sub expressionFunc, l []*lexer.Lexer, i *int) (expression.Expression, error) {
-	left, err := sub(l, i)
+func binExpression(ops []string, sub expressionFunc, tkl *lexer.TokenList) (expression.Expression, error) {
+	left, err := sub(tkl)
 	if err != nil {
 		return nil, err
 	}
-	for *i < len(l) && slices.Contains(ops, l[*i].Value) {
-		op := l[*i].Value
-		*i++
-		if *i >= len(l) {
+	for !tkl.Empty() && slices.Contains(ops, tkl.Current().Value) {
+		op := tkl.Current().Value
+		if !tkl.Next() {
 			return nil, ErrInvalidExpression
 		}
-		right, err := sub(l, i)
+		right, err := sub(tkl)
 		if err != nil {
 			return nil, err
 		}
@@ -145,13 +146,13 @@ func binExpression(ops []string, sub expressionFunc, l []*lexer.Lexer, i *int) (
 	return left, nil
 }
 
-func omitExpression(sub expressionFunc, cond func(*lexer.Lexer) bool, l []*lexer.Lexer, i *int) (expression.Expression, error) {
-	left, err := sub(l, i)
+func omitExpression(sub expressionFunc, cond func(*lexer.Lexer) bool, tkl *lexer.TokenList) (expression.Expression, error) {
+	left, err := sub(tkl)
 	if err != nil {
 		return nil, err
 	}
-	for *i < len(l) && cond(l[*i]) {
-		right, err := sub(l, i)
+	for !tkl.Empty() && cond(tkl.Current()) {
+		right, err := sub(tkl)
 		if err != nil {
 			return nil, err
 		}
@@ -160,9 +161,9 @@ func omitExpression(sub expressionFunc, cond func(*lexer.Lexer) bool, l []*lexer
 	return left, nil
 }
 
-func literalExpression(l []*lexer.Lexer, i *int) (expression.Expression, error) {
-	c := l[*i]
-	*i++
+func literalExpression(tkl *lexer.TokenList) (expression.Expression, error) {
+	c := tkl.Current()
+	tkl.Next()
 	switch c.Type {
 	case lexer.Number:
 		v, err := strconv.ParseFloat(c.Value, 64)
@@ -175,23 +176,23 @@ func literalExpression(l []*lexer.Lexer, i *int) (expression.Expression, error) 
 		}
 		return expression.Const(f), nil
 	case lexer.Literal:
-		return predefinedExpression(l, i, c.Value)
+		return predefinedExpression(tkl, c.Value)
 	case lexer.Separator:
 		if c.Value == "(" {
-			exp, err := termExpression(l, i)
+			exp, err := termExpression(tkl)
 			if err != nil {
 				return nil, err
 			}
-			if *i >= len(l) {
+			if tkl.Empty() {
 				return nil, errors.Join(ErrInvalidExpression, fmt.Errorf("')' excepted"))
-			} else if l[*i].Value != ")" {
-				return nil, errors.Join(ErrInvalidExpression, fmt.Errorf("')' excepted, not '%s'", l[*i].Value))
+			} else if tkl.Current().Value != ")" {
+				return nil, errors.Join(ErrInvalidExpression, fmt.Errorf("')' excepted, not '%s'", tkl.Current().Value))
 			}
-			*i++
+			tkl.Next()
 			return exp, nil
 		}
 	case lexer.Operator:
-		exp, err := expExpression(l, i)
+		exp, err := expExpression(tkl)
 		if err != nil {
 			return nil, err
 		}
@@ -207,12 +208,12 @@ func literalExpression(l []*lexer.Lexer, i *int) (expression.Expression, error) 
 	return nil, errors.Join(ErrUnknownExpression, fmt.Errorf("unknown type %s: excepting a valid literal expression", c))
 }
 
-func predefinedExpression(l []*lexer.Lexer, i *int, id string) (expression.Expression, error) {
+func predefinedExpression(tkl *lexer.TokenList, id string) (expression.Expression, error) {
 	if expression.IsPredefinedVariable(id) {
 		return expression.LiteralVariable(id), nil
 	}
 	if expression.IsPredefinedFunction(id) {
-		exp, err := operatorExpression(l, i)
+		exp, err := operatorExpression(tkl)
 		if err != nil {
 			return nil, err
 		}
@@ -221,18 +222,20 @@ func predefinedExpression(l []*lexer.Lexer, i *int, id string) (expression.Expre
 	return nil, expression.GenErrUnknownVariable(id)
 }
 
-func operatorExpression(l []*lexer.Lexer, i *int) (expression.Expression, error) {
-	c := l[*i]
+func operatorExpression(tkl *lexer.TokenList) (expression.Expression, error) {
+	c := tkl.Current()
 	if c.Type == lexer.Separator && c.Value == "(" {
-		*i++
-		exp, err := termExpression(l, i)
+		if !tkl.Next() {
+			return nil, ErrInvalidExpression
+		}
+		exp, err := termExpression(tkl)
 		if err != nil {
 			return nil, err
 		}
-		if l[*i].Value != ")" {
-			return exp, errors.Join(ErrInvalidExpression, fmt.Errorf(") excepted, not %s", l[*i].Value))
+		if tkl.Current().Value != ")" {
+			return exp, errors.Join(ErrInvalidExpression, fmt.Errorf(") excepted, not %s", tkl.Current().Value))
 		}
-		*i++
+		tkl.Next()
 		return exp, nil
 	}
 	return nil, ErrInvalidExpression

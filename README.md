@@ -10,7 +10,15 @@ $ go get -u github.com/nyttikord/gomath@latest
 ```
 You can replace `latest` with any valid tags.
 
-### General parsing
+You can install the CLI by cloning the repo and building it.
+```bash
+$ git clone https://github.com/nyttikord/gomath.git
+$ cd gomath/cmd 
+$ go build -o gomath . 
+```
+Then, you can put the file gomath where do you want (it could be in `/usr/local/bin` for example).
+
+### Calculate
 
 To parse an expression, use `gomath.Parse(string) (gomath.Result, error)`.
 The string is a valid expression, like `1+2` or `2(1/3+4)^5`.
@@ -60,6 +68,14 @@ if err != nil {
 }
 res.String == "25" // true
 ```
+
+### CLI
+
+You can get the help with `gomath help`.
+
+To evaluate an expression, use `gomath eval <expression>`.
+
+To convert an expression to $\LaTeX$, use `gomath latex <expression>`. 
 
 ### Special case
 

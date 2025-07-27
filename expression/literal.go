@@ -22,7 +22,7 @@ func (l *literalExpression) Eval() (*math.Fraction, error) {
 }
 
 func (l *literalExpression) RenderLatex() (string, priority, error) {
-	return string(*l), literalPriority, ErrUnknownOperation
+	return string(*l), literalPriority, nil
 }
 
 func (v *predefinedVariable) Eval() (*math.Fraction, error) {

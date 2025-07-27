@@ -139,7 +139,7 @@ func binExpression(ops []string, sub expressionFunc, l []*lexer.Lexer, i *int) (
 		case "^":
 			left = expression.Pow(left, right)
 		default:
-			return nil, expression.ErrUnknownOperation
+			return nil, errors.Join(expression.ErrUnknownOperation, fmt.Errorf("unknown operator %s", op))
 		}
 	}
 	return left, nil
@@ -203,7 +203,7 @@ func literalExpression(l []*lexer.Lexer, i *int) (expression.Expression, error) 
 			exp = expression.Neg(exp)
 		case "+":
 		default:
-			return nil, expression.ErrUnknownOperation
+			return nil, errors.Join(expression.ErrUnknownOperation, fmt.Errorf("unknown unary operator %s", c.Value))
 		}
 		return exp, nil
 	}

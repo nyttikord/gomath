@@ -31,7 +31,7 @@ type Lexer struct {
 }
 
 // Lex returns the Lexer of the content
-func Lex(content string) ([]*Lexer, error) {
+func Lex(content string) (*TokenList, error) {
 	var lexr []*Lexer
 	for _, w := range strings.Split(content, " ") {
 		word, err := lexWord(w)
@@ -52,7 +52,7 @@ func Lex(content string) ([]*Lexer, error) {
 			}
 		}
 	}
-	return lexr, nil
+	return &TokenList{-1, lexr}, nil
 }
 
 // lexWord returns the Lexer of the word

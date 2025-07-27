@@ -5,26 +5,29 @@ import (
 )
 
 func TestLexerLiteral(t *testing.T) {
-	lexr, err := Lex("1")
+	res, err := Lex("1")
 	if err != nil {
 		t.Fatal(err)
 	}
+	lexr := res.list
 	if lexr[0].Type != Number || lexr[0].Value != "1" {
 		t.Error("expecting number(1), got", lexr[0])
 	}
 
-	lexr, err = Lex("1.2")
+	res, err = Lex("1.2")
 	if err != nil {
 		t.Fatal(err)
 	}
+	lexr = res.list
 	if lexr[0].Type != Number || lexr[0].Value != "1.2" {
 		t.Error("expecting number(1.2), got", lexr[0])
 	}
 
-	lexr, err = Lex(".5")
+	res, err = Lex(".5")
 	if err != nil {
 		t.Fatal(err)
 	}
+	lexr = res.list
 	if lexr[0].Type != Number || lexr[0].Value != "0.5" {
 		t.Error("expecting number(0.5), got", lexr[0])
 	}
@@ -35,10 +38,11 @@ func TestLexerSum(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	fn := func(l []*Lexer) {
+	fn := func(tkl *TokenList) {
+		l := tkl.list
 		if len(l) != 3 {
-			t.Errorf("Lexer has wrong length, got %d, excepted %d", len(lexr), 3)
-			printLex(t, lexr)
+			t.Errorf("Lexer has wrong length, got %d, excepted %d", len(l), 3)
+			printLex(t, l)
 			return
 		}
 		first := l[0]
@@ -63,7 +67,7 @@ func TestLexerSum(t *testing.T) {
 			t.Errorf("got %s; want 2", third.Value)
 		}
 		if t.Failed() {
-			printLex(t, lexr)
+			printLex(t, l)
 		}
 	}
 	t.Log("Testing 1+2")
@@ -92,10 +96,11 @@ func TestLexerSub(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	fn := func(l []*Lexer) {
+	fn := func(tkl *TokenList) {
+		l := tkl.list
 		if len(l) != 3 {
-			t.Errorf("Lexer has wrong length, got %d, excepted %d", len(lexr), 3)
-			printLex(t, lexr)
+			t.Errorf("Lexer has wrong length, got %d, excepted %d", len(l), 3)
+			printLex(t, l)
 			return
 		}
 		first := l[0]
@@ -120,7 +125,7 @@ func TestLexerSub(t *testing.T) {
 			t.Errorf("got %s; want 2", third.Value)
 		}
 		if t.Failed() {
-			printLex(t, lexr)
+			printLex(t, l)
 		}
 	}
 	t.Log("Testing 1-2")
@@ -149,10 +154,11 @@ func TestLexerUnary(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	fn := func(l []*Lexer, op string) {
+	fn := func(tkl *TokenList, op string) {
+		l := tkl.list
 		if len(l) != 2 {
-			t.Errorf("Lexer has wrong length, got %d, excepted %d", len(lexr), 2)
-			printLex(t, lexr)
+			t.Errorf("Lexer has wrong length, got %d, excepted %d", len(l), 2)
+			printLex(t, l)
 			return
 		}
 		first := l[0]
@@ -170,7 +176,7 @@ func TestLexerUnary(t *testing.T) {
 			t.Errorf("got %s; want 1", second.Value)
 		}
 		if t.Failed() {
-			printLex(t, lexr)
+			printLex(t, l)
 		}
 	}
 	t.Log("Testing +1")
@@ -184,10 +190,11 @@ func TestLexerUnary(t *testing.T) {
 }
 
 func TestLexerComplex(t *testing.T) {
-	lexr, err := Lex("2(2+3)^2")
+	res, err := Lex("2(2+3)^2")
 	if err != nil {
 		t.Fatal(err)
 	}
+	lexr := res.list
 	if len(lexr) != 8 {
 		t.Errorf("Lexer has wrong length, got %d, excepted %d", len(lexr), 8)
 	}
@@ -242,10 +249,11 @@ func TestLexerComplex(t *testing.T) {
 }
 
 func TestLexer_Word(t *testing.T) {
-	lexr, err := Lex("cos sin exp")
+	res, err := Lex("cos sin exp")
 	if err != nil {
 		t.Fatal(err)
 	}
+	lexr := res.list
 	if len(lexr) != 3 {
 		t.Errorf("Lexer has wrong length, got %d, excepted %d", len(lexr), 3)
 	}

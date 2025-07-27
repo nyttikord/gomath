@@ -20,3 +20,11 @@ func (list *TokenList) Next() bool {
 func (list *TokenList) Empty() bool {
 	return list.index >= len(list.list)
 }
+
+func (list *TokenList) String() string {
+	s := "["
+	for _, l := range list.list {
+		s += l.String() + " "
+	}
+	return s[:len(s)-1] + "]"
+}

@@ -74,7 +74,7 @@ func Parse(tkl *lexer.TokenList, tpe Type) (*Ast, error) {
 		return nil, err
 	}
 	if !tkl.Empty() {
-		return nil, errors.Join(ErrUnknownExpression, fmt.Errorf("cannot parse expression %s", tkl.Current()))
+		return nil, errors.Join(ErrInvalidExpression, fmt.Errorf("invalid usage of %s", tkl.Current()))
 	}
 	return tree, tree.setStatement(exp) // works because tree is a pointer
 }
@@ -178,19 +178,20 @@ func literalExpression(tkl *lexer.TokenList) (expression.Expression, error) {
 	case lexer.Literal:
 		return predefinedExpression(tkl, c.Value)
 	case lexer.Separator:
-		if c.Value == "(" {
-			exp, err := termExpression(tkl)
-			if err != nil {
-				return nil, err
-			}
-			if tkl.Empty() {
-				return nil, errors.Join(ErrInvalidExpression, fmt.Errorf("')' excepted"))
-			} else if tkl.Current().Value != ")" {
-				return nil, errors.Join(ErrInvalidExpression, fmt.Errorf("')' excepted, not '%s'", tkl.Current().Value))
-			}
-			tkl.Next()
-			return exp, nil
+		if c.Value != "(" {
+			return nil, errors.Join(ErrInvalidExpression, fmt.Errorf("illegal separator %s", c.Value))
 		}
+		exp, err := termExpression(tkl)
+		if err != nil {
+			return nil, err
+		}
+		if tkl.Empty() {
+			return nil, errors.Join(ErrInvalidExpression, fmt.Errorf("')' excepted"))
+		} else if tkl.Current().Value != ")" {
+			return nil, errors.Join(ErrInvalidExpression, fmt.Errorf("')' excepted, not '%s'", tkl.Current().Value))
+		}
+		tkl.Next()
+		return exp, nil
 	case lexer.Operator:
 		exp, err := expExpression(tkl)
 		if err != nil {

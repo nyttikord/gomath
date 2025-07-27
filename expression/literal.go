@@ -15,6 +15,16 @@ type predefinedVariable variable
 
 type predefinedFunction function
 
+type literalExpression string
+
+func (l *literalExpression) Eval() (*math.Fraction, error) {
+	return nil, errors.Join(ErrUnknownOperation, fmt.Errorf("literal operations not supported"))
+}
+
+func (l *literalExpression) RenderLatex() (string, priority, error) {
+	return string(*l), literalPriority, nil
+}
+
 func (v *predefinedVariable) Eval() (*math.Fraction, error) {
 	val, ok := predefinedVariables[v.ID]
 	if !ok {
@@ -56,6 +66,14 @@ func (f *predefinedFunction) RenderLatex() (string, priority, error) {
 		return "", literalPriority, err
 	}
 	return fmt.Sprintf(`\%s\left(%s\right)`, f.ID, val), literalPriority, nil
+}
+
+func LiteralExpression(l string) (Literal, error) {
+	if IsPredefinedVariable(l) {
+		return LiteralVariable(l), nil
+	}
+	exp := literalExpression(l)
+	return &exp, nil
 }
 
 func LiteralVariable(id string) Literal {

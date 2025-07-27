@@ -140,7 +140,7 @@ func binExpression(ops []string, sub expressionFunc, tkl *lexer.TokenList) (expr
 		case "^":
 			left = expression.Pow(left, right)
 		default:
-			return nil, expression.ErrUnknownOperation
+			return nil, errors.Join(expression.ErrUnknownOperation, fmt.Errorf("unknown operator %s", op))
 		}
 	}
 	return left, nil
@@ -176,7 +176,10 @@ func literalExpression(tkl *lexer.TokenList) (expression.Expression, error) {
 		}
 		return expression.Const(f), nil
 	case lexer.Literal:
-		return predefinedExpression(tkl, c.Value)
+		if expression.IsPredefinedFunction(c.Value) {
+			return predefinedFunction(tkl, c.Value)
+		}
+		return expression.LiteralExpression(c.Value)
 	case lexer.Separator:
 		if c.Value != "(" {
 			return nil, errors.Join(ErrInvalidExpression, fmt.Errorf("illegal separator %s", c.Value))
@@ -202,25 +205,19 @@ func literalExpression(tkl *lexer.TokenList) (expression.Expression, error) {
 			exp = expression.Neg(exp)
 		case "+":
 		default:
-			return nil, expression.ErrUnknownOperation
+			return nil, errors.Join(expression.ErrUnknownOperation, fmt.Errorf("unknown unary operator %s", c.Value))
 		}
 		return exp, nil
 	}
 	return nil, errors.Join(ErrUnknownExpression, fmt.Errorf("unknown type %s: excepting a valid literal expression", c))
 }
 
-func predefinedExpression(tkl *lexer.TokenList, id string) (expression.Expression, error) {
-	if expression.IsPredefinedVariable(id) {
-		return expression.LiteralVariable(id), nil
+func predefinedFunction(tkl *lexer.TokenList, id string) (expression.Expression, error) {
+	exp, err := operatorExpression(tkl)
+	if err != nil {
+		return nil, err
 	}
-	if expression.IsPredefinedFunction(id) {
-		exp, err := operatorExpression(tkl)
-		if err != nil {
-			return nil, err
-		}
-		return expression.LiteralFunction(id, exp), nil
-	}
-	return nil, expression.GenErrUnknownVariable(id)
+	return expression.LiteralFunction(id, exp), nil
 }
 
 func operatorExpression(tkl *lexer.TokenList) (expression.Expression, error) {

@@ -59,7 +59,7 @@ type latexStatement struct {
 	Expression expression.Expression
 }
 
-func (l *latexStatement) Eval(opt *Options) (*StatementResult, error) {
+func (l *latexStatement) Eval(_ *Options) (*StatementResult, error) {
 	s, _, err := l.Expression.RenderLatex()
 	if err != nil {
 		return nil, err

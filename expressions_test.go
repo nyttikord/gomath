@@ -157,6 +157,7 @@ func TestEvalLatex(t *testing.T) {
 	genericTestRenderLatex(t, "2!*2!", `2! \times 2!`)
 	genericTestRenderLatex(t, "3^2!", `3^2!`)
 	genericTestRenderLatex(t, "(3+2)!", `\left(3 + 2\right)!`)
+	genericTestRenderLatex(t, "2x", `2 \times x`)
 }
 
 func genericTestRenderLatex(t *testing.T, exp string, excepted string) {

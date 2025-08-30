@@ -1,0 +1,43 @@
+.Dd $Mdocdate: August 30 2025 $
+.Dt GOMATH 1
+.Os
+.Sh NAME
+.Nm gomath
+.Nd perform math calculations and LaTeX conversions
+.Sh SYNOPSIS
+.Nm gomath
+.Op Fl p Ar precision
+.Ar subcommand ...
+.Sh DESCRIPTION
+The
+.Nm gomath
+utility performs math calculations and LaTeX conversions.
+.Pp
+The options are as follows:
+.Bl -tag -width Ds
+.It Fl p Ar precision
+Set the decimal
+.Ar precision.
+Default is 6.
+.El
+.Pp
+The
+.Ar subcommand
+are as follows:
+.Bl -tag -width Ds
+.It Ev help
+Print the help
+.It Ev eval Ar expression
+Evaluate the expression
+.It Ev latex Ar expression
+Convert the expression to LaTeX
+.Sh EXIT STATUS
+.Ex -std gomath
+.Sh EXAMPLES
+Perform a math calculations with decimal precision set to 12:
+.Pp
+.Dl $ gomath -p 12 eval "1/1.5*2"
+.Pp
+Convert a math expression to LaTeX:
+.Pp
+.Dl $ gomath latex "5x!(2+3)/2"
